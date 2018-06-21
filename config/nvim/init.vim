@@ -32,7 +32,6 @@ endif
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
-let guicursor=""
 
 " No mouse
 set mouse=
@@ -195,3 +194,5 @@ nnoremap <leader>f    :FZF<Space>
 nnoremap <leader>a    :FZF /manager<CR>
 set rtp+=fzf
 
+
+let guicursor=""
