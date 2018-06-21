@@ -194,5 +194,10 @@ nnoremap <leader>f    :FZF<Space>
 nnoremap <leader>a    :FZF /manager<CR>
 set rtp+=fzf
 
+"Same cursor than vim
+set guicursor=
 
-let guicursor=""
+" deoplete tab-complete
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
+
