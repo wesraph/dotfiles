@@ -97,3 +97,5 @@ export GOPATH=~/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 export PATH=/Users/raph/.local/bin:$PATH
+
+export VIMRC=$HOME/.config/nvim/init.vim
