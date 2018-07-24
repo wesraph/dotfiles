@@ -203,3 +203,5 @@ set guicursor=
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
+nnoremap <leader>lsf :setlocal spell spelllang=fr<CR>
+nnoremap <leader>lse :setlocal spell spelllang=en<CR>
