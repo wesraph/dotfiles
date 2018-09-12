@@ -28,9 +28,9 @@ Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
 Plug 'vim-syntastic/syntastic'
 "Plug 'vim-scripts/c.vim'
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-endif
+"if has('nvim')
+  "Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+"endif
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
@@ -205,3 +205,4 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>lsf :setlocal spell spelllang=fr<CR>
 nnoremap <leader>lse :setlocal spell spelllang=en<CR>
+a
