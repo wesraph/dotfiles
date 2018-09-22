@@ -97,6 +97,7 @@ export GOPATH=~/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 export PATH=/home/raph/.local/bin:$PATH
+export PATH=/home/raph/.bin/:$PATH
 
 export VIMRC=$HOME/.config/nvim/init.vim
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
@@ -104,3 +105,9 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 #No more display problem
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+
+alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1" 
+alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware" 
+alias ip="ip -c "
+
+. ~/.shell_functions

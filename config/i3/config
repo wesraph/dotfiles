@@ -187,3 +187,5 @@ bindsym XF86KbdBrightnessDown exec kbdlight down
 
 bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
+
+bindsym XF86PowerOff exec /home/raph/.bin/powermenu 

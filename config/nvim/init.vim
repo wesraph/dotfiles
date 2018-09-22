@@ -27,10 +27,12 @@ Plug 'scrooloose/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
 Plug 'vim-syntastic/syntastic'
+Plug 'w0rp/ale'
+Plug 'fatih/vim-go'
 "Plug 'vim-scripts/c.vim'
-"if has('nvim')
-  "Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-"endif
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+endif
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
@@ -205,4 +207,14 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>lsf :setlocal spell spelllang=fr<CR>
 nnoremap <leader>lse :setlocal spell spelllang=en<CR>
-a
+
+
+"Better syntax highlight for golang
+"autocmd BufNewFile,BufRead *.go colorscheme gitgo
+
+" Ale
+let g:ale_sign_error = '✗'
+let g:ale_sign_warning = '⚠'
+let g:ale_linters = {'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'] }
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
