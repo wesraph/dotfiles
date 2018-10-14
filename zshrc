@@ -117,6 +117,8 @@ alias ip="ip -c "
 
 [ -e ~/.shell_local  ] && . ~/.shell_local
 
+[ -e ~/.z.sh ] && . ~/.z.sh
+
 #Color in man
 export LESS_TERMCAP_mb=$'\e[1;32m'
 export LESS_TERMCAP_md=$'\e[1;32m'
