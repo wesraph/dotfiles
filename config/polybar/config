@@ -57,7 +57,7 @@ font-2 = siji:pixelsize=12;1
 
 modules-left = bspwm i3
 modules-center = 
-modules-right = filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan eth battery temperature date powermenu
+modules-right = ovh filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan eth battery temperature date powermenu
 
 tray-position = right
 tray-padding = 2
@@ -107,6 +107,13 @@ mount-0 = /
 label-mounted = %{F#0a81f5}%mountpoint%%{F-}: %free%
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground-alt}
+
+[module/ovh]
+type = custom/script
+exec = pgrep -x vpnc
+interval = 10
+label = OVH
+format-underline = ${colors.primary}
 
 [module/bspwm]
 type = internal/bspwm

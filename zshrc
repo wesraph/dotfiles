@@ -93,21 +93,35 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 export PATH=$PATH:/usr/local/go/bin
 
 export GOROOT=/usr/local/go
-export GOPATH=~/go
+export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-export PATH=/home/raph/.local/bin:$PATH
-export PATH=/home/raph/.bin/:$PATH
+export PATH=$HOME/.local/bin:$PATH
+export PATH=$HOME/.bin/:$PATH
 
 export VIMRC=$HOME/.config/nvim/init.vim
-export QT_AUTO_SCREEN_SCALE_FACTOR=1
 
 #No more display problem
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1" 
+
 alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware" 
+
+#Color in ip command
 alias ip="ip -c "
 
-. ~/.shell_functions
+[ -e ~/.shell_functions ] && . ~/.shell_functions
+
+[ -e ~/.shell_local  ] && . ~/.shell_local
+
+#Color in man
+export LESS_TERMCAP_mb=$'\e[1;32m'
+export LESS_TERMCAP_md=$'\e[1;32m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[01;33m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;4;31m'

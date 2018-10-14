@@ -35,7 +35,6 @@ bindsym $mod+Return exec alacritty
 # kill focused window
 bindsym $mod+Shift+q kill
 
-# kill focused window
 bindsym $mod+Shift+p exec betterlockscreen -l
 
 # start dmenu (a program launcher)
@@ -163,7 +162,7 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 exec_always --no-startup-id killall polybar ||  polybar example
-exec_always --no-startup-id feh --bg-scale /home/raph/Wallpapers/wallhaven-426396.png
+exec_always --no-startup-id feh --bg-scale /home/raph/Wallpapers/wallpaper.jpg
 
 smart_gaps on
 smart_borders on
