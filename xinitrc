@@ -28,9 +28,6 @@ dbus-update-activation-environment --systemd DBUS_SESSION_BUS_ADDRESS DISPLAY XA
 #Notifications
 dunst &
 
-eval `ssh-agent -t 3600`
-
 synclient PalmDetect=1
-
 
 exec i3
