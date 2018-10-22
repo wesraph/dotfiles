@@ -110,4 +110,8 @@ alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1"
 alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware" 
 alias ip="ip -c "
 
-. ~/.shell_functions
+export EDITOR=nvim
+
+[ -z ~/.shell_functions ] && {
+    . ~/.shell_functions
+}
