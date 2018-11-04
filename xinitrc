@@ -2,7 +2,7 @@
 xset r rate 200 50
 
 #Cursor speed
-xinput --set-prop  13 314 1, 3, 0.5 0
+xinput --set-prop 13 'libinput Accel Speed' 0.75
 
 #Keyboard intl
 setxkbmap -layout us -option compose:ralt
