@@ -132,3 +132,5 @@ export LESS_TERMCAP_us=$'\e[1;4;31m'
 
 #Fuzzy password-store
 fpass () {  pass $@ "$(find .password-store/ -name "*.gpg" | sed s/\.password-store\\///g | sed s/\.gpg$//g | fzf)"}
+
+oo () { cd $1;ls; }
