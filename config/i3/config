@@ -188,3 +188,7 @@ bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
 
 bindsym XF86PowerOff exec /home/raph/.bin/powermenu 
+
+bindsym $mod+m exec  setxkbmap -layout fr -option compose:ralt
+
+bindsym $mod+n exec  setxkbmap -layout us -option compose:ralt
