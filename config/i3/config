@@ -38,7 +38,7 @@ bindsym $mod+Shift+q kill
 bindsym $mod+Shift+p exec betterlockscreen -l
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run
+bindsym $mod+d exec rofi -show run
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -192,3 +192,6 @@ bindsym XF86PowerOff exec /home/raph/.bin/powermenu
 bindsym $mod+m exec  setxkbmap -layout fr -option compose:ralt
 
 bindsym $mod+n exec  setxkbmap -layout us -option compose:ralt
+
+for_window [class="^.*"] border pixel 1
+client.focused          #404552 #404552 #999999 #ff5757 #993333
