@@ -30,6 +30,7 @@ Plug 'vim-syntastic/syntastic'
 Plug 'w0rp/ale'
 Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
+Plug 'scrooloose/nerdtree'
 "Plug 'vim-scripts/c.vim'
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -223,3 +224,8 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 "Configure vim for latex
 let g:livepreview_previewer = 'zathura'
 
+" Open nerdtree with ctrl n
+map <C-n> :NERDTreeToggle<CR>
+
+" Sudo
+nnoremap <leader>sudo :w !sudo tee %

@@ -86,7 +86,7 @@ function cut(shift, endpos)
         mp.get_property("stream-path")))
     -- TODO: Windows?
     local outpath = escape(string.format("%s/%s",
-        o.target_dir:gsub("~", "/var/www/downloadsP/Treatment/cuted/"),
+        o.target_dir:gsub("~", "/mnt/coffre1/downloadsP/cuted/"),
         get_outname(shift, endpos)))
 
     cmd = cmd:gsub("$shift", shift)
