@@ -28,6 +28,9 @@ dbus-update-activation-environment --systemd DBUS_SESSION_BUS_ADDRESS DISPLAY XA
 #Notifications
 dunst &
 
+#Lock on sleep
+xss-lock -- betterlockscreen -l &
+
 synclient PalmDetect=1
 
 exec i3
