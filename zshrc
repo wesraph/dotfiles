@@ -135,3 +135,5 @@ fpass () {  pass $@ "$(find .password-store/ -name "*.gpg" | sed s/\.password-st
 alias ccal="cal -3 -m"
 
 oo () { cd $1;ls; }
+
+alias dailySnapshot="sudo btrfs subvolume snapshot -r / /snapshots/$(date "+%Y-%m-%d-%H-%M")"

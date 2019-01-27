@@ -222,7 +222,8 @@ let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
 "Configure vim for latex
-let g:livepreview_previewer = 'zathura'
+let g:vimtex_view_general_viewer = 'zathura'
+
 
 " Open nerdtree with ctrl n
 map <C-n> :NERDTreeToggle<CR>

@@ -212,6 +212,10 @@ prompt_status() {
   [[ -n "$symbols" ]] && prompt_segment black default "$symbols"
 }
 
+prompt_save_dir() {
+  pwd > /dev/shm/last_path
+}
+
 ## Main prompt
 build_prompt() {
   RETVAL=$?
@@ -222,6 +226,7 @@ build_prompt() {
   prompt_git
   prompt_bzr
   prompt_hg
+  prompt_save_dir
   prompt_end
 }
 
