@@ -1,4 +1,4 @@
-" Remap the leader key 
+" Remap the leader key
 
 let mapleader = ','
 set tabstop=4     " a tab is four spaces
@@ -31,7 +31,9 @@ Plug 'w0rp/ale'
 Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
 Plug 'scrooloose/nerdtree'
-"Plug 'vim-scripts/c.vim'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'vim-scripts/c.vim'
+Plug 'csexton/trailertrash.vim'
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 endif
@@ -49,14 +51,6 @@ colorscheme onedark
 " History
 set history=1000    " much more history than base
 set undolevels=1000 " much more undo
-" Backups, swap and undo files
-"set backup                                      " Enable backups
-"set backupdir=$HOME/.config/nvim/files/backup/
-"set backupext=-vimbackup                        " Backup extention
-"set backupskip=                                 " Backup everything
-"set directory=$HOME/.config/nvim/files/swap/
-"set undofile                                    " Keep the undo history
-"set undodir=$HOME/.config/nvim/files/undo/
 
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
@@ -77,10 +71,10 @@ vmap > >gv
 vmap < <gv
 
 " Set encoding
-"set encoding=utf-8 nobomb
+set encoding=utf-8 nobomb
 
 " Highlight trailing spaces
-highlight ExtraWhitespace term=reverse ctermbg=12
+highlight ExtraWhitespace term=reverse ctermbg=11
 au BufNewFile,BufRead * :match ExtraWhitespace /\s\+$/
 
 
@@ -183,7 +177,7 @@ augroup locationlist
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 
-" Syntastic for javascript 
+" Syntastic for javascript
 let g:syntastic_javascript_checkers = ['jshint']
 let g:javascript_plugin_jsdoc = 1
 let g:javascript_plugin_ngdoc = 1
@@ -230,3 +224,7 @@ map <C-n> :NERDTreeToggle<CR>
 
 " Sudo
 nnoremap <leader>sudo :w !sudo tee %
+
+" Enable trailertrash for good
+hi UnwantedTrailerTrash guibg=red ctermbg=red
+au BufWritePre * :TrailerTrim
