@@ -90,11 +90,14 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 #[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.shell_local ] && source ~/.shell_local
+
 export PATH=$PATH:/usr/local/go/bin
 
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+export GO111MODULE=on
 
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
@@ -106,9 +109,9 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1" 
+alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1"
 
-alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware" 
+alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware"
 
 #Color in ip command
 alias ip="ip -c "
