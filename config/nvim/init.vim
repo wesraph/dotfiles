@@ -228,3 +228,6 @@ nnoremap <leader>sudo :w !sudo tee %
 " Enable trailertrash for good
 hi UnwantedTrailerTrash guibg=red ctermbg=red
 au BufWritePre * :TrailerTrim
+
+" Replace with the first occurence
+nnoremap <leader>z 1z=
