@@ -201,8 +201,8 @@ set guicursor=
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
-nnoremap <leader>lsf :setlocal spell spelllang=fr<CR>
-nnoremap <leader>lse :setlocal spell spelllang=en<CR>
+nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
+nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 
 
 "Better syntax highlight for golang
