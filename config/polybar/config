@@ -27,7 +27,39 @@ primary = #ffb52a
 secondary = #e60053
 alert = #bd2c40
 
-[bar/example]
+#Material colors
+red = #e53935
+pink = #d81b60
+purple = #8e24aa
+deep-purple = #5e35b1
+indigo = #3949ab
+blue = #1e88e5
+light-blue = #039be5
+cyan = #00acc1
+teal = #00897b
+green = #43a047
+light-green = #7cb342
+lime = #c0ca33
+yellow = #fdd835
+amber = #ffb300
+orange = #fb8c00
+deep-orange = #f4511e
+brown = #6d4c41
+grey = #757575
+blue-gray = #546e7a
+
+#Shades
+shade1 = #212121
+shade2 = #424242
+shade3 = #616161
+shade4 = #757575
+shade5 = #9E9E9E
+shade6 = #BDBDBD
+shade7 = #D4D4D4
+shade8 = #EEEEEE
+ashade8 = #2C2C2C
+
+[bar/main]
 ;monitor = ${env:MONITOR:HDMI-1}
 width = 100%
 height = 27
@@ -51,13 +83,19 @@ padding-right = 2
 module-margin-left = 1
 module-margin-right = 2
 
-font-0 = fixed:pixelsize=12;1
-font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
-font-2 = siji:pixelsize=12;1
+;font-0 = fixed:pixelsize=12;1
+;font-1 = unifont:fontformat=truetype:size=8:antialias=false;0
+;font-2 = siji:pixelsize=12;1
 
-modules-left = bspwm i3
-modules-center = 
-modules-right = ovh filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan eth battery temperature date powermenu
+;font-0 = "Fantasque Sans Mono:pixelsize=15;3"
+;font-1 = "Iosevka Nerd Font:pixelsize=18;3"
+
+font-0 = "Deja Vu Sans Mono Nerd Font"
+
+
+modules-left = i3
+modules-center =
+modules-right = ovh filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan battery temperature date
 
 tray-position = right
 tray-padding = 2
@@ -86,8 +124,8 @@ label = %title:0:30:...%
 type = internal/xkeyboard
 blacklist-0 = num lock
 
-format-prefix = " "
-format-prefix-foreground = ${colors.foreground-alt}
+format-prefix = " "
+format-prefix-foreground = ${colors.foreground}
 format-prefix-underline = ${colors.secondary}
 
 label-layout = %layout%
@@ -104,7 +142,7 @@ interval = 25
 
 mount-0 = /
 
-label-mounted = %{F#0a81f5}%mountpoint%%{F-}: %free%
+label-mounted =  %free%
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground-alt}
 
@@ -190,20 +228,11 @@ label-song-ellipsis = true
 
 [module/xbacklight]
 type = internal/xbacklight
-
-format = <label> <bar>
-label = BL
-
-bar-width = 10
-bar-indicator = |
-bar-indicator-foreground = #fff
-bar-indicator-font = 2
-bar-fill = ─
-bar-fill-font = 2
-bar-fill-foreground = #9f78e1
-bar-empty = ─
-bar-empty-font = 2
-bar-empty-foreground = ${colors.foreground-alt}
+format = <ramp> <label>
+ramp-0 = 
+ramp-1 = ﯧ
+ramp-2 = ﯦ
+label = %percentage%%
 
 [module/backlight-acpi]
 inherit = module/xbacklight
@@ -221,8 +250,8 @@ label = %percentage:2%%
 [module/memory]
 type = internal/memory
 interval = 2
-format-prefix = " "
-format-prefix-foreground = ${colors.foreground-alt}
+format-prefix = " "
+format-prefix-foreground = ${colors.foreground}
 format-underline = #4bffdc
 label = %gb_used%
 
@@ -231,7 +260,7 @@ type = internal/network
 interface = wlp3s0
 interval = 3.0
 
-format-connected = <ramp-signal> <label-connected>
+format-connected =   <label-connected>
 format-connected-underline = #9f78e1
 label-connected = %essid%
 
@@ -241,16 +270,9 @@ format-disconnected =
 ;label-disconnected = %ifname% disconnected
 ;label-disconnected-foreground = ${colors.foreground-alt}
 
-ramp-signal-0 = 
-ramp-signal-1 = 
-ramp-signal-2 = 
-ramp-signal-3 = 
-ramp-signal-4 = 
-ramp-signal-foreground = ${colors.foreground-alt}
-
 [module/eth]
 type = internal/network
-interface = net0
+interface = wlp3s0
 interval = 3.0
 
 format-connected-underline = #55aa55
@@ -283,71 +305,66 @@ label = %date% %time%
 [module/pulseaudio]
 type = internal/pulseaudio
 
-format-volume = <label-volume> <bar-volume>
-label-volume = VOL %percentage%%
-label-volume-foreground = ${root.foreground}
+format-volume = <ramp-volume>  <label-volume>
+format-volume-padding = 2
+label-volume = %percentage%%
+label-muted = "婢"
+label-muted-padding = 2
 
-label-muted = 🔇 muted
-label-muted-foreground = #666
-
-bar-volume-width = 10
-bar-volume-foreground-0 = #55aa55
-bar-volume-foreground-1 = #55aa55
-bar-volume-foreground-2 = #55aa55
-bar-volume-foreground-3 = #55aa55
-bar-volume-foreground-4 = #55aa55
-bar-volume-foreground-5 = #f5a70a
-bar-volume-foreground-6 = #ff5555
-bar-volume-gradient = false
-bar-volume-indicator = |
-bar-volume-indicator-font = 2
-bar-volume-fill = ─
-bar-volume-fill-font = 2
-bar-volume-empty = ─
-bar-volume-empty-font = 2
-bar-volume-empty-foreground = ${colors.foreground-alt}
-
+ramp-volume-0 = 奄
+ramp-volume-1 = 奄
+ramp-volume-2 = 奔
+ramp-volume-3 = 奔
+ramp-volume-4 = 墳
+ramp-volume-5 = 墳
+ramp-volume-6 = 墳
 
 [module/battery]
 type = internal/battery
+full-at = 99
+time-format = %H:%M
 battery = BAT0
 adapter = ADP1
-full-at = 98
-
 format-charging = <animation-charging> <label-charging>
-format-charging-underline = #ffb52a
+#format-charging-background = ${colors.shade5}
+format-charging-padding = 2
+label-charging = %percentage%% %time%
+format-discharging = <ramp-capacity> <label-discharging>
+#format-discharging-background = ${colors.shade5}
+format-discharging-padding = 2
+label-discharging = %percentage%% %time%
+format-full = <label-full>
 
-label-charging = %percentage%% %time% 
-label-discharging = %percentage%% %time% 
+format-full-prefix = " "
+ramp-capacity-0 =  " "
+ramp-capacity-1 =  " "
+ramp-capacity-2 =  " "
+ramp-capacity-3 =  " "
+ramp-capacity-4 =  " "
+ramp-capacity-5 =  " "
+ramp-capacity-6 =  " "
+ramp-capacity-7 =  " "
+ramp-capacity-8 =  " "
+ramp-capacity-9 =  " "
 
-format-discharging = <animation-discharging> <label-discharging>
-format-discharging-underline = ${self.format-charging-underline}
+ramp-capacity-0-foreground = ${colors.red}
+ramp-capacity-1-foreground = ${colors.red}
+ramp-capacity-foreground   = ${colors.foreground}
+bar-capacity-width = 5
 
-format-full-prefix = " "
-format-full-prefix-foreground = ${colors.foreground-alt}
-format-full-underline = ${self.format-charging-underline}
+animation-charging-0 = " "
+animation-charging-1 = " "
+animation-charging-2 = " "
+animation-charging-3 = " "
+animation-charging-4 = " "
+animation-charging-5 = " "
+animation-charging-6 = " "
 
-ramp-capacity-0 = 
-ramp-capacity-1 = 
-ramp-capacity-2 = 
-ramp-capacity-foreground = ${colors.foreground-alt}
-
-animation-charging-0 = 
-animation-charging-1 = 
-animation-charging-2 = 
-animation-charging-foreground = ${colors.foreground-alt}
 animation-charging-framerate = 750
-
-animation-discharging-0 = 
-animation-discharging-1 = 
-animation-discharging-2 = 
-animation-discharging-foreground = ${colors.foreground-alt}
-animation-discharging-framerate = 750
-
 [module/temperature]
 type = internal/temperature
 thermal-zone = 0
-warn-temperature = 60
+warn-temperature = 75
 
 format = <ramp> <label>
 format-underline = #f50a4d
