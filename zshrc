@@ -55,46 +55,17 @@ plugins=(git zsh-autosuggestions)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/rsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
 export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 
-
-#export NVM_DIR="/Users/raph/.nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.shell_local ] && source ~/.shell_local
+
 export PATH=$PATH:/usr/local/go/bin
 
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+export GO111MODULE=on
 
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
@@ -106,9 +77,9 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1" 
+alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1"
 
-alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware" 
+alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware"
 
 #Color in ip command
 alias ip="ip -c "
@@ -137,3 +108,24 @@ alias ccal="cal -3 -m"
 oo () { cd $1;ls; }
 
 alias dailySnapshot="sudo btrfs subvolume snapshot -r / /snapshots/$(date "+%Y-%m-%d-%H-%M")"
+
+transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho transfer /tmp/test.md\ncat /tmp/test.md | transfer test.md"; return 1; fi
+    tmpfile=$( mktemp -t transferXXX ); if tty -s; then basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g'); curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile; else curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile ; fi; cat $tmpfile; rm -f $tmpfile; }
+
+#Vim mode
+bindkey -v
+bindkey -M viins 'jk' vi-cmd-mode
+function zle-line-init zle-keymap-select {
+    RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
+    RPS2=$RPS1
+    zle reset-prompt
+}
+zle -N zle-line-init
+zle -N zle-keymap-select
+
+# ctrl-r starts searching history backward
+bindkey '^r' history-incremental-search-backward
+
+# Use vim cli mode
+bindkey '^P' up-history
+bindkey '^N' down-history
