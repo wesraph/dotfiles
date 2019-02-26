@@ -1,0 +1,4 @@
+#!/bin/sh
+. ../config
+find "$SOULSEEK_DOWNLOAD_PATH" -maxdepth 1 -type d  |\
+    parallel -q -j0 -I {} iwatch -v -e close_nowrite -c "sh ~/.scripts/music/move_to_old $SOULSEEK_DOWNLOAD_PATH/Old %f" "{}"

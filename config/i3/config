@@ -72,7 +72,6 @@ bindsym $mod+v split v
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
 bindsym $mod+z layout tabbed
 bindsym $mod+e layout toggle split
 
@@ -157,10 +156,21 @@ mode "resize" {
         bindsym $mod+r mode "default"
 }
 
+mode "mode" {
+        bindsym $mod+m mode music
+        bindsym Escape mode "default"
+}
+
+mode "music" {
+        bindsym $mod+r exec systemctl --user restart mpd
+        bindsym $mod+s exec  ~/.config/ncmpcpp/move_to_library
+        bindsym Escape mode "default"
+}
+
+bindsym $mod+s  mode default
+bindsym $mod+m  mode mode
 bindsym $mod+r mode "resize"
 
-# Start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
 exec_always --no-startup-id killall compton; compton  -b -C -f ~/.config/compton/compton.conf
 exec_always --no-startup-id killall polybar; polybar main
 exec_always --no-startup-id killall dunst; dunst -conf ~/.config/dunst/dunstrc
@@ -196,9 +206,7 @@ bindsym $mod+i workspace prev
 
 bindsym XF86PowerOff exec /home/raph/.bin/powermenu
 
-bindsym $mod+m exec  setxkbmap -layout fr -option compose:ralt
-
-bindsym $mod+n exec  setxkbmap -layout us -option compose:ralt
+bindsym $mod+c exec  ~/scripts/toggle_keyboard_layout
 
 for_window [class="^.*"] border pixel 1
 client.focused          #404552 #404552 #999999 #ff5757 #993333

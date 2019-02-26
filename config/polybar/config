@@ -90,7 +90,7 @@ module-margin-right = 2
 ;font-0 = "Fantasque Sans Mono:pixelsize=15;3"
 ;font-1 = "Iosevka Nerd Font:pixelsize=18;3"
 
-font-0 = "Deja Vu Sans Mono Nerd Font"
+font-0 = "Deja Vu Sans Mono Nerd Font:pixelsize=15"
 
 
 modules-left = i3
@@ -242,8 +242,8 @@ card = intel_backlight
 [module/cpu]
 type = internal/cpu
 interval = 2
-format-prefix = " "
-format-prefix-foreground = ${colors.foreground-alt}
+format-prefix = ""
+format-prefix-foreground = ${colors.foreground}
 format-underline = #f90000
 label = %percentage:2%%
 
@@ -260,7 +260,7 @@ type = internal/network
 interface = wlp3s0
 interval = 3.0
 
-format-connected =   <label-connected>
+format-connected =  <label-connected>
 format-connected-underline = #9f78e1
 label-connected = %essid%
 
@@ -291,7 +291,7 @@ type = internal/date
 interval = 5
 
 date =
-date-alt = " %Y-%m-%d"
+date-alt = " %Y/%m/%d"
 
 time = %H:%M
 time-alt = %H:%M:%S
@@ -322,7 +322,7 @@ ramp-volume-6 = 墳
 [module/battery]
 type = internal/battery
 full-at = 99
-time-format = %H:%M
+time-format = %Hh%M
 battery = BAT0
 adapter = ADP1
 format-charging = <animation-charging> <label-charging>
@@ -335,30 +335,30 @@ format-discharging-padding = 2
 label-discharging = %percentage%% %time%
 format-full = <label-full>
 
-format-full-prefix = " "
-ramp-capacity-0 =  " "
-ramp-capacity-1 =  " "
-ramp-capacity-2 =  " "
-ramp-capacity-3 =  " "
-ramp-capacity-4 =  " "
-ramp-capacity-5 =  " "
-ramp-capacity-6 =  " "
-ramp-capacity-7 =  " "
-ramp-capacity-8 =  " "
-ramp-capacity-9 =  " "
+format-full-prefix = ""
+ramp-capacity-0 =  ""
+ramp-capacity-1 =  ""
+ramp-capacity-2 =  ""
+ramp-capacity-3 =  ""
+ramp-capacity-4 =  ""
+ramp-capacity-5 =  ""
+ramp-capacity-6 =  ""
+ramp-capacity-7 =  ""
+ramp-capacity-8 =  ""
+ramp-capacity-9 =  ""
 
 ramp-capacity-0-foreground = ${colors.red}
 ramp-capacity-1-foreground = ${colors.red}
 ramp-capacity-foreground   = ${colors.foreground}
 bar-capacity-width = 5
 
-animation-charging-0 = " "
-animation-charging-1 = " "
-animation-charging-2 = " "
-animation-charging-3 = " "
-animation-charging-4 = " "
-animation-charging-5 = " "
-animation-charging-6 = " "
+animation-charging-0 = ""
+animation-charging-1 = ""
+animation-charging-2 = ""
+animation-charging-3 = ""
+animation-charging-4 = ""
+animation-charging-5 = ""
+animation-charging-6 = ""
 
 animation-charging-framerate = 750
 [module/temperature]
