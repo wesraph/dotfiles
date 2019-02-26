@@ -95,7 +95,7 @@ font-0 = "Deja Vu Sans Mono Nerd Font:pixelsize=15"
 
 modules-left = i3
 modules-center =
-modules-right = ovh filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan battery temperature date
+modules-right = soulseekWatcher ovh filesystem xbacklight alsa pulseaudio xkeyboard memory cpu wlan battery temperature date
 
 tray-position = right
 tray-padding = 2
@@ -145,6 +145,13 @@ mount-0 = /
 label-mounted =  %free%
 label-unmounted = %mountpoint% not mounted
 label-unmounted-foreground = ${colors.foreground-alt}
+
+[module/soulseekWatcher]
+type = custom/script
+exec = sh /home/raph/.scripts/music/is_watcher_running
+interval = 1
+label = SLSK
+format-underline = ${colors.primary}
 
 [module/ovh]
 type = custom/script

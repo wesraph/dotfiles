@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
- . ../config
+ . "$HOME/.scripts/config"
 
 [ -z "$MUSIC_LIBRARY_PATH" ] && notify-send Music "Music library path is undefined"
 

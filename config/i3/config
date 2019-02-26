@@ -162,8 +162,10 @@ mode "mode" {
 }
 
 mode "music" {
-        bindsym $mod+r exec systemctl --user restart mpd
-        bindsym $mod+s exec  ~/.config/ncmpcpp/move_to_library
+        bindsym $mod+m exec systemctl --user start mpd
+        bindsym $mod+s exec sh  ~/.scripts/music/move_playing_to_library
+        bindsym $mod+k exec sh  ~/.scripts/music/kill_soulseek_watcher
+        bindsym $mod+w exec sh  ~/.scripts/music/watch_soulseek
         bindsym Escape mode "default"
 }
 
