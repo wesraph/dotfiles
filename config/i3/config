@@ -167,12 +167,15 @@ mode "music" {
         bindsym $mod+s exec sh  ~/.scripts/music/move_playing_to_library
         bindsym $mod+k exec sh  ~/.scripts/music/kill_soulseek_watcher
         bindsym $mod+w exec sh  ~/.scripts/music/watch_soulseek
+        bindsym $mod+h exec sh  ~/.scripts/show_helper music
         bindsym Escape mode "default"
 }
 
 mode "password" {
         bindsym $mod+c exec sh  ~/.scripts/password/copy_password
+        bindsym $mod+m exec sh  ~/.scripts/password/move_password
         bindsym $mod+e exec st -e sh  ~/.scripts/password/edit_password
+        bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
 }
 

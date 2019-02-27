@@ -1,0 +1,3 @@
+#!/bin/sh
+[ -z "$1" ] && exit
+cat "$HOME/.scripts/$1/helper" | rofi -dmenu
