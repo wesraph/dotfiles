@@ -158,14 +158,21 @@ mode "resize" {
 
 mode "mode" {
         bindsym $mod+m mode music
+        bindsym $mod+p mode password
         bindsym Escape mode "default"
 }
 
 mode "music" {
-        bindsym $mod+m exec systemctl --user start mpd
+        bindsym $mod+r exec sh ~/.scripts/music/restart_mpd
         bindsym $mod+s exec sh  ~/.scripts/music/move_playing_to_library
         bindsym $mod+k exec sh  ~/.scripts/music/kill_soulseek_watcher
         bindsym $mod+w exec sh  ~/.scripts/music/watch_soulseek
+        bindsym Escape mode "default"
+}
+
+mode "password" {
+        bindsym $mod+c exec sh  ~/.scripts/password/copy_password
+        bindsym $mod+e exec st -e sh  ~/.scripts/password/edit_password
         bindsym Escape mode "default"
 }
 
