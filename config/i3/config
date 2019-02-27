@@ -168,6 +168,8 @@ mode "music" {
         bindsym $mod+k exec sh  ~/.scripts/music/kill_soulseek_watcher
         bindsym $mod+w exec sh  ~/.scripts/music/watch_soulseek
         bindsym $mod+h exec sh  ~/.scripts/show_helper music
+        bindsym $mod+f exec mpc seek +5
+        bindsym $mod+b exec mpc seek -5
         bindsym Escape mode "default"
 }
 

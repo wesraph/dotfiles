@@ -1,0 +1,6 @@
+cmd+r: Restart MPD
+cmd+s: Move playing to library
+cmd+k: Kill Soulseek watcher
+cmd+w: Launch Soulseek watcher
+cmd+f: Forward of 5 secondes
+cmd+b: Backward of 5 secondes
