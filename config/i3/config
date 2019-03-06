@@ -159,6 +159,7 @@ mode "resize" {
 mode "mode" {
         bindsym $mod+m mode music
         bindsym $mod+p mode password
+        bindsym $mod+f mode file
         bindsym Escape mode "default"
 }
 
@@ -170,6 +171,12 @@ mode "music" {
         bindsym $mod+h exec sh  ~/.scripts/show_helper music
         bindsym $mod+f exec mpc seek +5
         bindsym $mod+b exec mpc seek -5
+        bindsym Escape mode "default"
+}
+
+mode "file" {
+        bindsym $mod+o exec sh ~/.scripts/file/open
+        bindsym $mod+f exec sh ~/.scripts/file/search
         bindsym Escape mode "default"
 }
 
