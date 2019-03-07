@@ -1,0 +1,5 @@
+#!/bin/sh
+running="$(ps aux | grep parallel | grep iwatch)"
+[ -z "$running" ] && exit 1
+echo "yes"
+exit 0

@@ -1,6 +1,7 @@
 [user]
 	name = Raphael Westphal
 	mail = westphal.raphael@gmail.com
+	email = westphal.raphael@gmail.com
 
 [branch]
     autosetupmerge = true

@@ -29,7 +29,7 @@
     # the top and down respectively.
     # The width can be negative.  In this case the actual width is the
     # screen width minus the width defined in within the geometry option.
-    geometry = "300x5-30+50"
+    geometry = "300x50-30+50"
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
@@ -193,6 +193,11 @@
     # Define the class of the windows spawned by dunst
     class = Dunst
 
+    # Define round corners
+    corner_radius = 2
+
+
+
     # Print a notification on startup.
     # This is mainly for error detection, since dbus (re-)starts dunst
     # automatically after a crash.
@@ -252,7 +257,7 @@
     #icon = /path/to/icon
 
 [urgency_normal]
-    background = "#285577"
+    background = "#555555"
     foreground = "#ffffff"
     timeout = 10
     # Icon for notifications with normal urgency, uncomment to enable

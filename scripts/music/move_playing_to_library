@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+ . "$HOME/.scripts/config"
+
+[ -z "$MUSIC_LIBRARY_PATH" ] && notify-send Music "Music library path is undefined"
+
+user_choice="$(ls  "$MUSIC_LIBRARY_PATH" | rofi -dmenu)"
+[ -z "$user_choice" ] && exit
+
+music_path="$(mpc -f  %file% | head -n1)"
+cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/"
+notify-send "Music" "Copied $(basename "$music_path") to $user_choice"
