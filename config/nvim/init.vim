@@ -231,3 +231,5 @@ au BufWritePre * :TrailerTrim
 
 " Replace with the first occurence
 nnoremap <leader>z 1z=
+
+autocmd BufNewFile,BufRead *.fizz set syntax=sql
