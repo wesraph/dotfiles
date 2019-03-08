@@ -57,9 +57,6 @@ source $ZSH/oh-my-zsh.sh
 
 export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-[ -f ~/.shell_local ] && source ~/.shell_local
-
 export PATH=$PATH:/usr/local/go/bin
 
 export GOROOT=/usr/local/go
@@ -102,7 +99,8 @@ export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[1;4;31m'
 
 #Fuzzy password-store
-fpass () {  pass $@ "$(find $HOME/.password-store -iname '*.gpg' | sed -e 's/.*password-store\///g' | sed -e 's/\.gpg$//g'| fzf)"}
+export fpass () {  pass $@ "$(find $HOME/.password-store -iname '*.gpg' | sed -e 's/.*password-store\///g' | sed -e 's/\.gpg$//g'| fzf)"}
+
 alias ccal="cal -3 -m"
 
 oo () { cd $1;ls; }

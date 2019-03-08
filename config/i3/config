@@ -30,7 +30,7 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec ~/.config/st/go_to_dir.sh
+bindsym $mod+Return exec sh ~/.config/st/go_to_dir.sh
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -186,10 +186,10 @@ bindsym $mod+m  mode mode
 bindsym $mod+r mode "resize"
 
 exec_always --no-startup-id killall compton; compton  -b -C -f ~/.config/compton/compton.conf
-exec_always --no-startup-id killall polybar; polybar main
+exec_always --no-startup-id killall polybar; sh  ~/.scripts/screens/launch_polybar.sh
 exec_always --no-startup-id killall dunst; dunst -conf ~/.config/dunst/dunstrc
 exec_always --no-startup-id killall xss-lock; xss-lock -- betterlockscreen -l
-exec_always --no-startup-id killall feh; feh --bg-scale /home/raph/Wallpapers/wallpaper.jpg
+exec_always --no-startup-id killall feh; feh --bg-scale ~/Wallpapers/wallpaper.jpg
 
 smart_gaps on
 smart_borders on
