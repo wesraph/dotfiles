@@ -35,7 +35,8 @@ bindsym $mod+Return exec sh ~/.config/st/go_to_dir.sh
 # kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym $mod+Shift+p exec betterlockscreen -l
+#bindsym $mod+Shift+p exec ~/.local/bin/betterlockscreen -l
+bindsym $mod+Shift+p exec i3lock -i ~/Wallpapers/wallpaper.png
 
 # start dmenu (a program launcher)
 bindsym $mod+d exec rofi -show run

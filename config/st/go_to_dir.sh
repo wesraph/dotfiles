@@ -1,8 +1,9 @@
 #!/bin/sh
+PATH=$PATH:~/.local/bin
 
 if [ -f /dev/shm/last_path ]
 then
-    st sh -c "cd \"$(cat /dev/shm/last_path)\" && zsh "
+    /home/rwestpha/.bin/st sh -c "cd \"$(cat /dev/shm/last_path)\" && zsh "
 else
-   st
+    /home/rwestpha/.bin/st
 fi
