@@ -1,0 +1,3 @@
+#!/bin/sh
+export MUSIC_LIBRARY_PATH=
+export SOULSEEK_DOWNLOAD_PATH=

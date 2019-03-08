@@ -1,0 +1,5 @@
+#!/bin/sh
+PATH_MUSIC_LIB="/home/data/Musique/"
+user_choice="$(ls  "$PATH_MUSIC_LIB" | rofi -dmenu)"
+[ -z "$user_choice" ] && exit
+cp "$(mpc -f  %file% | head -n1)" "$PATH_MUSIC_LIB/$user_choice/"
