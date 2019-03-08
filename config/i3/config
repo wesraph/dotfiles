@@ -161,6 +161,7 @@ mode "mode" {
         bindsym $mod+p mode password
         bindsym $mod+f mode file
         bindsym Escape mode "default"
+        bindsym $mod+q mode "default"
 }
 
 mode "music" {
@@ -172,12 +173,14 @@ mode "music" {
         bindsym $mod+f exec mpc seek +5
         bindsym $mod+b exec mpc seek -5
         bindsym Escape mode "default"
+        bindsym $mod+q mode "default"
 }
 
 mode "file" {
         bindsym $mod+o exec sh ~/.scripts/file/open
         bindsym $mod+f exec sh ~/.scripts/file/search
         bindsym Escape mode "default"
+        bindsym $mod+q mode "default"
 }
 
 mode "password" {
@@ -186,6 +189,7 @@ mode "password" {
         bindsym $mod+e exec st -e sh  ~/.scripts/password/edit_password
         bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
+        bindsym $mod+q mode "default"
 }
 
 bindsym $mod+s  mode default
