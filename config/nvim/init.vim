@@ -23,6 +23,7 @@ endif
 
 call plug#begin('~/.config/nvim/plugged')
 "Plug 'vim-airline/vim-airline'
+Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
@@ -233,3 +234,6 @@ au BufWritePre * :TrailerTrim
 nnoremap <leader>z 1z=
 
 autocmd BufNewFile,BufRead *.fizz set syntax=sql
+
+" Ansible highlight
+let g:ansible_attribute_highlight = "a"
