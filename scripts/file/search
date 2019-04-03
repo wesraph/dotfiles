@@ -8,4 +8,4 @@ folder=$(grep "$choice" ~/.scripts/file/config | head -n1 | cut -d";" -f2)
 file="$(find "$folder" | rofi -dmenu)"
 [ -z "$file" ] && exit
 
-mimeo "$file" &
+xdg-open "$file" &

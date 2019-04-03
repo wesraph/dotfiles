@@ -1,3 +1,3 @@
 #!/bin/sh
-export MUSIC_LIBRARY_PATH=/home/data/Musique
-export SOULSEEK_DOWNLOAD_PATH=/home/raph/Documents/SoulseekDownloads
+export MUSIC_LIBRARY_PATH=/home/rwestpha/Documents/Musique
+export SOULSEEK_DOWNLOAD_PATH=/home/rwestpha/Documents/SoulseekDownloads
