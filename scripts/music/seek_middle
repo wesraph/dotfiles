@@ -1,0 +1,2 @@
+#!/bin/sh
+mpc seek 50%
