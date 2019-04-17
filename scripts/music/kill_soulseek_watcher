@@ -1,10 +1,8 @@
 #!/bin/sh
-PID=$(ps aux | grep parallel | grep iwatch  | awk '{print $2}' | head -n 1)
+PID=$(ps aux | grep watch_soulseek | grep sh | awk '{print $2}' | head -n 1)
 if [ -z "$PID" ]; then
     notify-send "Music" "Cannot find soulseek watcher"
     exit
 fi
-kill "$PID"
-sleep 1
 kill "$PID"
 notify-send "Music" "Killed soulseek watcher"

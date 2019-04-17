@@ -1,4 +1,17 @@
 #!/bin/sh
 . "$HOME/.scripts/config"
-find "$SOULSEEK_DOWNLOAD_PATH" -type d | grep -v 'Old' |\
-    parallel -q -j100 -I {} iwatch -v -e close_nowrite -c "sh ~/.scripts/music/move_to_old $SOULSEEK_DOWNLOAD_PATH/Old %f" "{}"
+alias mpc="mpc -h /tmp/mpd.unix"
+while :
+do
+    playing="$(mpc | head -n1)"
+    mpc idle
+    nplaying="$(mpc | head -n1)"
+
+    if [ "$nplaying" != "$playing" ]; then
+        if [ ! -z "$playing" ]; then
+            echo "Moving to old"
+            ~/.scripts/music/move_to_old "$SOULSEEK_DOWNLOAD_PATH/Old" "$playing"
+        fi
+    fi
+    sleep 0.5
+done
