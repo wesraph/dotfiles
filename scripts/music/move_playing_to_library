@@ -7,7 +7,7 @@ set -e
 user_choice="$(ls  "$MUSIC_LIBRARY_PATH" | rofi -dmenu)"
 [ -z "$user_choice" ] && exit
 
-music_path="$(mpc -f  %file% | head -n1)"
-touch "$music_path"
+music_path="$(mpc -h /tmp/mpd.unix -f  %file% | head -n1)"
+#touch "$music_path"
 cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/"
 notify-send "Music" "Copied $(basename "$music_path") to $user_choice"
