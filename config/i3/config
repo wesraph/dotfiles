@@ -213,9 +213,9 @@ bindsym XF86AudioRaiseVolume exec pamixer --unmute --increase 5
 bindsym XF86AudioLowerVolume exec pamixer --unmute --decrease 5
 bindsym XF86AudioMute exec pamixer --toggle-mute
 
-bindsym XF86AudioPrev exec mpc --host /tmp/mpd.unix prev
-bindsym XF86AudioNext exec mpc --host /tmp/mpd.unix next
-bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
+bindsym $mod+F6 exec mpc --host /tmp/mpd.unix prev
+bindsym $mod+F8 exec mpc --host /tmp/mpd.unix next
+bindsym $mod+F7 exec mpc --host /tmp/mpd.unix toggle
 
 bindsym XF86MonBrightnessUp exec xbacklight -inc 5
 bindsym XF86MonBrightnessDown exec xbacklight -dec 5
