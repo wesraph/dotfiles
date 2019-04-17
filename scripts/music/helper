@@ -4,3 +4,4 @@ cmd+k: Kill Soulseek watcher
 cmd+w: Launch Soulseek watcher
 cmd+f: Forward of 5 secondes
 cmd+b: Backward of 5 secondes
+cmd+m: Seek to the middle of the song
