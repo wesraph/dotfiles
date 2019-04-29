@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$HOME/.scripts/config"
-alias mpc="mpc -h /tmp/mpd.unix"
+alias mpc="mpc -h /tmp/mpd.unix -f %file%"
 while :
 do
     playing="$(mpc | head -n1)"
