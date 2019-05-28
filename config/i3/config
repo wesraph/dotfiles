@@ -161,6 +161,7 @@ mode "mode" {
         bindsym $mod+m mode music
         bindsym $mod+p mode password
         bindsym $mod+f mode file
+        bindsym $mod+b mode bluetooth
         bindsym Escape mode "default"
 }
 
@@ -190,6 +191,12 @@ mode "password" {
         bindsym Escape mode "default"
 }
 
+mode "bluetooth" {
+        bindsym $mod+c exec sh ~/.scripts/bluetooth/connect
+        bindsym $mod+d exec sh ~/.scripts/bluetooth/disconnect
+        bindsym Escape mode "default"
+        bindsym $mod+q mode "default"
+}
 bindsym $mod+s  mode default
 bindsym $mod+m  mode mode
 bindsym $mod+r mode "resize"
