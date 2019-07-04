@@ -3,9 +3,9 @@
 alias mpc="mpc -h /tmp/mpd.unix"
 while :
 do
-    playing="$(mpc | head -n1)"
+    playing="$(mpc -f %file% | head -n1)"
     mpc idle
-    nplaying="$(mpc | head -n1)"
+    nplaying="$(mpc -f %file% | head -n1)"
 
     if [ "$nplaying" != "$playing" ]; then
         if [ ! -z "$playing" ]; then
