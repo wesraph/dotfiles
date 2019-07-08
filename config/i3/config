@@ -31,6 +31,7 @@ floating_modifier $mod
 
 # start a terminal
 bindsym $mod+Return exec sh ~/.config/st/go_to_dir.sh
+bindsym $mod+Shift+Return exec sh ~/.config/st/go_to_dir.sh lowres
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -200,9 +201,10 @@ mode "bluetooth" {
         bindsym Escape mode "default"
         bindsym $mod+q mode "default"
 }
+
 bindsym $mod+s  mode default
 bindsym $mod+m  mode mode
-bindsym $mod+r mode "resize"
+bindsym $mod+r  mode "resize"
 
 exec_always --no-startup-id killall compton; compton -b --config ~/.config/compton/compton.conf
 exec_always --no-startup-id killall polybar; sh  ~/.scripts/screens/launch_polybar.sh
