@@ -1,8 +1,8 @@
-!Xft.dpi: 96
-Xft.dpi: 190
+Xft.dpi: 96
+!Xft.dpi: 190
 Xft.rgba: rgb
 Xft.antialias: true
 Xft.hinting: h false
 Xft.lcdfilter: lcddefaultc
 rofi.font: Hasklig 20
-rofi.theme: /usr/share/rofi/themes/Arc-Dark.rasi 
+rofi.theme: /usr/share/rofi/themes/Arc-Dark.rasi
