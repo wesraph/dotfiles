@@ -59,10 +59,9 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 
 export PATH=$PATH:/usr/local/go/bin
 
-export GOROOT=/usr/local/go
+export GOROOT=/usr/lib/go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-export GO111MODULE=on
 
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
