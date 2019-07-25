@@ -35,6 +35,8 @@ Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'vim-scripts/c.vim'
 Plug 'csexton/trailertrash.vim'
+Plug 'tpope/vim-fugitive'
+Plug 'martinda/Jenkinsfile-vim-syntax'
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 endif
