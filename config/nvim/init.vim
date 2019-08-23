@@ -1,13 +1,15 @@
 " Remap the leader key
 
 let mapleader = ','
-set tabstop=4     " a tab is four spaces
+
+set tabstop=2     " a tab is four spaces
+set shiftwidth=2  " number of spaces to use for autoindenting
+
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
 set autoindent    " always set autoindenting on
 set copyindent    " copy the previous indentation on autoindenting
 set number        " always show line numbers
-set shiftwidth=4  " number of spaces to use for autoindenting
 set shiftround    " use multiple of shiftwidth when indenting with '<' and '>'
 set showmatch     " set show matching parenthesis
 set ignorecase    " ignore case when searching
@@ -37,12 +39,18 @@ Plug 'vim-scripts/c.vim'
 Plug 'csexton/trailertrash.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'martinda/Jenkinsfile-vim-syntax'
+Plug 'moll/vim-node'
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 endif
+Plug 'deoplete-plugins/deoplete-go', { 'do': 'make'}
+Plug 'carlitux/deoplete-ternjs' ", { 'do': 'npm install -g tern' }
+
 call plug#end()
 
 let g:deoplete#enable_at_startup = 1
+let g:deoplete#sources#go#package_dot = 1
+
 
 " No mouse
 set mouse=
@@ -239,3 +247,8 @@ autocmd BufNewFile,BufRead *.fizz set syntax=sql
 
 " Ansible highlight
 let g:ansible_attribute_highlight = "a"
+
+let g:go_fmt_command = "goimports"
+
+let g:deoplete#sources#ternjs#docs = 1
+
