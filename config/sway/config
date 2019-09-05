@@ -30,7 +30,7 @@ font Deja Vu Sans Mono Nerd Font:monospace 14
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec sh ~/.config/st/go_to_dir.sh
+bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
 bindsym $mod+Shift+Return exec sh ~/.config/st/go_to_dir.sh lowres
 
 # kill focused window
@@ -38,12 +38,8 @@ bindsym $mod+Shift+q kill
 
 bindsym $mod+Shift+p exec swaylock -i ~/Wallpapers/lockscreen.png
 
-# start dmenu (a program launcher)
+# start rofi
 bindsym $mod+d exec rofi -show run
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 # change focus
 bindsym $mod+h focus left
@@ -136,12 +132,6 @@ bindsym $mod+Shift+r restart
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
-        # These bindings trigger as soon as you enter the resize mode
-
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
         bindsym h resize shrink width 10 px or 10 ppt
         bindsym k resize grow height 10 px or 10 ppt
         bindsym j resize shrink height 10 px or 10 ppt
@@ -189,9 +179,10 @@ mode "file" {
 }
 
 mode "password" {
+        bindsym $mod+r exec sh  -c "pass -c Perso/ratiju && notify-send Password 'Password copied to clipboard'"
         bindsym $mod+c exec sh  ~/.scripts/password/copy_password
         bindsym $mod+m exec sh  ~/.scripts/password/move_password
-        bindsym $mod+e exec st -e sh  ~/.scripts/password/edit_password
+        bindsym $mod+e exec alacritty -e sh  ~/.scripts/password/edit_password
         bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
         bindsym $mod+q mode "default"
@@ -209,19 +200,12 @@ bindsym $mod+s  exec ~/.scripts/screens/screenshotWayland.sh
 bindsym $mod+m  mode mode
 bindsym $mod+r  mode "resize"
 
-exec_always --no-startup-id killall dunst; dunst -conf ~/.config/dunst/dunstrc
-exec_always --no-startup-id killall waybar; waybar
-exec_always --no-startup-id killall xss-lock; xss-lock -- swaylock -i ~/Wallpapers/lockscreen.png
-
 smart_gaps on
 smart_borders on
 
 gaps inner 15
 gaps outer 0
 
-for_window [class="^.*"] border pixel  0
-
-hide_edge_borders both
 
 bindsym XF86AudioRaiseVolume exec pamixer --unmute --increase 5
 bindsym XF86AudioLowerVolume exec pamixer --unmute --decrease 5
@@ -244,10 +228,15 @@ bindsym XF86PowerOff exec /home/raph/.bin/powermenu
 
 bindsym $mod+c exec  ~/scripts/toggle_keyboard_layout
 
-for_window [class="^.*"] border pixel 1
+bindsym Control+Space exec makoctl dismiss
+
+default_border none
+
+for_window [class="^.*"] border pixel 2
 client.focused          #404552 #404552 #999999 #ff5757 #993333
 
-#Fast input
+
+# Fast input
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_delay 200
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_rate 50
 
@@ -255,8 +244,23 @@ input 1452:627:bcm5974 {
     pointer_accel 0.75
 }
 
+# Define wallpaper
 output "*" bg ~/Wallpapers/wallpaper.jpg fill
 
 # By default we want the other screen smaller
 output DP-1 scale 0.65
-output DP-1 scale 0.65
+output DP-2 scale 0.65
+
+
+exec_always --no-startup-id killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
+exec_always --no-startup-id killall waybar; waybar
+exec_always --no-startup-id killall xss-lock; xss-lock -- swaylock -i ~/Wallpapers/lockscreen.png
+
+exec mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
+exec waybar
+exec xss-lock -- swaylock -i ~/Wallpapers/lockscreen.png
+
+input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
+    xkb_layout us
+    xkb_options compose:ralt
+}

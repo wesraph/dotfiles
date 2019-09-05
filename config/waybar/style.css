@@ -38,7 +38,7 @@ window#waybar {
     border-bottom: 3px solid white;
 }
 
-#clock, #battery, #cpu, #memory, #network, #pulseaudio, #custom-spotify, #tray, #mode {
+#clock, #battery, #cpu, #memory, #network, #pulseaudio, #custom-spotify, #tray, #mode , #custom-ovh, #custom-soulseek, #custom-fan, #custom-temperature{
     padding: 0 7px;
     margin: 0 2px;
 }
@@ -99,3 +99,6 @@ window#waybar {
 #tray {
 }
 
+#custom-soulseek {
+    color: #02aeff
+}

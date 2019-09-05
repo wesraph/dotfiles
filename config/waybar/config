@@ -4,7 +4,7 @@
     "height": 40, // Waybar height
     // "width": 1366, // Waybar width
     // Choose the order of the modules
-    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-left": ["sway/workspaces", "sway/mode", "custom/soulseek", "custom/ovh"],
     "modules-center": ["sway/window"],
     "modules-right": ["pulseaudio", "network", "cpu", "memory", "battery", "custom/temperature", "custom/fan", "tray", "clock"],
     "sway/workspaces": {
@@ -22,6 +22,9 @@
             "focused": "",
             "default": ""
         }
+    },
+    "sway/window": {
+        "max-length": 30
     },
     "sway/mode": {
         "format": "<span style=\"italic\">{}</span>"
@@ -87,5 +90,17 @@
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/shortcuts.sh get_temp"
+    },
+    "custom/soulseek": {
+        "format": "SLSK",
+        "max-length": 40,
+        "interval": 1, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/music/is_watcher_running"
+    },
+    "custom/ovh": {
+        "format": "OVH",
+        "max-length": 40,
+        "interval": 1, // Remove this if your script is endless and write in loop
+        "exec": "pgrep -x vpnc"
     }
 }
