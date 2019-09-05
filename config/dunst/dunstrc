@@ -41,7 +41,7 @@
     # The transparency of the window.  Range: [0; 100].
     # This option will only work if a compositing window manager is
     # present (e.g. xcompmgr, compiz, etc.).
-    transparency = 15
+    transparency = 10
 
     # The height of the entire notification.  If the height is smaller
     # than the font height and padding combined, it will be raised
@@ -65,6 +65,7 @@
 
     # Defines color of the frame around the notification window.
     frame_color = "#aaaaaa"
+
 
     # Define a color for the separator.
     # possible values are:
@@ -194,7 +195,7 @@
     class = Dunst
 
     # Define round corners
-    corner_radius = 9
+    #corner_radius = 9
 
 
 
@@ -223,7 +224,7 @@
     # dunst will attempt to calculate an appropriate dpi value for each monitor
     # using the resolution and physical size. This might be useful in setups
     # where there are multiple screens with very different dpi values.
-    per_monitor_dpi = false
+    per_monitor_dpi = true
 
 [shortcuts]
 
