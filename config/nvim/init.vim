@@ -251,4 +251,3 @@ let g:ansible_attribute_highlight = "a"
 let g:go_fmt_command = "goimports"
 
 let g:deoplete#sources#ternjs#docs = 1
-
