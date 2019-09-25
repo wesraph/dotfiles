@@ -39,12 +39,18 @@ Plug 'vim-scripts/c.vim'
 Plug 'csexton/trailertrash.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'martinda/Jenkinsfile-vim-syntax'
+Plug 'alvan/vim-closetag'
+Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-endif
-Plug 'deoplete-plugins/deoplete-go', { 'do': 'make'}
-Plug 'carlitux/deoplete-ternjs' ", { 'do': 'npm install -g tern' }
+
+Plug 'Shougo/neosnippet'
+Plug 'Shougo/neosnippet-snippets'
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+"Plug 'deoplete-plugins/deoplete-go', { 'do': 'make'}
+"Plug 'carlitux/deoplete-ternjs' , { 'do': 'npm install -g tern' }
 
 call plug#end()
 
@@ -250,4 +256,7 @@ let g:ansible_attribute_highlight = "a"
 
 let g:go_fmt_command = "goimports"
 
-let g:deoplete#sources#ternjs#docs = 1
+let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
+
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
