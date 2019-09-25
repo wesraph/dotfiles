@@ -203,6 +203,8 @@ bindsym $mod+r  mode "resize"
 smart_gaps on
 smart_borders on
 
+default_border pixel 2
+
 gaps inner 15
 gaps outer 0
 
@@ -230,8 +232,6 @@ bindsym $mod+c exec  ~/scripts/toggle_keyboard_layout
 
 bindsym Control+Space exec makoctl dismiss
 
-default_border none
-
 for_window [class="^.*"] border pixel 2
 client.focused          #404552 #404552 #999999 #ff5757 #993333
 
@@ -252,13 +252,14 @@ output DP-1 scale 0.65
 output DP-2 scale 0.65
 
 
-exec_always --no-startup-id killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
-exec_always --no-startup-id killall waybar; waybar
-exec_always --no-startup-id killall xss-lock; xss-lock -- swaylock -i ~/Wallpapers/lockscreen.png
+exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
+exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 
-exec mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
-exec waybar
-exec xss-lock -- swaylock -i ~/Wallpapers/lockscreen.png
+exec_always killall waybar; waybar
+exec sleep 1 && waybar
+
+exec_always swayidle -w  before-sleep 'swaylock -i ~/Wallpapers/lockscreen.png'
+exec swayidle -w  before-sleep 'swaylock -i ~/Wallpapers/lockscreen.png'
 
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
     xkb_layout us
