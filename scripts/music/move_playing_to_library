@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+#set -e
  . "$HOME/.scripts/config"
 
 [ -z "$MUSIC_LIBRARY_PATH" ] && notify-send "Music" "Music library path is undefined"
@@ -13,6 +13,6 @@ music_path="$(mpc -f  %file% | head -n1)"
 
 touch "$music_path"
 
-cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/" || notify-send "Music" "Cannot copy music" && exit
+cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/" -v || (notify-send "Music" "Cannot copy music" && exit)
 
 notify-send "Music" "Copied $music_path to $user_choice"
