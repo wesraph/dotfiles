@@ -260,3 +260,6 @@ let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
 
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Expand snippet
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
