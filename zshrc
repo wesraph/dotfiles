@@ -73,10 +73,6 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1"
-
-alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware"
-
 #Color in ip command
 alias ip="ip -c "
 
