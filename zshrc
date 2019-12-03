@@ -59,7 +59,12 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 
 export PATH=$PATH:/usr/local/go/bin
 
-export GOROOT=/usr/lib/go
+[ -d /usr/bin/go ] && {
+  export GOROOT=/usr/bin/go
+}
+[ -d /usr/local/go  ] && {
+  export GOROOT=/usr/local/go
+}
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
