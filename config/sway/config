@@ -240,6 +240,9 @@ client.focused          #404552 #404552 #999999 #ff5757 #993333
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_delay 200
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_rate 50
 
+input 7764:8240:TypeMatrix.com_USB_Keyboard repeat_delay 200
+input 7764:8240:TypeMatrix.com_USB_Keyboard repeat_rate 50
+
 input 1452:627:bcm5974 {
     pointer_accel 0.75
 }
@@ -250,7 +253,7 @@ output "*" bg ~/Wallpapers/wallpaper.jpg fill
 # By default we want the other screen smaller
 output DP-1 scale 0.65
 output DP-2 scale 0.65
-
+output HDMI-A-2 scale 0.65
 
 exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
