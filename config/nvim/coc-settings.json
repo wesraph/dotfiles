@@ -1,12 +1,13 @@
-{"languageserver":
+{
+  "suggest.minTriggerInputLength": 3,
+  "languageserver":
   {
     "golang": {
-      "command": "go-langserver",
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
       "filetypes": ["go"],
       "initializationOptions": {
-        "gocodeCompletionEnabled": true,
-        "diagnosticsEnabled": true,
-        "lintTool": "golint"
+        "usePlaceholders": true
       }
     },
     "latex": {
