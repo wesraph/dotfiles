@@ -59,7 +59,12 @@ export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 
 export PATH=$PATH:/usr/local/go/bin
 
-export GOROOT=/usr/lib/go
+[ -d /usr/bin/go ] && {
+  export GOROOT=/usr/bin/go
+}
+[ -d /usr/local/go  ] && {
+  export GOROOT=/usr/local/go
+}
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
@@ -72,10 +77,6 @@ export VIMRC=$HOME/.config/nvim/init.vim
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
-
-alias noscale="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1"
-
-alias noscalevmware="export QT_AUTO_SCREEN_SCALE_FACTOR=1; export QT_SCALE_FACTOR=1; vmware"
 
 #Color in ip command
 alias ip="ip -c "
@@ -112,13 +113,6 @@ transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho
 #Vim mode
 bindkey -v
 bindkey -M viins 'jk' vi-cmd-mode
-function zle-line-init zle-keymap-select {
-    RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-    RPS2=$RPS1
-    zle reset-prompt
-}
-zle -N zle-line-init
-zle -N zle-keymap-select
 
 # ctrl-r starts searching history backward
 bindkey '^r' history-incremental-search-backward

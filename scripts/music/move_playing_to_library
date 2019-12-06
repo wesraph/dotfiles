@@ -1,16 +1,18 @@
 #!/bin/sh
-set -e
+#set -e
  . "$HOME/.scripts/config"
 
-[ -z "$MUSIC_LIBRARY_PATH" ] && notify-send Music "Music library path is undefined"
+[ -z "$MUSIC_LIBRARY_PATH" ] && notify-send "Music" "Music library path is undefined"
 
 user_choice="$(ls  "$MUSIC_LIBRARY_PATH" | rofi -dmenu)"
 [ -z "$user_choice" ] && exit
 
 music_path="$(mpc -f  %file% | head -n1)"
 [ ! -f "$music_path" ] && music_path="$MUSIC_LIBRARY_PATH/$music_path"
+[ ! -f "$music_path" ] && notify-send "Music" "Error while getting music" && exit
 
 touch "$music_path"
 
-cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/"
-notify-send "Music" "Copied $(basename "$music_path") to $user_choice"
+cp "$music_path" "$MUSIC_LIBRARY_PATH/$user_choice/" -v || (notify-send "Music" "Cannot copy music" && exit)
+
+notify-send "Music" "Copied $music_path to $user_choice"

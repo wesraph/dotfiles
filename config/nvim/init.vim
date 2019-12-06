@@ -1,13 +1,14 @@
 " Remap the leader key
-
 let mapleader = ','
-set tabstop=4     " a tab is four spaces
+
+set tabstop=2     " a tab is four spaces
+set shiftwidth=2  " number of spaces to use for autoindenting
+
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
 set autoindent    " always set autoindenting on
 set copyindent    " copy the previous indentation on autoindenting
 set number        " always show line numbers
-set shiftwidth=4  " number of spaces to use for autoindenting
 set shiftround    " use multiple of shiftwidth when indenting with '<' and '>'
 set showmatch     " set show matching parenthesis
 set ignorecase    " ignore case when searching
@@ -22,7 +23,6 @@ if &t_Co > 2 || has("gui_running")
 endif
 
 call plug#begin('~/.config/nvim/plugged')
-"Plug 'vim-airline/vim-airline'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
@@ -35,12 +35,14 @@ Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'vim-scripts/c.vim'
 Plug 'csexton/trailertrash.vim'
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-endif
-call plug#end()
+Plug 'tpope/vim-fugitive'
+Plug 'martinda/Jenkinsfile-vim-syntax'
+Plug 'alvan/vim-closetag'
+Plug 'mxw/vim-jsx'
+Plug 'moll/vim-node'
 
-let g:deoplete#enable_at_startup = 1
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call plug#end()
 
 " No mouse
 set mouse=
@@ -55,7 +57,6 @@ set undolevels=1000 " much more undo
 
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
-
 
 " Indentation
 set expandtab       "Tabs to spaces
@@ -77,7 +78,6 @@ set encoding=utf-8 nobomb
 " Highlight trailing spaces
 highlight ExtraWhitespace term=reverse ctermbg=11
 au BufNewFile,BufRead * :match ExtraWhitespace /\s\+$/
-
 
 " Show all kinds of stuff
 set ruler           " Show the cursor position
@@ -118,13 +118,6 @@ nnoremap gl    :tabnext<CR>
 nnoremap gh    :tabprev<CR>
 nnoremap gL    :bnext<CR>
 nnoremap gH    :bprev<CR>
-
-
-" Insert mode paste toggle
-set pastetoggle=<F9>
-nnoremap <F10> :set nonumber!<CR>
-nnoremap <F12> :set paste<CR>i
-nnoremap <leader>i :set paste<CR>i
 
 " Open a new tab the easy way
 nnoremap <leader>t :tabedit<Space>
@@ -178,12 +171,6 @@ augroup locationlist
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 
-" Syntastic for javascript
-let g:syntastic_javascript_checkers = ['jshint']
-let g:javascript_plugin_jsdoc = 1
-let g:javascript_plugin_ngdoc = 1
-
-vnoremap <leader>z :%s/\%V
 "
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
@@ -198,8 +185,6 @@ set rtp+=fzf
 "Same cursor than vim
 set guicursor=
 
-" deoplete tab-complete
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
@@ -219,7 +204,6 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 "Configure vim for latex
 let g:vimtex_view_general_viewer = 'zathura'
 
-
 " Open nerdtree with ctrl n
 map <C-n> :NERDTreeToggle<CR>
 
@@ -237,3 +221,19 @@ autocmd BufNewFile,BufRead *.fizz set syntax=sql
 
 " Ansible highlight
 let g:ansible_attribute_highlight = "a"
+
+let g:go_fmt_command = "goimports"
+
+let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
+
+" Autocompletion with tab
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Syntastic config
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_auto_jump = 0

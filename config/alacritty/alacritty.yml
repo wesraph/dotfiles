@@ -15,12 +15,13 @@ env:
   TERM: xterm-256color
 
 window:
+
   # Window dimensions in character columns and lines
   # Falls back to size specified by window manager if set to 0x0.
   # (changes require restart)
   dimensions:
-    columns: 80
-    lines: 24
+    columns: 0
+    lines: 0
 
   # Adds this many blank pixels of padding around the window
   # Units are physical pixels; this is not DPI aware.
@@ -29,9 +30,9 @@ window:
     x: 2
     y: 2
 
+
   # Window decorations
-  # Setting this to false will result in window without borders and title bar.
-  decorations: full
+  decorations: none
 
 # Display tabs using this many cells (changes require restart)
 tabspaces: 8
@@ -61,24 +62,24 @@ draw_bold_text_with_bright_colors: true
 font:
   # The normal (roman) font face to use.
   normal:
-    family: monospace # should be "Menlo" or something on macOS.
+    family: Deja Vu Sans Mono Nerd Font # should be "Menlo" or something on macOS.
     # Style can be specified to pick a specific face.
     # style: Regular
 
   # The bold font face
   bold:
-    family: monospace # should be "Menlo" or something on macOS.
+    family: Deja Vu Sans Mono Nerd Font # should be "Menlo" or something on macOS.
     # Style can be specified to pick a specific face.
     # style: Bold
 
   # The italic font face
   italic:
-    family: monospace # should be "Menlo" or something on macOS.
+    family: Deja Vu Sans Mono Nerd Font # should be "Menlo" or something on macOS.
     # Style can be specified to pick a specific face.
     # style: Italic
 
   # Point size of the font
-  size: 8.0
+  size: 19.0
 
   # Offset is the extra space around each character. offset.y can be thought of
   # as modifying the linespacing, and offset.x as modifying the letter spacing.
@@ -105,7 +106,6 @@ font:
   use_thin_strokes: true
 
 # Should display the render timer
-render_timer: false
 
 # Use custom cursor colors. If true, display the cursor in the cursor.foreground
 # and cursor.background colors, otherwise invert the colors of the cursor.
@@ -192,7 +192,7 @@ visual_bell:
   duration: 0
 
 # Background opacity
-background_opacity: 0.7
+background_opacity: 0.6
 
 # Mouse bindings
 #
