@@ -52,15 +52,9 @@ Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
 Plug 'drewtempelmeyer/palenight.vim'
 
-Plug 'Shougo/neosnippet'
-Plug 'Shougo/neosnippet-snippets'
-
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
-
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#go#package_dot = 1
-
+"
 " No mouse
 set mouse=
 
@@ -78,6 +72,12 @@ set undolevels=1000 " much more undo
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
 
+" Indentation
+set expandtab       "Tabs to spaces
+set smarttab
+set softtabstop=4
+set linebreak
+set autoindent
 
 " Menu completion
 set wildmenu
@@ -92,7 +92,6 @@ set encoding=utf-8 nobomb
 " Highlight trailing spaces
 highlight ExtraWhitespace term=reverse ctermbg=11
 au BufNewFile,BufRead * :match ExtraWhitespace /\s\+$/
-
 
 " Show all kinds of stuff
 set ruler           " Show the cursor position
@@ -133,13 +132,6 @@ nnoremap gl    :tabnext<CR>
 nnoremap gh    :tabprev<CR>
 nnoremap gL    :bnext<CR>
 nnoremap gH    :bprev<CR>
-
-
-" Insert mode paste toggle
-set pastetoggle=<F9>
-nnoremap <F10> :set nonumber!<CR>
-nnoremap <F12> :set paste<CR>i
-nnoremap <leader>i :set paste<CR>i
 
 " Open a new tab the easy way
 nnoremap <leader>t :tabedit<Space>
@@ -191,12 +183,7 @@ augroup locationlist
     autocmd!
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
-
-" Syntastic for javascript
-let g:syntastic_javascript_checkers = ['jshint']
-let g:javascript_plugin_jsdoc = 1
-let g:javascript_plugin_ngdoc = 1
-
+"
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
 
@@ -208,8 +195,6 @@ set rtp+=fzf
 "Same cursor than vim
 set guicursor=
 
-" deoplete tab-complete
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
@@ -249,7 +234,12 @@ let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
 
 " Autocompletion with tab
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
-" Expand snippet
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+" Syntastic config
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_auto_jump = 0
