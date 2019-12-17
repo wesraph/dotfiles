@@ -45,7 +45,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
 Plug 'OmniSharp/omnisharp-vim'
 Plug 'ap/vim-css-color'
-Plug 'vim-syntastic/syntastic'
 Plug 'w0rp/ale'
 Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
@@ -67,6 +66,7 @@ call plug#end()
 set mouse=
 
 filetype plugin indent on
+filetype plugin on
 syntax on
 
 set background=dark
