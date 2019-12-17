@@ -11,6 +11,7 @@ endif
 " Indentation
 set expandtab       "Tabs to spaces
 set smarttab
+set tabstop=4
 set softtabstop=4
 set linebreak
 set autoindent
