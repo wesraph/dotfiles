@@ -57,7 +57,9 @@ Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
-Plug 'drewtempelmeyer/palenight.vim'
+
+" Themes
+Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
