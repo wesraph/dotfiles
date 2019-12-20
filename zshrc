@@ -67,6 +67,7 @@ export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
 
 export VIMRC=$HOME/.config/nvim/init.vim
+export SYSTEMD_EDITOR="vim"
 
 #No more display problem
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
