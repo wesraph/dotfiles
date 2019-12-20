@@ -1,9 +1,20 @@
 " Remap the leader key
-
 let mapleader = ','
 
-set tabstop=2     " a tab is four spaces
-set shiftwidth=2  " number of spaces to use for autoindenting
+" Termguicolors for alacrittyk
+if exists('+termguicolors')
+  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
+" Indentation
+set expandtab       "Tabs to spaces
+set smarttab
+set tabstop=4
+set softtabstop=4
+set linebreak
+set autoindent
 
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
@@ -18,18 +29,22 @@ set smartcase     " ignore case if search pattern is all lowercase,
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
 
+if (has("nvim"))
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
 if &t_Co > 2 || has("gui_running")
     " switch syntax highlighting on, when the terminal has colors
     syntax on
 endif
 
 call plug#begin('~/.config/nvim/plugged')
-"Plug 'vim-airline/vim-airline'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
-Plug 'vim-syntastic/syntastic'
+Plug 'OmniSharp/omnisharp-vim'
+Plug 'ap/vim-css-color'
 Plug 'w0rp/ale'
 Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
@@ -43,27 +58,22 @@ Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
 
-Plug 'Shougo/neosnippet'
-Plug 'Shougo/neosnippet-snippets'
+" Themes
+Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-"Plug 'deoplete-plugins/deoplete-go', { 'do': 'make'}
-"Plug 'carlitux/deoplete-ternjs' , { 'do': 'npm install -g tern' }
-
 call plug#end()
-
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#go#package_dot = 1
-
-
+"
 " No mouse
 set mouse=
 
 filetype plugin indent on
+filetype plugin on
 syntax on
-colorscheme onedark
+
+set background=dark
+colorscheme palenight
+"colorscheme onedark
 
 " History
 set history=1000    " much more history than base
@@ -71,7 +81,6 @@ set undolevels=1000 " much more undo
 
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
-
 
 " Indentation
 set expandtab       "Tabs to spaces
@@ -93,7 +102,6 @@ set encoding=utf-8 nobomb
 " Highlight trailing spaces
 highlight ExtraWhitespace term=reverse ctermbg=11
 au BufNewFile,BufRead * :match ExtraWhitespace /\s\+$/
-
 
 " Show all kinds of stuff
 set ruler           " Show the cursor position
@@ -134,13 +142,6 @@ nnoremap gl    :tabnext<CR>
 nnoremap gh    :tabprev<CR>
 nnoremap gL    :bnext<CR>
 nnoremap gH    :bprev<CR>
-
-
-" Insert mode paste toggle
-set pastetoggle=<F9>
-nnoremap <F10> :set nonumber!<CR>
-nnoremap <F12> :set paste<CR>i
-nnoremap <leader>i :set paste<CR>i
 
 " Open a new tab the easy way
 nnoremap <leader>t :tabedit<Space>
@@ -187,24 +188,14 @@ augroup vim_help
     au BufWinEnter *.txt if &ft == 'help' | wincmd L | endif
 augroup END
 
-
 " autocmd location list
 augroup locationlist
     autocmd!
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
-
-" Syntastic for javascript
-let g:syntastic_javascript_checkers = ['jshint']
-let g:javascript_plugin_jsdoc = 1
-let g:javascript_plugin_ngdoc = 1
-
-vnoremap <leader>z :%s/\%V
 "
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
-
-map  <leader>l   :TagbarToggle<CR>
 
 "Easy fzf
 nnoremap <leader>f    :FZF<Space>
@@ -214,16 +205,10 @@ set rtp+=fzf
 "Same cursor than vim
 set guicursor=
 
-" deoplete tab-complete
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
 nnoremap <leader>scus :setlocal spell spelllang=en<CR>
-
-
-"Better syntax highlight for golang
-"autocmd BufNewFile,BufRead *.go colorscheme gitgo
 
 " Ale
 let g:ale_sign_error = '✗'
@@ -234,7 +219,6 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
 "Configure vim for latex
 let g:vimtex_view_general_viewer = 'zathura'
-
 
 " Open nerdtree with ctrl n
 map <C-n> :NERDTreeToggle<CR>
@@ -259,4 +243,13 @@ let g:go_fmt_command = "goimports"
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
 
+" Autocompletion with tab
+inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Syntastic config
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_auto_jump = 0
