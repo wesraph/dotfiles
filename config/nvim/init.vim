@@ -1,10 +1,11 @@
 " Remap the leader key
 let mapleader = ','
 
-" Termguicolors for alacrittyk
-if exists('+termguicolors')
-  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+if (has("nvim"))
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
+if (has("termguicolors"))
   set termguicolors
 endif
 
@@ -57,6 +58,7 @@ Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
+Plug 'joshdick/onedark.vim'
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
