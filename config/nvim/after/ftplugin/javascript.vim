@@ -1,1 +1,3 @@
-/home/raph/.dotfiles/config/nvim/ftplugin/javascript.vim
+" Specific js indent
+setlocal shiftwidth=2
+setlocal softtabstop=2

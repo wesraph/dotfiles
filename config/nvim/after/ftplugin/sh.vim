@@ -1,1 +1,4 @@
-/home/raph/.dotfiles/config/nvim/ftplugin/sh.vim
+setlocal noexpandtab
+setlocal tabstop=4
+setlocal shiftwidth=4
+setlocal softtabstop=4
