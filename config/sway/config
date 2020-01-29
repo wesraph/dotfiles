@@ -113,7 +113,7 @@ bindsym $mod+0 workspace $ws10
 bindsym $mod+Shift+1 move container to workspace $ws1
 bindsym $mod+Shift+2 move container to workspace $ws2
 bindsym $mod+Shift+3 move container to workspace $ws3
-bindsym $mod+Shift+4 move container to workspace $ws4
+#bindsym $mod+Shift+4 move container to workspace $ws4
 bindsym $mod+Shift+5 move container to workspace $ws5
 bindsym $mod+Shift+6 move container to workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7
@@ -236,17 +236,6 @@ for_window [class="^.*"] border pixel 2
 client.focused          #404552 #404552 #999999 #ff5757 #993333
 
 
-# Fast input
-input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_delay 200
-input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad repeat_rate 50
-
-input 7764:8240:TypeMatrix.com_USB_Keyboard repeat_delay 200
-input 7764:8240:TypeMatrix.com_USB_Keyboard repeat_rate 50
-
-input 1452:627:bcm5974 {
-    pointer_accel 0.75
-}
-
 # Define wallpaper
 output "*" bg ~/Wallpapers/wallpaper.jpg fill
 
@@ -267,4 +256,17 @@ exec swayidle -w  before-sleep 'swaylock -i ~/Wallpapers/lockscreen.png'
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
     xkb_layout us
     xkb_options compose:ralt
+    repeat_delay 200
+    repeat_rate 50
+}
+
+input 7764:8240:TypeMatrix.com_USB_Keyboard {
+    xkb_layout us
+    xkb_options compose:ralt
+    repeat_delay 200
+    repeat_rate 50
+}
+
+input 1452:627:bcm5974 {
+    pointer_accel 0.75
 }

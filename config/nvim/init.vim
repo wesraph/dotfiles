@@ -1,8 +1,21 @@
 " Remap the leader key
 let mapleader = ','
 
-set tabstop=2     " a tab is four spaces
-set shiftwidth=2  " number of spaces to use for autoindenting
+if (has("nvim"))
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
+if (has("termguicolors"))
+  set termguicolors
+endif
+
+" Indentation
+set expandtab       "Tabs to spaces
+set smarttab
+set tabstop=4
+set softtabstop=4
+set linebreak
+set autoindent
 
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
@@ -17,6 +30,10 @@ set smartcase     " ignore case if search pattern is all lowercase,
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
 
+if (has("nvim"))
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
 if &t_Co > 2 || has("gui_running")
     " switch syntax highlighting on, when the terminal has colors
     syntax on
@@ -27,7 +44,8 @@ Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
-Plug 'vim-syntastic/syntastic'
+Plug 'OmniSharp/omnisharp-vim'
+Plug 'ap/vim-css-color'
 Plug 'w0rp/ale'
 Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
@@ -40,16 +58,24 @@ Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
+Plug 'joshdick/onedark.vim'
+
+" Themes
+Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
-
+"
 " No mouse
 set mouse=
 
 filetype plugin indent on
+filetype plugin on
 syntax on
-colorscheme onedark
+
+set background=dark
+colorscheme palenight
+"colorscheme onedark
 
 " History
 set history=1000    " much more history than base
@@ -164,18 +190,14 @@ augroup vim_help
     au BufWinEnter *.txt if &ft == 'help' | wincmd L | endif
 augroup END
 
-
 " autocmd location list
 augroup locationlist
     autocmd!
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
-
 "
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
-
-map  <leader>l   :TagbarToggle<CR>
 
 "Easy fzf
 nnoremap <leader>f    :FZF<Space>
@@ -189,10 +211,6 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
 nnoremap <leader>scus :setlocal spell spelllang=en<CR>
-
-
-"Better syntax highlight for golang
-"autocmd BufNewFile,BufRead *.go colorscheme gitgo
 
 " Ale
 let g:ale_sign_error = '✗'
