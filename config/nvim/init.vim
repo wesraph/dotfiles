@@ -57,6 +57,7 @@ Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
+Plug 'sheerun/vim-polyglot'
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
@@ -213,9 +214,12 @@ nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 " Ale
 let g:ale_sign_error = '✗'
 let g:ale_sign_warning = '⚠'
-let g:ale_linters = {'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'] }
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_linters = {
+\ 'cs': ['OmniSharp'],
+\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck']
+\}
 
 "Configure vim for latex
 let g:vimtex_view_general_viewer = 'zathura'
@@ -253,3 +257,6 @@ let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_auto_jump = 0
+
+let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_server_use_mono = 1
