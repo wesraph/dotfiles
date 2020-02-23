@@ -15,6 +15,8 @@ mac="$(echo "$DEVICES" | grep "$choice" | cut -d" " -f1)"
     exit
 }
 
+bluetoothctl power on
+
 touch "$LOCK"
 
 notify-send "Bluetooth" "Trying to connect to $choice"
