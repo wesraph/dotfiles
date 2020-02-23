@@ -1,0 +1,5 @@
+#!/bin/sh
+
+notify-send "Starting RN mic"
+pacmd suspend-sink mic_denoised_out 0
+pacmd suspend-sink mic_raw_in  0
