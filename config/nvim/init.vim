@@ -10,12 +10,10 @@ if (has("termguicolors"))
 endif
 
 " Indentation
-set expandtab       "Tabs to spaces
-set smarttab
 set tabstop=4
-set softtabstop=4
-set linebreak
-set autoindent
+set softtabstop=0 noexpandtab "Use real tab and dont convert to space
+set shiftwidth=4
+
 
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
@@ -29,6 +27,7 @@ set smartcase     " ignore case if search pattern is all lowercase,
                     "    case-sensitive otherwise
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
+set linebreak
 
 if (has("nvim"))
   let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -58,6 +57,7 @@ Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
+Plug 'sheerun/vim-polyglot'
 Plug 'joshdick/onedark.vim'
 
 " Themes
@@ -83,13 +83,6 @@ set undolevels=1000 " much more undo
 
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
-
-" Indentation
-set expandtab       "Tabs to spaces
-set smarttab
-set softtabstop=4
-set linebreak
-set autoindent
 
 " Menu completion
 set wildmenu
@@ -215,9 +208,12 @@ nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 " Ale
 let g:ale_sign_error = '✗'
 let g:ale_sign_warning = '⚠'
-let g:ale_linters = {'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'] }
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_linters = {
+\ 'cs': ['OmniSharp'],
+\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck']
+\}
 
 "Configure vim for latex
 let g:vimtex_view_general_viewer = 'zathura'
@@ -255,3 +251,6 @@ let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_auto_jump = 0
+
+let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_server_use_mono = 1
