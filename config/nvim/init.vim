@@ -1,20 +1,19 @@
 " Remap the leader key
 let mapleader = ','
 
-" Termguicolors for alacrittyk
-if exists('+termguicolors')
-  let &t_8f="\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b="\<Esc>[48;2;%lu;%lu;%lum"
+if (has("nvim"))
+  let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
+if (has("termguicolors"))
   set termguicolors
 endif
 
 " Indentation
-set expandtab       "Tabs to spaces
-set smarttab
 set tabstop=4
-set softtabstop=4
-set linebreak
-set autoindent
+set softtabstop=0 noexpandtab "Use real tab and dont convert to space
+set shiftwidth=4
+
 
 set backspace=indent,eol,start
                     " allow backspacing over everything in insert mode
@@ -28,6 +27,7 @@ set smartcase     " ignore case if search pattern is all lowercase,
                     "    case-sensitive otherwise
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
+set linebreak
 
 if (has("nvim"))
   let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -58,6 +58,7 @@ Plug 'alvan/vim-closetag'
 Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
 Plug 'sheerun/vim-polyglot'
+Plug 'joshdick/onedark.vim'
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
@@ -82,13 +83,6 @@ set undolevels=1000 " much more undo
 
 " Don't try to highlight lines longer than 800 characters.
 set synmaxcol=800
-
-" Indentation
-set expandtab       "Tabs to spaces
-set smarttab
-set softtabstop=4
-set linebreak
-set autoindent
 
 " Menu completion
 set wildmenu
