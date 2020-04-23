@@ -4,7 +4,7 @@
     "height": 40, // Waybar height
     // "width": 1366, // Waybar width
     // Choose the order of the modules
-    "modules-left": ["sway/workspaces", "sway/mode", "custom/soulseek", "custom/ovh"],
+    "modules-left": ["sway/workspaces", "sway/mode", "custom/soulseek", "custom/ovh", "custom/mic"],
     "modules-center": ["sway/window"],
     "modules-right": ["pulseaudio", "network", "cpu", "memory", "battery", "custom/temperature", "custom/fan", "tray", "clock"],
     "sway/workspaces": {
@@ -102,5 +102,11 @@
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "pgrep -x vpnc"
+    },
+    "custom/mic": {
+        "format": "MIC OFF",
+        "max-length": 40,
+        "interval": 1, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/microphone/get_mic_state"
     }
 }
