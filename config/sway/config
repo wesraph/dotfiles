@@ -110,6 +110,7 @@ mode "mode" {
         bindsym $mod+b mode bluetooth
         bindsym $mod+i mode microphone
         bindsym $mod+w mode workspace
+        bindsym $mod+o mode ovh
         bindsym Escape mode "default"
 }
 
@@ -160,7 +161,12 @@ mode "bluetooth" {
         bindsym Escape mode "default"
 }
 
-#bindsym $mod+s  exec sh -c "grim -g \"$(slurp)\" \" /home/raph/$(date).png\" "
+mode "ovh" {
+	bindsym $mod+s exec alacritty -e zsh -i -c sdocker
+	bindsym $mod+r exec alacritty -e /usr/bin/ssh raph-dev
+	bindsym Escape mode "default"
+}
+
 bindsym $mod+s  exec ~/.scripts/screens/screenshotWayland.sh
 bindsym $mod+m  mode mode
 bindsym $mod+r  mode "resize"
@@ -183,9 +189,6 @@ bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
 
 bindsym XF86MonBrightnessUp exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -A 5 || light -A 1"
 bindsym XF86MonBrightnessDown exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -U 5 || light -U 1"
-
-bindsym XF86KbdBrightnessUp exec kbdlight up
-bindsym XF86KbdBrightnessDown exec kbdlight down
 
 bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
