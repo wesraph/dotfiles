@@ -6,7 +6,6 @@ floating_modifier $mod
 
 # start a terminal
 bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
-bindsym $mod+Shift+Return exec sh ~/.config/st/go_to_dir.sh lowres
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -40,7 +39,6 @@ bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+z layout tabbed
-bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -101,16 +99,8 @@ mode "resize" {
         bindsym j resize shrink height 10 px or 10 ppt
         bindsym l resize grow width 10 px or 10 ppt
 
-        # same bindings, but for the arrow keys
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
-
         # back to normal: Enter or Escape or $mod+r
-        bindsym Return mode "default"
         bindsym Escape mode "default"
-        bindsym $mod+r mode "default"
 }
 
 mode "mode" {
@@ -121,21 +111,18 @@ mode "mode" {
         bindsym $mod+i mode microphone
         bindsym $mod+w mode workspace
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 mode "workspace" {
         bindsym $mod+l move workspace to output right
         bindsym $mod+h move workspace to output left
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 mode "microphone" {
         bindsym $mod+m exec sh ~/.scripts/microphone/mute_mic
         bindsym $mod+u exec sh ~/.scripts/microphone/start_mic
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 mode "music" {
@@ -150,7 +137,6 @@ mode "music" {
         bindsym $mod+f exec mpc seek +5
         bindsym $mod+b exec mpc seek -5
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 mode "file" {
@@ -163,18 +149,15 @@ mode "file" {
 mode "password" {
         bindsym $mod+r exec sh  -c "pass -c Perso/ratiju && notify-send Password 'Password copied to clipboard'"
         bindsym $mod+c exec sh  ~/.scripts/password/copy_password
-        bindsym $mod+m exec sh  ~/.scripts/password/move_password
         bindsym $mod+e exec alacritty -e sh  ~/.scripts/password/edit_password
         bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 mode "bluetooth" {
         bindsym $mod+c exec sh ~/.scripts/bluetooth/connect
         bindsym $mod+d exec sh ~/.scripts/bluetooth/disconnect
         bindsym Escape mode "default"
-        bindsym $mod+q mode "default"
 }
 
 #bindsym $mod+s  exec sh -c "grim -g \"$(slurp)\" \" /home/raph/$(date).png\" "
@@ -207,7 +190,8 @@ bindsym XF86KbdBrightnessDown exec kbdlight down
 bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
 
-bindsym XF86PowerOff exec /home/raph/.scripts/microphone/toggle_microphone
+bindsym XF86PowerOff   exec /home/raph/.scripts/microphone/toggle_microphone
+bindsym XF86Calculator exec /home/raph/.scripts/microphone/toggle_microphone
 
 bindsym $mod+c exec  ~/scripts/toggle_keyboard_layout
 
