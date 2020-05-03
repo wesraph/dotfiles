@@ -132,7 +132,13 @@ mode "music" {
         bindsym $mod+k exec sh  ~/.scripts/music/kill_soulseek_watcher
         bindsym $mod+w exec sh  ~/.scripts/music/watch_soulseek
         bindsym $mod+h exec sh  ~/.scripts/show_helper music
-        bindsym $mod+m exec sh  ~/.scripts/music/seek_middle
+		bindsym $mod+m exec sh  ~/.scripts/music/seek_middle
+
+		#bindsym $mod+= exec mpc
+
+		bindsym $mod+u exec pamixer --unmute --increase 5
+		bindsym $mod+d exec pamixer --unmute --decrease 5
+
         bindsym $mod+n exec mpc next
         bindsym $mod+p exec mpc prev
         bindsym $mod+f exec mpc seek +5
