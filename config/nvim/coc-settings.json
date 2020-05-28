@@ -1,6 +1,7 @@
 {
 	"suggest.minTriggerInputLength": 3,
 	"diagnostic.enable": false,
+	"suggest.floatEnable": false,
 	"languageserver":
 	{
 		"ccls": {
@@ -16,7 +17,8 @@
 		"golang": {
 			"command": "gopls",
 			"rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-			"filetypes": ["go"]
+			"filetypes": ["go"],
+			"diagnostic.enable": false,
 		},
 		"latex": {
 			"command": "texlab",
