@@ -106,11 +106,9 @@ export LESS_TERMCAP_us=$'\e[1;4;31m'
 #Fuzzy password-store
 fpass () {  pass $@ "$(find $HOME/.password-store -iname '*.gpg' | sed -e 's/.*password-store\///g' | sed -e 's/\.gpg$//g'| fzf)"}
 
-alias ccal="cal -3 -m"
+alias ccal="cal -n 6 -S"
 
 oo () { cd $1;ls; }
-
-alias dailySnapshot="sudo btrfs subvolume snapshot -r / /snapshots/$(date "+%Y-%m-%d-%H-%M")"
 
 transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho transfer /tmp/test.md\ncat /tmp/test.md | transfer test.md"; return 1; fi
     tmpfile=$( mktemp -t transferXXX ); if tty -s; then basefile=$(basename "$1" | sed -e 's/[^a-zA-Z0-9._-]/-/g'); curl --progress-bar --upload-file "$1" "https://transfer.sh/$basefile" >> $tmpfile; else curl --progress-bar --upload-file "-" "https://transfer.sh/$1" >> $tmpfile ; fi; cat $tmpfile; rm -f $tmpfile; }
@@ -119,7 +117,7 @@ transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho
 bindkey -v
 bindkey -M viins 'jk' vi-cmd-mode
 
-# ctrl-r starts searching history backward
+# Ctrl-r starts searching history backward
 bindkey '^r' history-incremental-search-backward
 
 # Use vim cli mode
