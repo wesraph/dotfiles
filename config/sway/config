@@ -110,6 +110,7 @@ mode "mode" {
         bindsym $mod+b mode bluetooth
         bindsym $mod+i mode microphone
         bindsym $mod+w mode workspace
+        bindsym $mod+s mode screen
         bindsym $mod+o mode ovh
         bindsym Escape mode "default"
 }
@@ -141,6 +142,7 @@ mode "music" {
 
         bindsym $mod+n exec mpc next
         bindsym $mod+p exec mpc prev
+        bindsym $mod+t exec mpc toggle
         bindsym $mod+f exec mpc seek +5
         bindsym $mod+b exec mpc seek -5
         bindsym Escape mode "default"
@@ -165,6 +167,11 @@ mode "bluetooth" {
         bindsym $mod+c exec sh ~/.scripts/bluetooth/connect
         bindsym $mod+d exec sh ~/.scripts/bluetooth/disconnect
         bindsym Escape mode "default"
+}
+
+mode "screen" {
+		bindsym $mod+s exec sh -c "~/.scripts/screens/stream_screen"
+		bindsym Escape mode "default"
 }
 
 mode "ovh" {
@@ -202,8 +209,6 @@ bindsym $mod+i workspace prev
 bindsym XF86PowerOff   exec /home/raph/.scripts/microphone/toggle_microphone
 bindsym XF86Calculator exec /home/raph/.scripts/microphone/toggle_microphone
 
-bindsym $mod+c exec  ~/scripts/toggle_keyboard_layout
-
 bindsym Control+Space exec makoctl dismiss
 
 for_window [class="^.*"] border pixel 2
@@ -217,16 +222,18 @@ output "*" bg ~/Wallpapers/wallpaper.jpg fill
 #output DP-1 scale 0.65
 output eDP-1 scale 1
 #output DP-2 scale 0.65
-output HDMI-A-2 scale 0.65
+output HDMI-A-2 scale 0.66666666
 
 exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 
-exec_always killall waybar; waybar
-exec sleep 1 && waybar
 
 exec_always swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
+
+bar {
+    swaybar_command waybar
+}
 
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
     xkb_layout us
