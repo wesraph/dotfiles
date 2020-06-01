@@ -78,6 +78,10 @@ filetype plugin indent on
 filetype plugin on
 syntax on
 
+" Theme
+set background=dark
+colorscheme palenight
+
 " History
 set history=1000    " much more history than base
 set undolevels=1000 " much more undo
