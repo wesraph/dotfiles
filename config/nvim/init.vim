@@ -55,10 +55,15 @@ Plug 'csexton/trailertrash.vim'
 Plug 'tpope/vim-fugitive'
 Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'alvan/vim-closetag'
-Plug 'mxw/vim-jsx'
 Plug 'moll/vim-node'
 Plug 'sheerun/vim-polyglot'
+Plug 'epilande/vim-react-snippets'
+
 Plug 'joshdick/onedark.vim'
+Plug 'prettier/vim-prettier', {
+  \ 'do': 'yarn install',
+  \ 'branch': 'release/0.x'
+  \ }
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
@@ -72,10 +77,6 @@ set mouse=
 filetype plugin indent on
 filetype plugin on
 syntax on
-
-set background=dark
-colorscheme palenight
-"colorscheme onedark
 
 " History
 set history=1000    " much more history than base
@@ -239,7 +240,7 @@ let g:ansible_attribute_highlight = "a"
 let g:go_fmt_command = "goimports"
 
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
-let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js'
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js,*.jsx'
 
 " Autocompletion with tab
 inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"

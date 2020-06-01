@@ -1,6 +1,9 @@
 {
 	"suggest.minTriggerInputLength": 3,
 	"diagnostic.enable": false,
+	"snippets.extends": {
+		"javascriptreact": ["jsx", "javascript"]
+	},
 	"languageserver":
 	{
 		"ccls": {

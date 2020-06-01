@@ -1,0 +1,24 @@
+# Snippets for JS/React
+
+priority -10
+
+snippet gridi "Grid item"
+<Grid item xs={${1}} m={${2}}>
+	${0}
+</Grid>
+
+snippet cat "Create action type"
+export const ${1} = '${1}';
+
+snippet csa "Create simple action"
+export const ${1} = (value) => (dispatch) => {
+  dispatch({
+	type: ${2},
+	payload: {
+		${3}: ${4:value}
+	}
+  })
+}
+
+snippet cmdtp "Create map display to props entry"
+${1}: (value) => dispatch(${1}(value)),
