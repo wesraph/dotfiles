@@ -193,6 +193,12 @@ augroup locationlist
     autocmd!
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
+
+" Highlight yanked text
+augroup highlight_yank
+    autocmd!
+    autocmd TextYankPost * silent! lua require'vim.highlight'.on_yank("IncSearch", 1000)
+augroup END
 "
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
@@ -205,8 +211,10 @@ set rtp+=fzf
 "Same cursor than vim
 set guicursor=
 
+" Keep the old cursor
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 
+" Change spell language
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
 nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 
@@ -217,7 +225,7 @@ let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
-\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck']
+\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet']
 \}
 
 "Configure vim for latex
@@ -246,10 +254,6 @@ let g:go_fmt_command = "goimports"
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js,*.jsx'
 
-" Autocompletion with tab
-inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
 " Syntastic config
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 0
@@ -257,16 +261,26 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_auto_jump = 0
 
+" Enable usage of omnisharp
 let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_server_use_mono = 1
 
-" use <tab> for trigger completion and navigate to the next complete item
+" Autocompletion with tab
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~ '\s'
 endfunction
 
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 inoremap <silent><expr> <Tab>
       \ pumvisible() ? "\<C-n>" :
       \ <SID>check_back_space() ? "\<Tab>" :
       \ coc#refresh()
+
+" Vim go configuration
+" Set the diagnostic height to max 3
+let g:go_list_height = 3
+" Enable auto-imports
+let g:go_fmt_command = "goimports"
+" Disable vim warning when not using neovim
+let g:go_version_warning = 0

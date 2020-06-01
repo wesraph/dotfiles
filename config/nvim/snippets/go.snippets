@@ -2,6 +2,17 @@
 
 priority -10
 
+snippet pp "pretty.Println(value)"
+pretty.Println($1)
+
+snippet ijsonun "Implements JSON unmashallInterface"
+// UnmarshallJSON implements UnmarshallJSON interface
+func (el *${1}) UnmarshallJSON(data []byte) error {
+	${0}
+
+	return nil
+}
+
 # shorthand variable declaration
 snippet : "v := value"
 ${1} := ${0}
@@ -149,6 +160,11 @@ if err := ${1:condition}; err != nil {
 	${0:${VISUAL}}
 }
 
+# if inline error
+snippet ifer "If with inline error and return"
+if err := ${1:condition}; err != nil {
+    return err
+}
 
 snippet ew "errors.Wrap"
 errors.Wrap(${1:err}, "${2:message}")
