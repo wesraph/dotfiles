@@ -22,3 +22,10 @@ export const ${1} = (value) => (dispatch) => {
 
 snippet cmdtp "Create map display to props entry"
 ${1}: (value) => dispatch(${1}(value)),
+
+snippet cra "Create reducer action"
+case ${1}:
+	return Object.assign({}, state, {
+		${2}: action.payload,
+	});
+${0}
