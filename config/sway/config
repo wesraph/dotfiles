@@ -171,6 +171,7 @@ mode "bluetooth" {
 
 mode "screen" {
 		bindsym $mod+s exec sh -c "~/.scripts/screens/stream_screen"
+		bindsym $mod+r exec sh -c "~/.scripts/screens/record_screen"
 		bindsym Escape mode "default"
 }
 
@@ -218,21 +219,22 @@ client.unfocused #404552 #361515 #999999 #ff5757 #993333
 # Define wallpaper
 output "*" bg ~/Wallpapers/wallpaper.jpg fill
 
-# By default we want the other screen smaller
-#output DP-1 scale 0.65
-output eDP-1 scale 1
-#output DP-2 scale 0.65
-output HDMI-A-2 scale 0.66666666
-
 exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
-
 
 exec_always swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 
+output "eDP-1" {
+	scale 1
+}
+
+output "HDMI-A-2" {
+	scale 0.66666666
+}
+
 bar {
-    swaybar_command waybar
+	swaybar_command waybar
 }
 
 input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
