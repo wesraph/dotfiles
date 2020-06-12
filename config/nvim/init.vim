@@ -13,10 +13,7 @@ endif
 set tabstop=4
 set softtabstop=0 noexpandtab "Use real tab and dont convert to space
 set shiftwidth=4
-
-
 set backspace=indent,eol,start
-                    " allow backspacing over everything in insert mode
 set autoindent    " always set autoindenting on
 set copyindent    " copy the previous indentation on autoindenting
 set number        " always show line numbers
@@ -34,7 +31,6 @@ if (has("nvim"))
 endif
 
 if &t_Co > 2 || has("gui_running")
-    " switch syntax highlighting on, when the terminal has colors
     syntax on
 endif
 
@@ -46,7 +42,6 @@ Plug 'junegunn/vim-easy-align'
 Plug 'OmniSharp/omnisharp-vim'
 Plug 'ap/vim-css-color'
 Plug 'w0rp/ale'
-Plug 'fatih/vim-go'
 Plug 'lervag/vimtex'
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -249,8 +244,6 @@ autocmd BufNewFile,BufRead *.fizz set syntax=sql
 " Ansible highlight
 let g:ansible_attribute_highlight = "a"
 
-let g:go_fmt_command = "goimports"
-
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js,*.jsx'
 
@@ -271,16 +264,29 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~ '\s'
 endfunction
 
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-inoremap <silent><expr> <Tab>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<Tab>" :
-      \ coc#refresh()
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
+inoremap <silent><expr> <Tab>
+	  \ pumvisible() ? "\<C-n>" :
+	  \ <SID>check_back_space() ? "\<Tab>" :
+	  \ coc#refresh()
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+command! -nargs=0 Format :call CocAction('format')
+autocmd FileType go nmap gtj :CocCommand go.tags.add json<cr>
+
+" Reorganize import on save
+autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 " Vim go configuration
 " Set the diagnostic height to max 3
-let g:go_list_height = 3
-" Enable auto-imports
-let g:go_fmt_command = "goimports"
-" Disable vim warning when not using neovim
-let g:go_version_warning = 0
+"let g:go_fmt_command = "goimports"
+"let g:go_list_height = 3
+"" Enable auto-imports
+"let g:go_fmt_command = "goimports"
+"" Disable vim warning when not using neovim
+"let g:go_version_warning = 0
+
+nmap <silent> gd <Plug>(coc-definition)
