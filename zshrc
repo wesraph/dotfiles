@@ -70,3 +70,11 @@ bindkey '^r' history-incremental-search-backward
 # Use vim cli mode
 bindkey '^P' up-history
 bindkey '^N' down-history
+
+scalehidpi() {
+	export GDK_SCALE=2
+	export GDK_DPI_SCALE=0.95
+	export QT_SCREEN_SCALE_FACTORS=0.9
+	export QT_AUTO_SCREEN_SCALE_FACTOR=2
+	export QT_SCALE_FACTOR=2
+}
