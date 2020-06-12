@@ -181,6 +181,11 @@ if err != nil {
 }
 ${0}
 
+snippet errnn "Error return nil and err"
+if err != nil {
+	return nil, err
+}
+${0}
 
 snippet errnw "Error return wrap" !b
 if err != nil {
