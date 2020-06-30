@@ -2,7 +2,7 @@
 	"suggest.minTriggerInputLength": 3,
 	"diagnostic.enable": false,
 	"suggest.floatEnable": false,
-	"coc.preferences.formatOnSaveFiletypes": ["go"],
+	"coc.preferences.formatOnSaveFiletypes": ["go", "json"],
 	"snippets.extends": {
 		"javascriptreact": ["jsx", "javascript"]
 	},
