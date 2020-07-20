@@ -2,17 +2,33 @@
 	"suggest.minTriggerInputLength": 3,
 	"diagnostic.enable": false,
 	"suggest.floatEnable": false,
-	"coc.preferences.formatOnSaveFiletypes": ["go", "json"],
+	"coc.preferences.formatOnSaveFiletypes": [
+		"go",
+		"json"
+	],
 	"snippets.extends": {
-		"javascriptreact": ["jsx", "javascript"]
+		"javascriptreact": [
+			"jsx",
+			"javascript"
+		]
 	},
 	"coc.preferences.messageLevel": "error",
-	"languageserver":
-	{
+	"go.goplsPath": "$HOME/go/bin/gopls",
+	"languageserver": {
 		"ccls": {
 			"command": "ccls",
-			"filetypes": ["c", "cpp", "objc", "objcpp"],
-			"rootPatterns": [".ccls", "compile_commands.json", ".git/", ".hg/"],
+			"filetypes": [
+				"c",
+				"cpp",
+				"objc",
+				"objcpp"
+			],
+			"rootPatterns": [
+				".ccls",
+				"compile_commands.json",
+				".git/",
+				".hg/"
+			],
 			"initializationOptions": {
 				"cache": {
 					"directory": "/tmp/ccls"
@@ -21,9 +37,16 @@
 		},
 		"golang": {
 			"command": "gopls",
-			"rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-			"completeUnimported" : true,
-			"filetypes": ["go"],
+			"rootPatterns": [
+				"go.mod",
+				".vim/",
+				".git/",
+				".hg/"
+			],
+			"completeUnimported": true,
+			"filetypes": [
+				"go"
+			],
 			"diagnostic.enable": false,
 			"initializationOptions": {
 				"usePlaceholders": true
@@ -32,8 +55,15 @@
 		"latex": {
 			"command": "texlab",
 			// not start server at home directory, since it won't work.
-			"ignoredRootPaths": ["~"],
-			"filetypes": ["tex", "bib", "plaintex", "context"]
+			"ignoredRootPaths": [
+				"~"
+			],
+			"filetypes": [
+				"tex",
+				"bib",
+				"plaintex",
+				"context"
+			]
 		},
 		"python": {
 			"command": "python",
