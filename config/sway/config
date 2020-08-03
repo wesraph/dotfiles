@@ -204,6 +204,9 @@ bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
 bindsym XF86MonBrightnessUp exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -A 5 || light -A 1"
 bindsym XF86MonBrightnessDown exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -U 5 || light -U 1"
 
+bindsym XF86KbdBrightnessUp exec kbdlight up
+bindsym XF86KbdBrightnessDown exec kbdlight down
+
 bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
 
