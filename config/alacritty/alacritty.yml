@@ -184,9 +184,6 @@ colors:
 #
 # To completely disable the visual bell, set its duration to 0.
 #
-visual_bell:
-  animation: EaseOutExpo
-  duration: 0
 
 # Background opacity
 background_opacity: 0.76
@@ -231,8 +228,6 @@ mouse:
 
 selection:
   semantic_escape_chars: ",│`|:\"' ()[]{}<>"
-
-dynamic_title: true
 
 
 # Style of the cursor
