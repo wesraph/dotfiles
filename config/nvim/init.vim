@@ -278,6 +278,8 @@ nmap <silent> gr <Plug>(coc-references)
 command! -nargs=0 Format :call CocAction('format')
 autocmd FileType go nmap gtj :CocCommand go.tags.add json<cr>
 
+let g:coc_disable_startup_warning = 1
+
 " Reorganize import on save
 autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 " Vim go configuration
@@ -287,6 +289,4 @@ autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeIm
 "" Enable auto-imports
 "let g:go_fmt_command = "goimports"
 "" Disable vim warning when not using neovim
-"let g:go_version_warning = 0
-
 nmap <silent> gd <Plug>(coc-definition)
