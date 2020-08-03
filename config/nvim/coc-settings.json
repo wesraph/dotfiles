@@ -2,11 +2,12 @@
 	"suggest.minTriggerInputLength": 3,
 	"diagnostic.enable": false,
 	"suggest.floatEnable": false,
-	"coc.preferences.formatOnSaveFiletypes": ["go"],
+	"coc.preferences.formatOnSaveFiletypes": ["go", "js"],
 	"snippets.extends": {
 		"javascriptreact": ["jsx", "javascript"]
 	},
 	"coc.preferences.messageLevel": "error",
+	"eslint.autoFixOnSave": true,
 	"languageserver":
 	{
 		"ccls": {
