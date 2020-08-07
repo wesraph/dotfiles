@@ -3,7 +3,7 @@
     "height": 40, // Waybar height
     "modules-left": ["sway/workspaces", "sway/mode", "custom/soulseek", "custom/ovh", "custom/mic"],
     "modules-center": ["sway/window"],
-    "modules-right": ["pulseaudio", "network", "cpu", "memory", "battery", "custom/temperature", "custom/fan", "tray", "clock"],
+    "modules-right": ["pulseaudio", "cpu", "memory", "battery", "custom/temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
