@@ -232,7 +232,11 @@ output "eDP-1" {
 	scale 1
 }
 
-output "HDMI-A-2" {
+output "HDMI-A-1"  {
+	scale 0.66666666
+}
+
+output "HDMI-A-2"  {
 	scale 0.66666666
 }
 
