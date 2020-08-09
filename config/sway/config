@@ -230,10 +230,12 @@ exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 
 output "eDP-1" {
 	scale 1
+	pos 0 0
 }
 
 output "HDMI-A-2" {
 	scale 0.66666666
+	pos 2560 0
 }
 
 bar {
