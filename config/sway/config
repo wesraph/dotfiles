@@ -233,6 +233,9 @@ client.unfocused #404552 #361515 #999999 #ff5757 #993333
 # Define wallpaper
 output "*" bg ~/Wallpapers/wallpaper.jpg fill
 
+exec sleep 5 && nm-applet --indicator
+exec_always killall nm-applet; nm-applet --indicator
+
 exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
 
