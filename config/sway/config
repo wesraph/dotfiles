@@ -178,6 +178,7 @@ mode "screen" {
 mode "ovh" {
 	bindsym $mod+s exec alacritty -e zsh -i -c sdocker
 	bindsym $mod+r exec alacritty -e /usr/bin/ssh raph-dev
+	bindsym $mod+l exec alacritty -e /usr/bin/pass edit OVH/links
 	bindsym Escape mode "default"
 }
 
