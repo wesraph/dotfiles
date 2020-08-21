@@ -5,9 +5,9 @@ priority -10
 snippet pp "pretty.Println(value)"
 pretty.Println($1)
 
-snippet ijsonun "Implements JSON unmashallInterface"
-// UnmarshallJSON implements UnmarshallJSON interface
-func (el *${1}) UnmarshallJSON(data []byte) error {
+snippet ijsonun "Implements JSON unmashalInterface"
+// UnmarshalJSON implements UnmarshalJSON interface
+func (el *${1}) UnmarshalJSON(data []byte) error {
 	${0}
 
 	return nil
