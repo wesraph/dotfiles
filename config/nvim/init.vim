@@ -55,6 +55,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/vim-easy-align'
 Plug 'OmniSharp/omnisharp-vim'
 Plug 'ap/vim-css-color'
+Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
 Plug 'w0rp/ale'
 Plug 'lervag/vimtex'
 Plug 'scrooloose/nerdtree'
@@ -83,6 +84,7 @@ call plug#end()
 " No mouse
 set mouse=
 
+" Use indent per filetype
 filetype plugin indent on
 filetype plugin on
 syntax on
