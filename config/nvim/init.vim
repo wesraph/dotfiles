@@ -34,6 +34,20 @@ if &t_Co > 2 || has("gui_running")
     syntax on
 endif
 
+let g:coc_global_extensions = [
+\ 'coc-ultisnips',
+\ 'coc-snippets',
+\ 'coc-go',
+\ 'coc-json',
+\ 'coc-tsserver',
+\ 'coc-html',
+\ 'coc-css',
+\ 'coc-yaml',
+\ 'coc-highlight',
+\ 'coc-react-refactor',
+\ ]
+
+
 call plug#begin('~/.config/nvim/plugged')
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
@@ -63,7 +77,7 @@ Plug 'prettier/vim-prettier', {
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release','do': { -> coc#util#install() }}
 call plug#end()
 "
 " No mouse
