@@ -57,7 +57,6 @@ Plug 'OmniSharp/omnisharp-vim'
 Plug 'ap/vim-css-color'
 Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
 Plug 'w0rp/ale'
-Plug 'lervag/vimtex'
 Plug 'scrooloose/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'vim-scripts/c.vim'
