@@ -2,7 +2,7 @@
 choice="$(cut -d";" -f1 ~/.scripts/file/config | rofi -dmenu)"
 [ -z "$choice" ] && exit
 
-folder=$(grep "$choice;" ~/.scripts/file/config | head -n1 | cut -d";" -f2)
+folder=$(grep "^$choice;" ~/.scripts/file/config | head -n1 | cut -d";" -f2)
 [ -z "$folder" ] && exit
 
 file="$(find "$folder" | rofi -dmenu)"
