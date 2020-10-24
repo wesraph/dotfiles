@@ -9,6 +9,7 @@
     * NOTE: I am including all of them even though I am using a sub-set. I keep
     * tweaking my theme and having access to all of the colors here is handy. */
 
+    font: "Deja Vu Sans Mono Nerd 20";
     base03: #002b36;
     base02: #073642;
     base01: #586e75;
