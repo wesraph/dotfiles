@@ -248,14 +248,7 @@ bar {
 	swaybar_command waybar
 }
 
-input 1452:627:Apple_Inc._Apple_Internal_Keyboard_/_Trackpad {
-    xkb_layout us
-    xkb_options compose:ralt
-    repeat_delay 200
-    repeat_rate 50
-}
-
-input 7764:8240:TypeMatrix.com_USB_Keyboard {
+input * {
     xkb_layout us
     xkb_options compose:ralt
     repeat_delay 200
