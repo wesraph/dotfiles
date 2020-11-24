@@ -1,0 +1,3 @@
+#!/bin/sh
+
+amixer get Capture | grep '\[off\]'

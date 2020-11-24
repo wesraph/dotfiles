@@ -1,13 +1,13 @@
 #!/bin/sh
 set -e
-
 if [ -d "$2" ]; then
     echo "Not moving directory"
     exit
 fi
 
 path="$1/$(date +%Y-%m-%d-%H-%M)"
-mkdir -p "$path"
 
-mv "$2" "$path"
+mkdir -p "$path"
+mv -v "$2" "$path"
+
 notify-send "Music" "Has moved $2 to $1"
