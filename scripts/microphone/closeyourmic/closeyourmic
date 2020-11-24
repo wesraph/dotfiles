@@ -1,0 +1,18 @@
+#!/bin/sh
+
+findKeyboard() {
+	input=$(ls /dev/input/by-id/usb-*TypeMatrix*-kbd 2>/dev/null)
+	if [ -n "$input" ]; then
+		echo "$input"
+		return
+	fi
+
+	ls /dev/input/by-id/usb-Apple*-event-kbd
+}
+
+while true; do
+	input=$(findKeyboard)
+	dd if="$input" of=/dev/null count=2 2>/dev/null
+	amixer get Capture | grep '\[off\]' > /dev/null || notify-send -t 5000 "Microphone" "Your mic is open"
+	sleep 5
+done

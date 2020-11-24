@@ -8,7 +8,7 @@ do
     nplaying="$(mpc | head -n1)"
 
     if [ "$nplaying" != "$playing" ]; then
-        if [ ! -z "$playing" ]; then
+        if [ -n "$playing" ]; then
             echo "Moving to old"
             ~/.scripts/music/move_to_old "$SOULSEEK_DOWNLOAD_PATH/Old" "$playing"
         fi
