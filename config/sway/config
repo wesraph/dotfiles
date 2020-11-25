@@ -218,7 +218,7 @@ bindsym XF86Calculator exec /home/raph/.scripts/microphone/toggle_microphone
 bindsym Control+Space exec makoctl dismiss
 
 for_window [class="^.*"] border pixel 2
-client.focused #404552 #784e4e #cccccc #ff5757 #993333
+client.focused #404552 #784e4e #cccccc #ff5757 #ff5757
 client.unfocused #404552 #361515 #999999 #ff5757 #993333
 
 # Define wallpaper
