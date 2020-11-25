@@ -1,0 +1,18 @@
+bind_to_address    "/tmp/mpd.unix"
+port               "6602"
+music_directory    "/home/data/Musique/"
+playlist_directory "~/.mpd/playlists"
+database {
+    cache_directory    "~/.mpd/cache"
+    plugin "simple"
+    path "~/.mpd/mpd.db"
+}
+log_file           "~/.mpd/mpd.log"
+pid_file           "~/.mpd/pid"
+state_file         "~/.mpd/state"
+audio_output {
+    type          "pulse"
+    name          "Pulse audio"         ## Mettre ici n'importe quel nom, c'est au choix…
+    mixer_control "Master"
+    format        "44100:16:1"
+}
