@@ -8,7 +8,7 @@
   },
   "coc.preferences.messageLevel": "error",
   "eslint.autoFixOnSave": true,
-  "go.goplsPath": "$HOME/go/bin/gopls",
+  "go.goplsPath": "/home/raph/go/bin/gopls",
   "languageserver": {
     "ccls": {
       "command": "ccls",
