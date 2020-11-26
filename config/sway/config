@@ -172,6 +172,7 @@ mode "bluetooth" {
 mode "screen" {
 		bindsym $mod+s exec sh -c "~/.scripts/screens/stream_screen"
 		bindsym $mod+r exec sh -c "~/.scripts/screens/record_screen"
+		bindsym $mod+u exec sh -c "~/.scripts/screens/upload_last_screen.sh"
 		bindsym Escape mode "default"
 }
 
