@@ -1,0 +1,3 @@
+#!/bin/sh
+
+alacritty -e sh -c 'wf-recorder -g "$(slurp)" || sleep 1'
