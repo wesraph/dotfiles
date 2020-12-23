@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ -n "$1" ]; then
+  sudo modprobe -r brcmfmac
+  sudo modprobe brcmfmac
+  exit
+fi
+
+alacritty -e $HOME/.scripts/wifi/restart restartbitch

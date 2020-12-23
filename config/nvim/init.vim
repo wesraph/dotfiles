@@ -67,6 +67,7 @@ Plug 'alvan/vim-closetag'
 Plug 'moll/vim-node'
 Plug 'sheerun/vim-polyglot'
 Plug 'epilande/vim-react-snippets'
+Plug 'kristijanhusak/vim-js-file-import', {'do': 'npm install'}
 
 Plug 'joshdick/onedark.vim'
 Plug 'prettier/vim-prettier', {
@@ -213,11 +214,6 @@ augroup END
 "Easy regex on visual
 vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
 
-"Easy fzf
-nnoremap <leader>f    :FZF<Space>
-nnoremap <leader>a    :FZF /manager<CR>
-set rtp+=fzf
-
 "Same cursor than vim
 set guicursor=
 
@@ -294,6 +290,9 @@ command! -nargs=0 Format :call CocAction('format')
 autocmd FileType go nmap gtj :CocCommand go.tags.add json<cr>
 
 let g:coc_disable_startup_warning = 1
+
+" JS import
+noremap <Leader>if <Plug>(JsFileImport)
 
 " Reorganize import on save
 autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')

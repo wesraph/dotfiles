@@ -112,6 +112,7 @@ mode "mode" {
         bindsym $mod+w mode workspace
         bindsym $mod+s mode screen
         bindsym $mod+o mode ovh
+        bindsym $mod+r mode restart
         bindsym Escape mode "default"
 }
 
@@ -181,6 +182,12 @@ mode "ovh" {
 	bindsym $mod+r exec alacritty -e /usr/bin/ssh raph-dev
 	bindsym $mod+e exec alacritty -e /usr/bin/pass edit OVH/links
 	bindsym $mod+l exec /home/raph/.scripts/ovh/links
+	bindsym Escape mode "default"
+}
+
+mode "restart" {
+	bindsym $mod+w exec sh ~/.scripts/wifi/restart
+	bindsym $mod+b exec sh ~/.scripts/bluetooth/restart
 	bindsym Escape mode "default"
 }
 
