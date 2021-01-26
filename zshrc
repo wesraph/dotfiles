@@ -5,27 +5,23 @@ plugins=(git zsh-autosuggestions)
 source $ZSH/oh-my-zsh.sh
 
 export PATH=/opt/local/bin:/opt/local/sbin:$PATH
-
 export PATH=$PATH:/usr/local/go/bin
 
 [ -d /usr/bin/go ] && {
   export GOROOT=/usr/bin/go
-}
-[ -d /usr/local/go  ] && {
+} || [ -d /usr/local/go  ] && {
   export GOROOT=/usr/local/go
-}
-[ -d /usr/lib/go  ] && {
+} || [ -d /usr/lib/go  ] && {
   export GOROOT=/usr/lib/go
 }
 
 export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+export VIMRC=$HOME/.config/nvim/init.vim
+export SYSTEMD_EDITOR="$(which nvim > /dev/null  && echo nvim || echo vim)"
 
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
-
-export VIMRC=$HOME/.config/nvim/init.vim
-export SYSTEMD_EDITOR="vim"
 
 #No more display problem
 export QT_AUTO_SCREEN_SCALE_FACTOR=1

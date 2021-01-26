@@ -222,6 +222,8 @@ bindsym $mod+i workspace prev
 
 bindsym XF86PowerOff   exec /home/raph/.scripts/microphone/toggle_microphone
 bindsym XF86Calculator exec /home/raph/.scripts/microphone/toggle_microphone
+bindsym XF86AudioMicMute exec /home/raph/.scripts/microphone/toggle_microphone
+
 
 bindsym Control+Space exec makoctl dismiss
 
@@ -243,7 +245,15 @@ output "eDP-1" {
 	pos 0 0
 }
 
-output "HDMI-A-1"  {
+output "HDMI-A-1"   {
+	scale 0.66666666
+}
+
+output "DP-2" {
+	scale 0.66666666
+}
+
+output "DP-4" {
 	scale 0.66666666
 }
 
