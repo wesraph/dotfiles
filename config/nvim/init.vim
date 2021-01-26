@@ -231,6 +231,7 @@ vnoremap <leader>r :<C-BS><C-BS><C-BS><C-BS><C-BS>%s/\%V
 
 "Same cursor than vim
 set guicursor=
+set guicursor+=a:blinkon0
 
 " Keep the old cursor
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
