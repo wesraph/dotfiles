@@ -59,7 +59,7 @@ Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
 Plug 'ap/vim-css-color'
 
 " Go
-"Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries' }
+Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries' }
 
 " C
 Plug 'vim-scripts/c.vim'
