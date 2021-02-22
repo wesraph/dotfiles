@@ -49,38 +49,53 @@ let g:coc_global_extensions = [
 
 
 call plug#begin('~/.config/nvim/plugged')
-Plug 'pearofducks/ansible-vim'
-Plug 'scrooloose/nerdcommenter'
-Plug 'airblade/vim-gitgutter'
-Plug 'junegunn/vim-easy-align'
-Plug 'OmniSharp/omnisharp-vim'
-Plug 'ap/vim-css-color'
-Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
-Plug 'w0rp/ale'
-Plug 'scrooloose/nerdtree'
-Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'vim-scripts/c.vim'
-Plug 'csexton/trailertrash.vim'
-Plug 'tpope/vim-fugitive'
-Plug 'martinda/Jenkinsfile-vim-syntax'
-Plug 'alvan/vim-closetag'
-Plug 'moll/vim-node'
-Plug 'sheerun/vim-polyglot'
-Plug 'epilande/vim-react-snippets'
-Plug 'kristijanhusak/vim-js-file-import', {'do': 'npm install'}
 
-Plug 'joshdick/onedark.vim'
-Plug 'prettier/vim-prettier', {
-  \ 'do': 'yarn install',
-  \ 'branch': 'release/0.x'
-  \ }
+" Web/Nodejs
+Plug 'epilande/vim-react-snippets', {'for': ['js']}
+Plug 'alvan/vim-closetag', {'for': ['html']}
+Plug 'moll/vim-node', {'for': ['js', 'html']}
+Plug 'prettier/vim-prettier', {'for': ['js', 'html'], 'do': 'yarn install', 'branch': 'release/0.x'}
+Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
+Plug 'ap/vim-css-color'
+
+" Go
+"Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries' }
+
+" C
+Plug 'vim-scripts/c.vim'
+
+" C#
+Plug 'OmniSharp/omnisharp-vim'
+
+" Perl
+Plug 'vim-perl/vim-perl', {'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny'}
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
+Plug 'joshdick/onedark.vim'
+Plug 'sheerun/vim-polyglot' " Highlight for all languages
 
-Plug 'neoclide/coc.nvim', {'branch': 'release','do': { -> coc#util#install() }}
+" Git
+Plug 'tpope/vim-fugitive' " Git shit
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'airblade/vim-gitgutter'
+
+" Misc
+Plug 'martinda/Jenkinsfile-vim-syntax'
+Plug 'csexton/trailertrash.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'junegunn/vim-easy-align'
+Plug 'pearofducks/ansible-vim'
+Plug 'scrooloose/nerdcommenter'
+
+" Autocomplete/linter
+Plug 'neovim/nvim-lspconfig'
+Plug 'neoclide/coc.nvim', {'for': ['js', 'html', 'cs', 'go'], 'branch': 'release','do': { -> coc#util#install() }}
+Plug 'w0rp/ale'
+"Plug 'nvim-lua/completion-nvim'
+
 call plug#end()
-"
+
 " No mouse
 set mouse=
 
@@ -116,7 +131,7 @@ au BufNewFile,BufRead * :match ExtraWhitespace /\s\+$/
 
 " Show all kinds of stuff
 set ruler           " Show the cursor position
-set shortmess=atI   " Don’t show the intro message when starting Vim
+set shortmess=atIc   " Don’t show the intro message when starting Vim
 set showmode        " Show the current mode
 set title           " Show the filename in the window titlebar
 set showcmd         " Show the (partial) command as it’s being typed
@@ -258,49 +273,36 @@ let g:ansible_attribute_highlight = "a"
 let g:closetag_xhtml_filenames = '*.xhtml,*.jsx, App.js'
 let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js,*.jsx'
 
-" Syntastic config
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_auto_jump = 0
-
 " Enable usage of omnisharp
 let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_server_use_mono = 1
 
-" Autocompletion with tab
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-
-inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-
-inoremap <silent><expr> <Tab>
-	  \ pumvisible() ? "\<C-n>" :
-	  \ <SID>check_back_space() ? "\<Tab>" :
-	  \ coc#refresh()
-" GoTo code navigation.
+" Coc
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 command! -nargs=0 Format :call CocAction('format')
 autocmd FileType go nmap gtj :CocCommand go.tags.add json<cr>
-
 let g:coc_disable_startup_warning = 1
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+inoremap <silent><expr> <Tab>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<Tab>" :
+      \ coc#refresh()
+
+" Golang
+"autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 
 " JS import
 noremap <Leader>if <Plug>(JsFileImport)
 
-" Reorganize import on save
-autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
-" Vim go configuration
-" Set the diagnostic height to max 3
-"let g:go_fmt_command = "goimports"
-"let g:go_list_height = 3
-"" Enable auto-imports
-"let g:go_fmt_command = "goimports"
-"" Disable vim warning when not using neovim
-nmap <silent> gd <Plug>(coc-definition)
+" C#
+autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
+
+" Lsp
+set omnifunc=syntaxcomplete#Complete

@@ -8,7 +8,7 @@
   },
   "coc.preferences.messageLevel": "error",
   "eslint.autoFixOnSave": true,
-  "go.goplsPath": "/home/raph/go/bin/gopls",
+  "go.enable": false,
   "languageserver": {
     "ccls": {
       "command": "ccls",
@@ -22,7 +22,7 @@
     },
     "golang": {
       "command": "gopls",
-      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "rootPatterns": ["go.mod"],
       "completeUnimported": true,
       "filetypes": ["go"],
       "diagnostic.enable": false,
