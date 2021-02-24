@@ -12,6 +12,7 @@
     la = !git l --all
     rmtls = remote -v show
     brls = branch -vva --list
+    graph = log --graph --date-order --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cd) %C(bold blue)<%an>%Creset' --abbrev-commit
     current-branch = rev-parse --abbrev-ref HEAD
     pushbr = !git push --set-upstream origin `git current-branch`
     st = status
