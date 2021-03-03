@@ -87,10 +87,13 @@ Plug 'scrooloose/nerdtree'
 Plug 'junegunn/vim-easy-align'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
+Plug 'nvim-lua/popup.nvim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
 Plug 'neovim/nvim-lspconfig'
-Plug 'neoclide/coc.nvim', {'for': ['js', 'html', 'cs', 'go'], 'branch': 'release','do': { -> coc#util#install() }}
+Plug 'neoclide/coc.nvim', {'branch': 'release','do': { -> coc#util#install() }}
 Plug 'w0rp/ale'
 "Plug 'nvim-lua/completion-nvim'
 
@@ -277,6 +280,10 @@ let g:closetag_filenames = '*.html,*.xhtml,*.phtml, App.js,*.jsx'
 " Enable usage of omnisharp
 let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_server_use_mono = 1
+
+" Telescope
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 
 " Coc
 nmap <silent> gd <Plug>(coc-definition)
