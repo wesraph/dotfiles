@@ -95,7 +95,6 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
-Plug 'neovim/nvim-lspconfig'
 Plug 'neoclide/coc.nvim', {'branch': 'release','do': { -> coc#util#install() }}
 Plug 'w0rp/ale'
 "Plug 'nvim-lua/completion-nvim'
