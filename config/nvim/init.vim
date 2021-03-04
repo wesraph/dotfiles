@@ -318,6 +318,7 @@ inoremap <silent><expr> <Tab>
 
 " Golang
 "autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+let g:go_fmt_fail_silently = 1
 
 " JS import
 noremap <Leader>if <Plug>(JsFileImport)
