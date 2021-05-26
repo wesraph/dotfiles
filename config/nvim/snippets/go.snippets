@@ -234,7 +234,7 @@ ${0}
 # error panic
 snippet errp "Error panic" !b
 if err != nil {
-	panic(${1})
+	panic(err)
 }
 ${0}
 

@@ -54,9 +54,12 @@ call plug#begin('~/.config/nvim/plugged')
 Plug 'epilande/vim-react-snippets', {'for': ['js']}
 Plug 'alvan/vim-closetag', {'for': ['html']}
 Plug 'moll/vim-node', {'for': ['js', 'html']}
-Plug 'prettier/vim-prettier', {'for': ['js', 'html'], 'do': 'yarn install', 'branch': 'release/0.x'}
+Plug 'prettier/vim-prettier', {'for': ['js', 'html', 'solidity'], 'do': 'yarn install', 'branch': 'release/0.x'}
 Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
 Plug 'ap/vim-css-color'
+
+" Solidity
+Plug 'tomlion/vim-solidity'
 
 " Go
 Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries' }
@@ -154,6 +157,9 @@ hi SpellRare ctermfg=200
 " Don’t add empty newlines at the end of files
 set noeol
 
+" Close all tabs to the right
+noremap <leader>dtr .+1,$tabdo :tabc<CR>
+
 " jk or kj to quit insert mode
 imap jk <Esc>
 
@@ -250,9 +256,14 @@ let g:ale_sign_error = '✗'
 let g:ale_sign_warning = '⚠'
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_fixers= {
+\ 'solidity': ['prettier'],
+\ 'typescript': ['eslint']
+\}
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
-\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet']
+\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'],
+\ 'solidity': ['solhint', 'solc', 'solium']
 \}
 
 "Configure vim for latex
@@ -320,8 +331,13 @@ inoremap <silent><expr> <Tab>
 "autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 let g:go_fmt_fail_silently = 1
 
+" Solidity
+autocmd BufWritePre *.sol ALEFix
+
 " JS import
 noremap <Leader>if <Plug>(JsFileImport)
+autocmd BufWritePre *.ts ALEFix
+autocmd BufWritePre *.js ALEFix
 
 " C#
 autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
