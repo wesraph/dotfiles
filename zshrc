@@ -60,12 +60,11 @@ transfer() { if [ $# -eq 0 ]; then echo -e "No arguments specified. Usage:\necho
 bindkey -v
 bindkey -M viins 'jk' vi-cmd-mode
 
-# Ctrl-r starts searching history backward
-bindkey '^r' history-incremental-search-backward
-
 # Use vim cli mode
 bindkey '^P' up-history
 bindkey '^N' down-history
+
+which fzf > /dev/null && source $HOME/.fzf/key-bindings.zsh || bindkey '^r' history-incremental-search-backward
 
 scalehidpi() {
 	export GDK_SCALE=2
