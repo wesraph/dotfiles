@@ -32,6 +32,7 @@ export LANG=en_US.UTF-8
 alias ip="ip -c "
 
 export EDITOR=nvim
+export VISUAL=nvim
 
 [ -e ~/.shell_functions ] && . ~/.shell_functions
 [ -e ~/.shell_local  ] && . ~/.shell_local
