@@ -91,6 +91,7 @@ Plug 'junegunn/vim-easy-align'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'AndrewRadev/splitjoin.vim'
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
@@ -271,6 +272,8 @@ let g:vimtex_view_general_viewer = 'zathura'
 
 " Open nerdtree with ctrl n
 map <C-n> :NERDTreeToggle<CR>
+" Same nerdtree on all tabs
+autocmd BufWinEnter * silent NERDTreeMirror
 
 " Sudo
 nnoremap <leader>sudo :w !sudo tee %
