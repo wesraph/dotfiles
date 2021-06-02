@@ -240,6 +240,8 @@ exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin
 exec_always swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+
 output "eDP-1" {
 	scale 1
 	pos 0 0
