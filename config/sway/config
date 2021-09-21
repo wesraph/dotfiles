@@ -181,7 +181,7 @@ mode "ovh" {
 	bindsym $mod+s exec alacritty -e zsh -i -c sdocker
 	bindsym $mod+r exec alacritty -e /usr/bin/ssh raph-dev
 	bindsym $mod+e exec alacritty -e /usr/bin/pass edit OVH/links
-	bindsym $mod+l exec /home/raph/.scripts/ovh/links
+	bindsym $mod+l exec ~/.scripts/ovh/links
 	bindsym Escape mode "default"
 }
 
@@ -220,10 +220,9 @@ bindsym XF86KbdBrightnessDown exec kbdlight down
 bindsym $mod+o workspace next
 bindsym $mod+i workspace prev
 
-bindsym XF86PowerOff   exec /home/raph/.scripts/microphone/toggle_microphone
-bindsym XF86Calculator exec /home/raph/.scripts/microphone/toggle_microphone
-bindsym XF86AudioMicMute exec /home/raph/.scripts/microphone/toggle_microphone
-
+bindsym XF86PowerOff   exec ~/.scripts/microphone/toggle_microphone
+bindsym XF86Calculator exec ~/.scripts/microphone/toggle_microphone
+bindsym XF86AudioMicMute exec ~/.scripts/microphone/toggle_microphone
 
 bindsym Control+Space exec makoctl dismiss
 
@@ -264,10 +263,6 @@ output "HDMI-A-2"  {
 	pos 2560 0
 }
 
-bar {
-	swaybar_command waybar
-}
-
 input * {
     xkb_layout us
     xkb_options compose:ralt
@@ -277,4 +272,8 @@ input * {
 
 input 1452:627:bcm5974 {
     pointer_accel 0.75
+}
+
+bar {
+	swaybar_command waybar
 }
