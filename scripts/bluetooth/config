@@ -1,5 +1,6 @@
 #!/bin/sh
-DEVICES='00:18:16:11:64:07 Elegiant Audio
+DEVICES='7C:58:CA:00:33:E7 Fosi Audio
 38:18:4C:59:A8:14 Sony WH-1000XM3
 74:1A:E0:20:D6:59 nuraphone 578
-FF:95:F0:75:78:94 S2025'
+FF:95:F0:75:78:94 S2025
+00:18:16:11:64:07 Elegiant Audio'
