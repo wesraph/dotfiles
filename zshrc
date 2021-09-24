@@ -74,3 +74,5 @@ scalehidpi() {
 	export QT_AUTO_SCREEN_SCALE_FACTOR=2
 	export QT_SCALE_FACTOR=2
 }
+
+alias update_arch_mirrors="curl -s 'https://archlinux.org/mirrorlist/?country=FR&country=GB&protocol=https&use_mirror_status=on' | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - | sudo tee  /etc/pacman.d/mirrorlist"
