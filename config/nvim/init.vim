@@ -273,7 +273,7 @@ let g:vimtex_view_general_viewer = 'zathura'
 " Open nerdtree with ctrl n
 map <C-n> :NERDTreeToggle<CR>
 " Same nerdtree on all tabs
-autocmd BufWinEnter * silent NERDTreeMirror
+"autocmd BufWinEnter * silent NERDTreeMirror
 
 " Sudo
 nnoremap <leader>sudo :w !sudo tee %
