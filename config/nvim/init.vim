@@ -90,7 +90,7 @@ Plug 'scrooloose/nerdtree'
 Plug 'junegunn/vim-easy-align'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'AndrewRadev/splitjoin.vim'
 
 " Explore easily with ,ff and ,fg
@@ -307,7 +307,6 @@ require'nvim-treesitter.configs'.setup {
   ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
   highlight = {
     enable = true,              -- false will disable the whole extension
-    disable = { "c", "rust" },  -- list of language that will be disabled
   },
 }
 EOF
@@ -334,6 +333,9 @@ inoremap <silent><expr> <Tab>
 "autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
 let g:go_fmt_fail_silently = 1
 
+" Do not print "SUCCESS" when GoTo definition
+let g:go_echo_command_info = 0
+
 " Solidity
 autocmd BufWritePre *.sol ALEFix
 
@@ -347,3 +349,5 @@ autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 
 " Lsp
 set omnifunc=syntaxcomplete#Complete
+
+" To restart gopls: :call go#lsp#Exit()
