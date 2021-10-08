@@ -1,0 +1,236 @@
+# A valid snippet should starts with:
+#
+#		snippet trigger_word [ "description" [ options ] ]
+#
+# and end with:
+#
+#		endsnippet
+#
+# Snippet options:
+#
+#		b - Beginning of line.
+#		i - In-word expansion.
+#		w - Word boundary.
+#		r - Regular expression
+#		e - Custom context snippet
+#		A - Snippet will be triggered automatically, when condition matches.
+#
+# Basic example:
+#
+#		snippet emitter "emitter properties" b
+#		private readonly ${1} = new Emitter<$2>()
+#		public readonly ${1/^_(.*)/$1/}: Event<$2> = this.$1.event
+#		endsnippet
+#
+# Online reference: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
+snippet errrr "renderError" b
+if err != nil {
+	app.RenderError(w, err)
+	return
+}
+endsnippet
+
+snippet ijsonm "Create new json interface" b
+// MarshalJSON implements the MarshalJSON interface
+func (${2} *${1}) MarshalJSON() ([]byte, error) {
+	return json.Marshal(${2})
+}
+endsnippet
+
+snippet fp "fmt.Println" b
+fmt.Println(${1})
+endsnippet
+
+snippet apih  "Add a api handler" b
+// HandleAdd${1} handle the creation of ${2}
+func (app *App) HandleAdd${1}(w http.ResponseWriter, r *http.Request) {
+	app.addConfToService(
+		app.DB,
+		r.URL.Query(),
+		w,
+		common.GetNic(r),
+		mux.Vars(r)["serviceID"\],
+		configuration.Type${1},
+	)
+}
+endsnippet
+
+snippet fromquery "Create a FromQuery" b
+// FromQuery creates a ${1} from url.Values
+func (${2} *${1}) FromQuery(q url.Values) error {
+	ok := checkMandatoryValues(q, []string{${3}})
+	if !ok {
+		return ErrMissingRequestParameter
+	}
+	${4}
+	return nil
+}
+endsnippet
+
+snippet renderConf "Description" b
+// HandleGet${1} handles the get of the ${2}
+func (app *App) HandleGet${1}(w http.ResponseWriter, r *http.Request) {
+	app.renderConf(
+		app.DB,
+		common.GetNic(r),
+		mux.Vars(r)["serviceID"],
+		w,
+		configuration.Type${1},
+	)
+}
+endsnippet
+
+snippet deviceconf "Created a deviceConf get" b
+d := &[]configuration.${1}{}
+
+err := configuration.DataFromDeviceID(
+	app.db,
+	getDevice(r).ID,
+	configuration.Type${1},
+	d,
+)
+if err != nil {
+	app.renderError(w, err)
+	return
+}
+
+dd := []*configuration.Device${1}{}
+for _, v := range *d {
+	dd = append(dd, (*configuration.Device${1})(&v))
+}
+
+app.renderOK(w, dd)
+endsnippet
+
+snippet dmarshal "JSON marshal for Device" b
+// MarshalJSON implements the MarshalJSON interface
+func (d *Device${1}) MarshalJSON() ([]byte, error) {
+	type Alias Device${1}
+	dh := struct {
+		*Alias
+	}{
+		Alias: (*Alias)(d),
+	}
+
+	return json.Marshal(dh)
+}
+endsnippet
+
+snippet amarshal "JSON marshal for API" b
+// MarshalJSON implements the MarshalJSON interface
+func (a *API${1}) MarshalJSON() ([]byte, error) {
+	type Alias API${1}
+	dh := struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	return json.Marshal(dh)
+}
+endsnippet
+
+snippet cerr "Custom error" b
+Err${1} = fmt.Errorf("${2}")
+endsnippet
+
+snippet apierr "Create new API error" b
+ErrAPI${1}      = &apierror.Error{Class: "${2}", HTTPStatus: http.${3}}
+endsnippet
+
+snippet cGetType "Create a getType" b
+// GetType returns the type of configuration
+func (d *${1}) GetType() Type {
+	return Type("${2}")
+}
+endsnippet
+
+snippet cGetPath "Create a getPath" b
+// GetPath returns the path of to get the struct
+func (d *${1}) GetPath() string {
+	return "${2}"
+}
+
+endsnippet
+
+snippet cMeta  "Create necessay for meta interface" b
+// GetType returns the type of configuration
+func (${2} *${1}) GetType() Type {
+	return Type("${3}")
+}
+
+// GetPath returns the path of to get the struct
+func (${2} *${1}) GetPath() string {
+	return "${4}"
+}
+
+// NewArray returns a new array of DHCPConfig
+func (${2} *${1}) NewArray() interface{} {
+	return []${1}{}
+}
+
+// NewAPIConf returns a new API conf from the conf
+func (${2} *${1}) NewAPIConf() interface{} {
+	return &API${1}{}
+}
+
+// NewDeviceConf returns a new device conf
+func (${2} *${1}) NewDeviceConf() interface{} {
+	return &Device${1}{}
+}
+endsnippet
+
+snippet cNew "New new meta interface" b
+// New returns a new ${1}
+func (${2} ${1}) New() *${1}{
+	return &${1}{}
+}
+
+endsnippet
+
+snippet ToDB "Create a new ToDB function"
+// ToDB implements the APIData interface
+func ($2 *$1) ToDB() (DBData, error) {
+	return $1, nil
+}
+endsnippet
+
+snippet CheckValues "Create a new CheckValues"
+// CheckValues implements the CheckValues interface
+func ($2 *$1) CheckValues() error {
+	return $1
+}
+endsnippet
+
+snippet ToAPI "Create a new ToAPI"
+// ToAPI implements the DBData interface
+func ($2 *$1) ToAPI() (APIData, error) {
+	return $1, nil
+}
+endsnippet
+
+snippet custUnmarshall "Create a custom unmarshall"
+// UnmarshalJSON implements the UnmarshalJSON interface
+func ($1 *$2) UnmarshalJSON(data []byte) error {
+	type Alias $2
+	dh := struct {
+		*Alias
+	}{
+		Alias: (*Alias)(d),
+	}
+
+	err := json.Unmarshal(data, &dh)
+	if err != nil {
+		return err
+	}
+
+	$3
+}
+endsnippet
+
+snippet ToDevice "Create a ToDevice"
+// ToDevice transforms a DBData to a DeviceData
+func (${2} *${1}) ToDevice() (DeviceData, error) {
+	return ${2}, nil
+}
+endsnippet

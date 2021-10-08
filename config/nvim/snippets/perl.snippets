@@ -1,0 +1,170 @@
+# #!/usr/bin/perl
+snippet #!
+	#!/usr/bin/perl
+
+# Hash Pointer
+snippet .
+	 =>
+# Function
+snippet sub
+	sub ${1:function_name} {
+		${2:#body ...}
+	}
+# Conditional
+snippet if
+	if (${1})
+	{
+		${2:# body...}
+	}
+# Conditional if..else
+snippet ife
+	if (${1})
+	{
+		${2:# body...}
+	}
+	else
+	{
+		${3:# else...}
+	}
+# Conditional if..elsif..else
+snippet ifee
+	if (${1}) {
+		${2:# body...}
+	} elsif (${3}) {
+		${4:# elsif...}
+	} else {
+		${5:# else...}
+	}
+# Conditional One-line
+snippet xif
+	${1:expression} if ${2:condition};${3}
+# Unless conditional
+snippet unless
+	unless (${1}) {
+		${2:# body...}
+	}
+# Unless conditional One-line
+snippet xunless
+	${1:expression} unless ${2:condition};${3}
+# Try/Except
+snippet eval
+	eval {
+		${1:# do something risky...}
+	};
+	if ($@) {
+		${2:# handle failure...}
+	}
+# While Loop
+snippet wh
+	while (${1}) {
+		${2:# body...}
+	}
+# While Loop One-line
+snippet xwh
+	${1:expression} while ${2:condition};${3}
+# For Loop
+snippet for
+	for (my $${2:var} = 0; $$2 < ${1:count}; $$2${3:++}) {
+		${4:# body...}
+	}
+# Foreach Loop
+snippet fore
+	foreach my $${1:x} (@${2:array}) {
+		${3:# body...}
+	}
+# Foreach Loop One-line
+snippet xfore
+	${1:expression} foreach @${2:array};${3}
+# Package
+snippet cl
+	package ${1:ClassName};
+
+	use base qw(${2:ParentClass});
+
+	sub new {
+		my $class = shift;
+		$class = ref $class if ref $class;
+		my $self = bless {}, $class;
+		$self;
+	}
+
+	1;${3}
+# Read File
+snippet slurp
+	my $${1:var};
+	{ local $/ = undef; local *FILE; open FILE, "<${2:file}"; $$1 = <FILE>; close FILE }${3}
+
+snippet inc
+	use strict;
+
+	use Data::Dumper;
+
+	use lib '/manager';
+	use common::Logger;
+
+	Logger::min_log_level_to_print(10);
+
+snippet objlist
+	my $${1:ObjectList} = l1::ObjectList->new(
+		objectType      => '${2:type}',
+		characteristics => {
+			${3:#characs...}
+		},
+	);
+	$$1 or return $$1;
+#
+snippet nar
+	not $${1:var} and return $$1;
+
+snippet orr
+	$${1:var} or return $$1;
+# newFromCharacteristics
+snippet nfc
+	my $${1:var} = ${2:type}->newFromCharacteristics(characteristics => {
+		${3:#characs...}
+	});
+	$$1 or return $$1;
+#
+snippet rr
+	return Result->${1:CODE}(${2});
+#
+snippet rma
+	my $${1:var} = $${2:params}{$1} or return Result->MISSING_ARGUMENT('Missing $1 argument');
+#
+snippet wl
+	$${1:ObjectList}->resetIterator();
+	while (my $${2:Object} = $$1->iterate())
+	{
+		${3:#body...}
+	}
+#
+snippet pb
+	$${1:result} or return $${2:Executor}->problem(result => $$1, message => '${3:msg}');
+#
+snippet li
+	Logger::info(${1:msg});
+#
+snippet lw
+	Logger::warn(${1:msg});
+
+snippet ld
+	Logger::debug(${1:msg});
+#
+snippet com
+	my $commitRet = $${1:Object}->commit();
+	not $commitRet and return $commitRet;
+#
+snippet val
+	$${1:var} = $$1->value();
+
+snippet rok
+	return Result->ok(${1:var});
+
+snippet 8
+	=
+
+snippet ifnt
+	not $${1:ret} and return $this->problem(
+			result  => $$1,
+			comment => '${2:comment}',
+	);

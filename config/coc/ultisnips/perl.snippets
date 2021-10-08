@@ -1,0 +1,97 @@
+# A valid snippet should starts with:
+#
+#		snippet trigger_word [ "description" [ options ] ]
+#
+# and end with:
+#
+#		endsnippet
+#
+# Snippet options:
+#
+#		b - Beginning of line.
+#		i - In-word expansion.
+#		w - Word boundary.
+#		r - Regular expression
+#		e - Custom context snippet
+#		A - Snippet will be triggered automatically, when condition matches.
+#
+# Basic example:
+#
+#		snippet emitter "emitter properties" b
+#		private readonly ${1} = new Emitter<$2>()
+#		public readonly ${1/^_(.*)/$1/}: Event<$2> = this.$1.event
+#		endsnippet
+#
+# Online reference: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
+
+snippet notn "not x and return x"
+not $${1} and return $${1};
+endsnippet
+
+snippet missing "return if missing argument"
+not $${1} and return Result->MISSING_ARGUMENT('Missing argument ${1}');
+endsnippet
+
+snippet newScript "Create a new script"
+#!/usr/bin/perl
+use lib '/manager';
+use strict;
+
+use common::Result;
+use common::Logger;
+use common::Script;
+use Getopt::Long;
+use l1::ObjectList;
+
+# Description :
+# ${2}
+
+common::Script->new(
+    'name'                              => '${1}.pl',
+    'locations'                         => [ { 'user' => 'rwestpha', 'host'  => 'sdev.ha.ovh.net', },
+        { 'user' => 'ovh',      'host'  => 'mozg-otb.ovh.ha.ovh.net', },
+        { 'user' => 'ovh',      'host'  => 'mozg-sticky.ovh.ha.ovh.net', },
+    ],
+    'author'                            => ['raphael.westphal@corp.ovh.com'],
+    'scriptType'                        => 'oneShot',
+    'logFile'                           => '/home/ovh/logs/${1}.log',
+    'extraLoggerParameter'              => {
+        'min_log_level_to_print'        => Logger::Logger_Debug,
+        'min_log_level_to_mail'         => Logger::Logger_Critical,
+        'min_log_level_to_save'         => Logger::Logger_Info,
+        'prefix'                        => '${1}',
+    },
+    'mustLock'                          => 1,
+    'main'                              => \&main,
+);
+
+sub func
+{
+    # Logger
+    my $FuncLogger = Logger->new();
+
+    my $${3};
+    my $options = Getopt::Long::GetOptions(
+        "${3}|i=s" => \\$${3},
+    );
+
+    $${3} or return Result->MISSING_ARGUMENT("Missing ${3} argument");
+
+    ${4}
+
+    $FuncLogger->last_iteration();
+    return Result->ok();
+}
+
+sub main
+{
+    my $fnret = func();
+    if (not $fnret)
+    {
+        Logger::info("+-"x40);
+        Logger::warn("Error : ", $fnret);
+        Logger::info("+-"x40);
+    }
+    return Result->ok();
+}
+endsnippet
