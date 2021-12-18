@@ -222,6 +222,7 @@ bindsym $mod+i workspace prev
 
 bindsym XF86PowerOff   exec ~/.scripts/microphone/toggle_microphone
 bindsym XF86Calculator exec ~/.scripts/microphone/toggle_microphone
+bindsym F9 exec ~/.scripts/microphone/toggle_microphone
 bindsym XF86AudioMicMute exec ~/.scripts/microphone/toggle_microphone
 
 bindsym Control+Space exec makoctl dismiss
@@ -271,10 +272,8 @@ input * {
     xkb_options "compose:ralt,caps:escape"
     repeat_delay 200
     repeat_rate 50
-}
-
-input 1452:627:bcm5974 {
     pointer_accel 0.75
+    tap enabled
 }
 
 bar {

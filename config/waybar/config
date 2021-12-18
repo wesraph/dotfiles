@@ -1,9 +1,9 @@
 {
     "layer": "top", // Waybar at top layer
     "height": 40, // Waybar height
-    "modules-left": ["sway/workspaces", "sway/mode", "custom/soulseek", "custom/ovh", "custom/mic"],
+    "modules-left": ["sway/workspaces", "sway/mode", "custom/mic"],
     "modules-center": [],
-    "modules-right": ["pulseaudio", "network", "cpu", "memory", "battery", "custom/temperature", "custom/fan", "tray", "clock"],
+    "modules-right": ["pulseaudio", "cpu", "memory", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -40,7 +40,6 @@
         "format": "{used:0.1f} "
     },
     "battery": {
-        "bat": "BAT0",
         "states": {
             // "good": 95,
             "warning": 30,
@@ -55,7 +54,7 @@
         "format": "{temperatureC}°C"
     },
     "network": {
-        "interface": "wlp3s0", // (Optional) To force the use of this interface
+        "interface": "wlp170s0", // (Optional) To force the use of this interface
         "format-wifi": "{essid} ({signalStrength}%) ",
         "format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
         "format-disconnected": "Disconnected ⚠"
@@ -93,12 +92,6 @@
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/music/is_watcher_running"
-    },
-    "custom/ovh": {
-        "format": "OVH",
-        "max-length": 40,
-        "interval": 1, // Remove this if your script is endless and write in loop
-        "exec": "pgrep -x vpnc"
     },
     "custom/mic": {
         "format": "MIC OFF",
