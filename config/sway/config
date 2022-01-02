@@ -250,19 +250,11 @@ output "eDP-1" {
 	pos 0 0
 }
 
-output "HDMI-A-1"   {
+output "DP-3" {
 	scale 0.66666666
 }
 
-output "DP-2" {
-	scale 0.66666666
-}
-
-output "DP-4" {
-	scale 0.66666666
-}
-
-output "HDMI-A-2"  {
+output "HDMI-*"  {
 	scale 0.66666666
 	pos 2560 0
 }
