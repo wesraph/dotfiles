@@ -58,6 +58,8 @@ Plug 'prettier/vim-prettier', {'for': ['js', 'html', 'solidity'], 'do': 'yarn in
 Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
 Plug 'ap/vim-css-color'
 
+Plug 'morhetz/gruvbox'
+
 " Solidity
 Plug 'tomlion/vim-solidity'
 
@@ -113,9 +115,13 @@ filetype plugin indent on
 filetype plugin on
 syntax on
 
+let gruvbox_contrast_dark="soft"
+
 " Theme
 set background=dark
-colorscheme palenight
+
+"colorscheme palenight
+colorscheme gruvbox
 
 " History
 set history=1000    " much more history than base
