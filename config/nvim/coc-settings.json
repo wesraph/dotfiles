@@ -7,7 +7,9 @@
     "javascriptreact": ["jsx", "javascript"]
   },
   "coc.preferences.messageLevel": "error",
-  "eslint.autoFixOnSave": true,
+  "coc.source.file.priority": 999,
+  "coc.source.around.priority": 1000,
+  "coc.source.ultisnips.priority": 998,
   "go.enable": false,
   "languageserver": {
     "ccls": {
