@@ -357,3 +357,6 @@ autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 set omnifunc=syntaxcomplete#Complete
 
 " To restart gopls: :call go#lsp#Exit()
+
+" Add shortcut to quickly close the tab
+map <C-x> :tab close<CR>
