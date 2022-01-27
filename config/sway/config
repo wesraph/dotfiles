@@ -250,7 +250,15 @@ output "eDP-1" {
 	pos 0 0
 }
 
-output "DP-3" {
+output "DP-2" {
+	scale 0.66666666
+}
+
+output "DP-4" {
+	scale 0.66666666
+}
+
+output "DP-*" {
 	scale 0.66666666
 }
 
