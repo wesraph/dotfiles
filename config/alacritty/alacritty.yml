@@ -19,6 +19,7 @@ window:
   # Window dimensions in character columns and lines
   # Falls back to size specified by window manager if set to 0x0.
   # (changes require restart)
+  opacity: 0.76
   dimensions:
     columns: 0
     lines: 0
@@ -184,9 +185,6 @@ colors:
 #
 # To completely disable the visual bell, set its duration to 0.
 #
-
-# Background opacity
-background_opacity: 0.76
 
 # Mouse bindings
 #
