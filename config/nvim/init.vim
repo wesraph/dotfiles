@@ -75,6 +75,9 @@ Plug 'OmniSharp/omnisharp-vim'
 " Perl
 Plug 'vim-perl/vim-perl', {'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny'}
 
+" Yul
+Plug 'mattdf/vim-yul'
+
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 Plug 'joshdick/onedark.vim'
