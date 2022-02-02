@@ -361,5 +361,8 @@ set omnifunc=syntaxcomplete#Complete
 
 " To restart gopls: :call go#lsp#Exit()
 
-" Add shortcut to quickly close the tab
+" Shortcut to quickly close the tab
 map <C-x> :tab close<CR>
+
+" Copy the same tab in new tab
+map <leader>ct :tab split<CR>
