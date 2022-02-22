@@ -34,7 +34,7 @@
         "format" : "{:%Y-%m-%d %H:%M}"
     },
     "cpu": {
-        "format": "{load} "
+        "format": "{load:0.1f} "
     },
     "memory": {
         "format": "{used:0.1f} "
