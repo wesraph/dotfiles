@@ -17,8 +17,8 @@ default-timeout=10000
 group-by=summary
 format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%b</span>
 
-[grouped]
-format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%b</span>
+#[grouped]
+#format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%b</span>
 
 [mode=do-not-disturb]
 invisible=1
