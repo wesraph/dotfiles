@@ -237,8 +237,8 @@ output "*" bg ~/Wallpapers/wallpaper.jpg fill
 exec sleep 5 && nm-applet --indicator
 exec_always killall nm-applet; nm-applet --indicator
 
-exec_always killall mako; mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
-exec sleep 5 &&  mako --font "Deja Vu Sans Mono Nerd Font:monospace 13" --margin "10,20,0,0" --border-radius 3 --height 1000 --default-timeout 45000
+exec_always killall mako; mako -c ~/.config/mako/config
+exec sleep 5 && mako -c ~/.config/mako/config
 
 exec_always swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
 exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
