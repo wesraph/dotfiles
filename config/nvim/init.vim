@@ -366,3 +366,6 @@ map <C-x> :tab close<CR>
 
 " Copy the same tab in new tab
 map <leader>ct :tab split<CR>
+
+" Print the hexadecimal value in decimal
+vnoremap <leader>h y:echo str2nr('<C-r>0', 16)<CR>
