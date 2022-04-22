@@ -111,7 +111,7 @@ mode "mode" {
         bindsym $mod+i mode microphone
         bindsym $mod+w mode workspace
         bindsym $mod+s mode screen
-        bindsym $mod+o mode ovh
+        bindsym $mod+o mode crypto
         bindsym $mod+r mode restart
         bindsym Escape mode "default"
 }
@@ -177,11 +177,8 @@ mode "screen" {
 		bindsym Escape mode "default"
 }
 
-mode "ovh" {
-	bindsym $mod+s exec alacritty -e zsh -i -c sdocker
-	bindsym $mod+r exec alacritty -e /usr/bin/ssh raph-dev
-	bindsym $mod+e exec alacritty -e /usr/bin/pass edit OVH/links
-	bindsym $mod+l exec ~/.scripts/ovh/links
+mode "crypto" {
+	bindsym $mod+p exec sh -c "~/.scripts/crypto/openOnPoocoin.sh"
 	bindsym Escape mode "default"
 }
 
