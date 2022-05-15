@@ -13,7 +13,7 @@ bindsym $mod+Shift+q kill
 bindsym $mod+Shift+p exec swaylock -s fit -i ~/Wallpapers/lockscreen.png
 
 # start rofi
-bindsym $mod+d exec sh -c 'killall rofi; wofi  --show drun,run'
+bindsym $mod+d exec sh -c 'killall wofi; wofi  --show drun,run'
 bindsym $mod+p exec rofi -show run -run-command "sh -c 'export GDK_SCALE=2; export GDK_DPI_SCALE=0.5; export QT_AUTO_SCREEN_SCALE_FACTOR=2; {cmd}'"
 
 # change focus
@@ -179,6 +179,7 @@ mode "screen" {
 
 mode "crypto" {
 	bindsym $mod+p exec sh -c "~/.scripts/crypto/openOnPoocoin.sh"
+	bindsym $mod+m exec sh -c "~/.scripts/crypto/changeMode.sh"
 	bindsym Escape mode "default"
 }
 
@@ -207,7 +208,7 @@ bindsym XF86AudioMute exec pamixer --toggle-mute
 bindsym XF86AudioPrev exec mpc --host /tmp/mpd.unix prev
 bindsym XF86AudioNext exec mpc --host /tmp/mpd.unix next
 bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
-bindsym XF86AudioMedia exec ~/.scripts/crypto/openInBscScan.sh
+bindsym XF86AudioMedia exec ~/.scripts/crypto/openInExplorer.sh
 
 bindsym XF86MonBrightnessUp exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -A 5 || light -A 1"
 bindsym XF86MonBrightnessDown exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -U 5 || light -U 1"
