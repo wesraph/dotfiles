@@ -201,8 +201,8 @@ default_border pixel 2
 gaps inner 15
 gaps outer 0
 
-bindsym XF86AudioRaiseVolume exec pamixer --unmute --increase 5
-bindsym XF86AudioLowerVolume exec pamixer --unmute --decrease 5
+bindsym XF86AudioRaiseVolume exec sh -c 'if [ "$(pamixer --get-volume)" -le 10 ]; then pamixer --unmute --increase 1; else pamixer --unmute --increase 5; fi'
+bindsym XF86AudioLowerVolume exec sh -c 'if [ "$(pamixer --get-volume)" -le 10 ]; then pamixer --unmute --decrease 1; else pamixer --unmute --decrease 5; fi'
 bindsym XF86AudioMute exec pamixer --toggle-mute
 
 bindsym XF86AudioPrev exec mpc --host /tmp/mpd.unix prev
