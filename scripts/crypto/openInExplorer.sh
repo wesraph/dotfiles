@@ -1,0 +1,1 @@
+/home/raph/.dotfiles/scripts/crypto/openInBscScan.sh
