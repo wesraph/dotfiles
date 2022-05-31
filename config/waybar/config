@@ -3,7 +3,7 @@
     "height": 40, // Waybar height
     "modules-left": ["sway/workspaces", "sway/mode", "custom/mic"],
     "modules-center": [],
-    "modules-right": ["pulseaudio", "cpu", "memory", "battery", "temperature", "tray", "clock"],
+    "modules-right": ["pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -76,7 +76,7 @@
         "on-click": "pavucontrol"
     },
     "custom/fan": {
-        "format": " {}",
+        "format": "{} ",
         "max-length": 40,
         "interval": 1,
         "exec": "cat /sys/devices/platform/applesmc.768/fan1_input"
@@ -98,5 +98,11 @@
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/microphone/get_mic_state"
-    }
+    },
+    "custom/agent": {
+        "format": "🔒 {} mn",
+        "max-length": 40,
+        "interval": 60, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/sway/remainingAgentTime.sh"
+    },
 }
