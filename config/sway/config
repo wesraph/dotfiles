@@ -178,10 +178,11 @@ mode "screen" {
 }
 
 mode "crypto" {
-	bindsym $mod+p exec ~/.scripts/crypto/openOnPoocoin.sh"
+	bindsym $mod+p exec ~/.scripts/crypto/openOnPoocoin.sh
     bindsym $mod+e exec ~/.scripts/crypto/openInExplorer.sh
 	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
 	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
+	bindsym $mod+c exec ~/.scripts/crypto/doCalcul.sh
 	bindsym Escape mode "default"
 }
 
