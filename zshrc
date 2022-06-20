@@ -22,6 +22,8 @@ export SYSTEMD_EDITOR="$(which nvim > /dev/null  && echo nvim || echo vim)"
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
+export PATH=$HOME/.node/bin:$PATH
+export NODE_PATH="$HOME/.node/lib/node_modules:$NODE_PATH"
 
 #No more display problem
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
