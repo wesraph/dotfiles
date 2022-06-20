@@ -1,14 +1,7 @@
 #!/bin/sh
 set -e
 . ~/.scripts/bluetooth/config
-
-IFS=$'\n'
 LOCK=/tmp/bluetoothConnect.lock
-choice="$(echo  "$DEVICES" | cut -d" " -f2-99 | rofi -dmenu)"
-
-[ -z "$choice" ] && exit
-
-mac="$(echo "$DEVICES" | grep "$choice" | cut -d" " -f1)"
 
 [ -f "$LOCK" ] && {
     notify-send "Bluetooth" "Already trying to disconnect"
@@ -17,9 +10,9 @@ mac="$(echo "$DEVICES" | grep "$choice" | cut -d" " -f1)"
 
 touch "$LOCK"
 
-notify-send "Bluetooth" "Trying to disconnect from $choice"
+notify-send "Bluetooth" "Trying to disconnect from $(bluetoothctl info  | grep Name | cut -d":" -f2)"
 
-bluetoothctl disconnect "$mac" || {
+bluetoothctl disconnect "$(bluetoothctl info | grep Device  | cut -d" " -f2)" || {
     notify-send "Bluetooth" "Failed to disconnect"
     rm "$LOCK"
     exit
