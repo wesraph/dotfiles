@@ -41,6 +41,7 @@ let g:coc_global_extensions = [
 \ 'coc-json',
 \ 'coc-tsserver',
 \ 'coc-html',
+\ 'coc-rls',
 \ 'coc-css',
 \ 'coc-yaml',
 \ 'coc-highlight',
@@ -268,12 +269,14 @@ let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_fixers= {
 \ 'solidity': ['prettier'],
-\ 'typescript': ['eslint']
+\ 'typescript': ['eslint'],
+\ 'rust': ['rustfmt', 'trim_whitespace', 'remove_trailing_lines']
 \}
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
 \ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'],
-\ 'solidity': ['solhint', 'solc', 'solium']
+\ 'solidity': ['solhint', 'solc', 'solium'],
+\ 'rust': ['analyzer'],
 \}
 
 "Configure vim for latex
@@ -326,7 +329,10 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 command! -nargs=0 Format :call CocAction('format')
+
 autocmd FileType go nmap gtj :CocCommand go.tags.add json<cr>
+autocmd FileType go nmap gC :GoCallers<cr>
+
 let g:coc_disable_startup_warning = 1
 function! s:check_back_space() abort
   let col = col('.') - 1
