@@ -180,6 +180,7 @@ mode "screen" {
 mode "crypto" {
 	bindsym $mod+p exec ~/.scripts/crypto/openOnPoocoin.sh
     bindsym $mod+e exec ~/.scripts/crypto/openInExplorer.sh
+    bindsym $mod+a exec ~/.scripts/crypto/analyze.sh
 	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
 	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
 	bindsym $mod+c exec ~/.scripts/crypto/doCalcul.sh
@@ -257,6 +258,14 @@ output "DP-2" {
 }
 
 output "DP-4" {
+	scale 0.66666666
+}
+
+output "DP-5" {
+	scale 0.66666666
+}
+
+output "DP-6" {
 	scale 0.66666666
 }
 
