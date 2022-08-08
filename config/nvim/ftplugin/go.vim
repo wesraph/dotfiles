@@ -8,5 +8,3 @@ let g:go_gopls_use_placeholders = "true"
 let g:go_list_height = 3
 
 let b:ale_linters = ['go build', 'gofmt', 'golint', 'go vet']
-
-"lua require'lspconfig'.gopls.setup{on_attach=require'completion'.on_attach}
