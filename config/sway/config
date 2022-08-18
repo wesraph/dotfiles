@@ -257,6 +257,10 @@ output "DP-2" {
 	scale 0.66666666
 }
 
+output "DP-3" {
+	scale 0.66666666
+}
+
 output "DP-4" {
 	scale 0.66666666
 }
