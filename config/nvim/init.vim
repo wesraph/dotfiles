@@ -43,7 +43,6 @@ Plug 'moll/vim-node', {'for': ['js', 'html']}
 Plug 'prettier/vim-prettier', {'for': ['js', 'html', 'solidity'], 'do': 'yarn install', 'branch': 'release/0.x'}
 " Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
 Plug 'ap/vim-css-color'
-
 Plug 'morhetz/gruvbox'
 
 " Solidity
@@ -83,25 +82,21 @@ Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'AndrewRadev/splitjoin.vim'
+Plug 'jiangmiao/auto-pairs'
+
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
-" Snippets
-
 " Autocomplete/linter
 Plug 'w0rp/ale'
-
-" For snippy users.
 Plug 'dcampos/nvim-snippy'
 Plug 'dcampos/cmp-snippy'
-
-Plug 'hrsh7th/cmp-buffer'
-"Plug 'hrsh7th/cmp-cmdline'
+"Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-path'
+"Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -121,7 +116,7 @@ let gruvbox_contrast_dark="soft"
 " Theme
 set background=dark
 
-"colorscheme palenight
+"colorscheme onedark
 colorscheme gruvbox
 
 " History
@@ -351,7 +346,6 @@ map <leader>ct :tab split<CR>
 " Print the hexadecimal value in decimal
 vnoremap <leader>h y:echo str2nr('<C-r>0', 16)<CR>
 
-set completeopt=menu,menuone,noselect
 lua <<EOF
  -- Setup nvim-cmp.
   local cmp = require'cmp'
@@ -383,7 +377,7 @@ lua <<EOF
 
     appearance = {
       menu = {
-        direction = 'below' -- auto or above or below
+        direction = 'auto' -- auto or above or below
       }
     },
 
@@ -394,8 +388,10 @@ lua <<EOF
       end,
     },
     window = {
-      -- completion = cmp.config.window.bordered(),
-      -- documentation = cmp.config.window.bordered(),
+      completion = {
+        completeopt = 'menu,menuone,noinsert'
+      },
+      documentation = false,
     },
     mapping = cmp.mapping.preset.insert({
       ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -447,7 +443,7 @@ lua <<EOF
     }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      { name = 'vsnip' }, -- For vsnip users.
+      { name = 'snippy' }, -- For vsnip users.
     }, {
     })
   })
@@ -491,7 +487,7 @@ lua <<EOF
           experimentalPostfixCompletions = true,
           analyses = {
             unusedparams = true,
-            shadow = true,
+            shadow = false,
           },
           staticcheck = true,
         },
