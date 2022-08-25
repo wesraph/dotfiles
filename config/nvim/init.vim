@@ -41,7 +41,6 @@ Plug 'epilande/vim-react-snippets', {'for': ['js']}
 Plug 'alvan/vim-closetag', {'for': ['html']}
 Plug 'moll/vim-node', {'for': ['js', 'html']}
 Plug 'prettier/vim-prettier', {'for': ['js', 'html', 'solidity'], 'do': 'yarn install', 'branch': 'release/0.x'}
-" Plug 'kristijanhusak/vim-js-file-import', {'for': ['js'], 'do': 'npm install'}
 Plug 'ap/vim-css-color'
 Plug 'morhetz/gruvbox'
 
@@ -91,16 +90,8 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
-Plug 'w0rp/ale'
-Plug 'dcampos/nvim-snippy'
-Plug 'dcampos/cmp-snippy'
-"Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-nvim-lsp'
-"Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'neovim/nvim-lspconfig'
-Plug 'williamboman/mason-lspconfig.nvim'
-Plug 'williamboman/mason.nvim'
+"Plug 'w0rp/ale'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 
 " No mouse
@@ -111,13 +102,12 @@ filetype plugin indent on
 filetype plugin on
 syntax on
 
-let gruvbox_contrast_dark="soft"
-
 " Theme
 set background=dark
-
-"colorscheme onedark
+let gruvbox_contrast_dark="soft"
+let gruvbox_contrast_light="medium"
 colorscheme gruvbox
+
 
 " History
 set history=1000    " much more history than base
@@ -128,6 +118,7 @@ set synmaxcol=800
 
 " Menu completion
 set wildmenu
+"set wildmode=longest,list:full
 
 " Better indent
 vmap > >gv
@@ -310,7 +301,7 @@ lua <<EOF
 require'nvim-treesitter.configs'.setup {
 ensure_installed = {"c", "lua", "go", "javascript"},
   highlight = {
-    enable = true,              -- false will disable the whole extension
+    enable = true,
   },
 }
 EOF
@@ -346,154 +337,20 @@ map <leader>ct :tab split<CR>
 " Print the hexadecimal value in decimal
 vnoremap <leader>h y:echo str2nr('<C-r>0', 16)<CR>
 
-lua <<EOF
- -- Setup nvim-cmp.
-  local cmp = require'cmp'
+set completeopt=menu,menuone,noselect
 
-  local has_words_before = function()
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-    return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-  end
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-  local feedkey = function(key, mode)
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
-  end
-  local snippy = require("snippy")
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice.
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
-  require("mason").setup()
-  require("mason-lspconfig").setup()
-
-
-  cmp.setup({
-    comparators = {
-      cmp.config.compare.score,
-      cmp.config.compare.offset,
-      cmp.config.compare.exact,
-      cmp.config.compare.kind,
-      -- cmp.config.compare.sort_text,
-      cmp.config.compare.length,
-      cmp.config.compare.order,
-    },
-
-    appearance = {
-      menu = {
-        direction = 'auto' -- auto or above or below
-      }
-    },
-
-    snippet = {
-      -- REQUIRED - you must specify a snippet engine
-      expand = function(args)
-          require('snippy').expand_snippet(args.body)
-      end,
-    },
-    window = {
-      completion = {
-        completeopt = 'menu,menuone,noinsert'
-      },
-      documentation = false,
-    },
-    mapping = cmp.mapping.preset.insert({
-      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-
-      ["<Tab>"] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        elseif snippy.can_expand_or_advance() then
-          snippy.expand_or_advance()
-        elseif has_words_before() then
-          cmp.complete()
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
-
-      ["<C-j>"] = cmp.mapping(function(fallback)
-          if snippy.can_expand_or_advance() then
-            snippy.expand_or_advance()
-          elseif has_words_before() then
-            cmp.complete()
-          else
-            fallback()
-          end
-      end, { "i", "s" }),
-
-      ["<C-k>"] = cmp.mapping(function(fallback)
-        if snippy.can_jump(-1) then
-          snippy.previous()
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
-
-      ["<S-Tab>"] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_prev_item()
-        elseif snippy.can_jump(-1) then
-          snippy.previous()
-        else
-          fallback()
-        end
-      end, { "i", "s" }),
-
-    }),
-    sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'snippy' }, -- For vsnip users.
-    }, {
-    })
-  })
-
-  -- Set configuration for specific filetype.
-  cmp.setup.filetype('gitcommit', {
-    sources = cmp.config.sources({
-      { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
-    }, {
-      { name = 'buffer' },
-    })
-  })
-
-  -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
-
-  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
-  })
-
-  -- Setup lspconfig.
-  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-  require('lspconfig')['gopls'].setup {
-     cmd = {'gopls'},
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = {
-        gopls = {
-          experimentalPostfixCompletions = true,
-          analyses = {
-            unusedparams = true,
-            shadow = false,
-          },
-          staticcheck = true,
-        },
-      },
-      init_options = {
-        usePlaceholders = true,
-      }
-  }
-EOF
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
