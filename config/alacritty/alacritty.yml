@@ -126,9 +126,9 @@ colors:
     # bright_foreground: '0xffffff'
 
   # Colors the cursor will use if `custom_cursor_colors` is true
-  cursor:
-    text: '0x000000'
-    cursor: '0xffffff'
+  #cursor:
+    #text: '0x000000'
+    #cursor: '0xffffff'
 
   # Normal colors
   normal:
