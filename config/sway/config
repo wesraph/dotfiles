@@ -213,6 +213,7 @@ bindsym XF86AudioPrev exec mpc --host /tmp/mpd.unix prev
 bindsym XF86AudioNext exec mpc --host /tmp/mpd.unix next
 bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
 bindsym XF86AudioMedia exec ~/.scripts/crypto/openInExplorer.sh
+bindsym Print exec ~/.scripts/system/changeTTY.sh
 
 bindsym XF86MonBrightnessUp exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -A 5 || light -A 1"
 bindsym XF86MonBrightnessDown exec sh -c "[ \"$(light -G)\" -gt 6 ] && light -U 5 || light -U 1"
