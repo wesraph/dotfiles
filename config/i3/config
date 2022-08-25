@@ -230,6 +230,8 @@ bindsym XF86AudioPrev exec mpc --host /tmp/mpd.unix prev
 bindsym XF86AudioNext exec mpc --host /tmp/mpd.unix next
 bindsym XF86AudioPlay exec mpc --host /tmp/mpd.unix toggle
 
+bindsym Print exec ~/.scripts/system/changeTTY.sh
+
 bindsym XF86MonBrightnessUp exec xbacklight -inc 5
 bindsym XF86MonBrightnessDown exec xbacklight -dec 5
 
