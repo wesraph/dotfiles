@@ -5,6 +5,5 @@ setlocal softtabstop=4   " 4 spaces to represent a tab
 
 let g:go_fmt_command = "goimports"
 let g:go_gopls_use_placeholders = "true"
-let g:go_list_height = 3
 
 let b:ale_linters = ['go build', 'gofmt', 'golint', 'go vet']
