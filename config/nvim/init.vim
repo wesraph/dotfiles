@@ -90,7 +90,7 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
-"Plug 'w0rp/ale'
+Plug 'w0rp/ale'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 
@@ -108,6 +108,13 @@ let gruvbox_contrast_dark="soft"
 let gruvbox_contrast_light="medium"
 colorscheme gruvbox
 
+function SetLightTheme()
+  set background=light
+endfunction
+
+function SetDarkTheme()
+  set background=dark
+endfunction
 
 " History
 set history=1000    " much more history than base
