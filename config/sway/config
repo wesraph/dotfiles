@@ -252,6 +252,7 @@ exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DE
 output "eDP-1" {
 	scale 1
 	pos 0 0
+	max_render_time 5
 }
 
 output "DP-1" {
