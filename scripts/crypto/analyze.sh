@@ -1,9 +1,15 @@
 #!/bin/sh
 set -e
 
-. ./config
+. $HOME/.scripts/crypto/config
 
 tx=$(wl-paste)
 notify-send "Opening $tx"
 
-cd "$HOME/.local/bin/bscanalyzer" && ./bscanalyzer -rpcEndpoint "$ENDPOINT" -stage admin -action "analyzeSandwichAndOpenLink,$tx"
+if [ "$(cat $HOME/.scripts/crypto/mode)" = "bsc" ]; then
+	ENDPOINT=$BSC_ENDPOINT
+else
+	ENDPOINT=$POLYGON_ENDPOINT
+fi
+
+cd "$HOME/.local/bin/bscanalyzer" && ./bscanalyzer -chain "$(cat $HOME/.scripts/crypto/mode)" -rpcEndpoint "$ENDPOINT" -stage admin -action "analyzeSandwichAndOpenLink,$tx"

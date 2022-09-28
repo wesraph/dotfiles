@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
-. ./config
+. $HOME/.scripts/crypto/config
 
 cd ~/.local/bin/bscanalyzer/ && ./bscanalyzer -rpcEndpoint "$ENDPOINT" -action "openOnPoocoin,$(wl-paste)"
