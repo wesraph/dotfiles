@@ -32,3 +32,5 @@
 	clean = git-lfs clean -- %f
 [credential]
 	helper = store
+[pull]
+	rebase = true
