@@ -1,7 +1,7 @@
 {
     "layer": "top", // Waybar at top layer
     "height": 40, // Waybar height
-    "modules-left": ["sway/workspaces", "sway/mode", "custom/mic"],
+    "modules-left": ["sway/workspaces", "sway/mode", "custom/mic", "custom/soulseek"],
     "modules-center": [],
     "modules-right": ["pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
