@@ -10,7 +10,7 @@ bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
 # kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym $mod+Shift+p exec swaylock -s fit -i ~/Wallpapers/lockscreen.png
+bindsym $mod+Shift+p exec swaylock -s stretch -i ~/Wallpapers/lockscreen.png
 
 # start rofi
 bindsym $mod+d exec sh -c 'killall wofi; wofi  --show drun,run'
