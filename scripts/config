@@ -1,4 +1,4 @@
 #!/bin/sh
 export MUSIC_LIBRARY_PATH=/home/data/Musique
-export SOULSEEK_DOWNLOAD_PATH=/home/raph/Documents/SoulseekDownloads/toListen/
+export SOULSEEK_DOWNLOAD_PATH=/mnt/toListen
 export MPD_HOST=/tmp/mpd.unix
