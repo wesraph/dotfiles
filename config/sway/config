@@ -10,8 +10,6 @@ bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
 # kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym $mod+Shift+p exec swaylock -s stretch -i ~/Wallpapers/lockscreen.png
-
 # start rofi
 bindsym $mod+d exec sh -c 'killall wofi; wofi  --show drun,run'
 bindsym $mod+p exec rofi -show run -run-command "sh -c 'export GDK_SCALE=2; export GDK_DPI_SCALE=0.5; export QT_AUTO_SCREEN_SCALE_FACTOR=2; {cmd}'"
@@ -244,8 +242,13 @@ exec_always killall nm-applet; nm-applet --indicator
 exec_always killall mako; mako -c ~/.config/mako/config
 exec sleep 5 && mako -c ~/.config/mako/config
 
-exec_always swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
-exec swayidle -w  before-sleep 'swaylock -s fit -i ~/Wallpapers/lockscreen.png'
+bindsym $mod+Shift+p exec swaylock -s stretch -i ~/Wallpapers/lockscreen.png
+
+exec_always swayidle -w  before-sleep 'swaylock -s stretch -i ~/Wallpapers/lockscreen.png'
+exec swayidle -w  before-sleep 'swaylock -s stretch -i ~/Wallpapers/lockscreen.png'
+
+exec_always /usr/bin/easyeffects --gapplication-service
+exec /usr/bin/easyeffects --gapplication-service
 
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
 
