@@ -180,6 +180,7 @@ mode "crypto" {
     bindsym $mod+e exec ~/.scripts/crypto/openInExplorer.sh
     bindsym $mod+a exec ~/.scripts/crypto/analyze.sh
 	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
+	bindsym $mod+t exec ~/.scripts/crypto/openOnTenderly.sh
 	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
 	bindsym $mod+c exec ~/.scripts/crypto/doCalcul.sh
 	bindsym Escape mode "default"
