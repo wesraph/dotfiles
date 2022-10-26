@@ -22,7 +22,7 @@ touch "$LOCK"
 notify-send "Bluetooth" "Trying to connect to $choice"
 
 bluetoothctl connect "$mac" || {
-    notify-send "Bluetooth" "Failed to disconnect"
+    notify-send "Bluetooth" "Failed to connect"
     rm "$LOCK"
     exit
 }
