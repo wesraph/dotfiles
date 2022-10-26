@@ -1,4 +1,13 @@
 # Snippets for Go
+
+# error snippet
+snippet errn "Error return" !b
+if err != nil {
+	return err
+}
+${0}
+endsnippet
+
 snippet pp "pretty.Println(value)"
 pretty.Println($1)
 endsnippet
@@ -195,15 +204,6 @@ endsnippet
 
 snippet ewf "errors.Wrapf"
 errors.Wrapf(${1:err}, "${2:message %v}", ${3:args...})
-endsnippet
-
-
-# error snippet
-snippet errn "Error return" !b
-if err != nil {
-	return err
-}
-${0}
 endsnippet
 
 snippet errnn "Error return nil and err"
