@@ -82,6 +82,7 @@ Plug 'scrooloose/nerdcommenter'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jiangmiao/auto-pairs'
+Plug 'nvim-treesitter/nvim-treesitter-context'
 
 
 " Explore easily with ,ff and ,fg
