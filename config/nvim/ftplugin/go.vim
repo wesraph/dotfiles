@@ -7,3 +7,6 @@ let g:go_fmt_command = "goimports"
 let g:go_gopls_use_placeholders = "true"
 
 let b:ale_linters = ['go build', 'gofmt', 'golint', 'go vet']
+
+noremap gc :GoCallers<CR>
+noremap gr :GoReferrers<CR>
