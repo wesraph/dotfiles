@@ -1,3 +1,5 @@
+#zmodload zsh/zprof
+
 export ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="agnoster"
 plugins=(git zsh-autosuggestions)
@@ -35,6 +37,7 @@ alias ip="ip -c "
 
 export EDITOR=nvim
 export VISUAL=nvim
+export BROWSER=firefox
 
 [ -e ~/.shell_functions ] && . ~/.shell_functions
 [ -e ~/.shell_local  ] && . ~/.shell_local
@@ -78,3 +81,5 @@ scalehidpi() {
 }
 
 alias update_arch_mirrors="curl -s 'https://archlinux.org/mirrorlist/?country=FR&country=GB&protocol=https&use_mirror_status=on' | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - | sudo tee  /etc/pacman.d/mirrorlist"
+
+#zprof
