@@ -12,7 +12,7 @@ touch "$LOCK"
 
 notify-send "Bluetooth" "Trying to disconnect from $(bluetoothctl info  | grep Name | cut -d":" -f2)"
 
-bluetoothctl disconnect "$(bluetoothctl info | grep Device  | cut -d" " -f2)" || {
+bluetoothctl disconnect "$(bluetoothctl info | grep Device  | cut -d" " -f2 | head -n1)" || {
     notify-send "Bluetooth" "Failed to disconnect"
     rm "$LOCK"
     exit
