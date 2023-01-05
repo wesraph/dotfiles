@@ -10,3 +10,4 @@ let b:ale_linters = ['go build', 'gofmt', 'golint', 'go vet']
 
 noremap gc :GoCallers<CR>
 noremap gr :GoReferrers<CR>
+noremap gi :GoImplements<CR>
