@@ -83,7 +83,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'nvim-treesitter/nvim-treesitter-context'
-
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
@@ -265,7 +265,7 @@ let g:ale_fixers= {
 \}
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
-\ 'go': ['go build', 'gofmt', 'golint', 'gosimple', 'go vet', 'staticcheck'],
+\ 'go': ['gobuild', 'staticcheck', 'gofmt', 'golint', 'gosimple', 'govet'],
 \ 'solidity': ['solhint', 'solc', 'solium'],
 \ 'rust': ['analyzer'],
 \}
