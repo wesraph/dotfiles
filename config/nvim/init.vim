@@ -362,3 +362,19 @@ function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+
+function! DisableAutism()
+  set mouse=a
+  map <Up> <Up>
+  map <Down> <Down>
+  map <Left> <Left>
+  map <Right> <Right>
+endfunction
+
+function! EnableAutism()
+  set mouse=
+  map <Left>  <C-W><
+  map <Right> <C-W>>
+  map <Up>    <C-W>+
+  map <Down>  <C-W>-
+endfunction
