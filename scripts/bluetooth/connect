@@ -4,7 +4,7 @@ set -e
 
 IFS=$'\n'
 LOCK=/tmp/bluetoothDisconnect.lock
-choice="$(echo  "$DEVICES" | cut -d" " -f2-99 | rofi -dmenu)"
+choice="$(echo  "$DEVICES" | cut -d" " -f2-99 | wofi -dmenu)"
 
 [ -z "$choice" ] && exit
 
