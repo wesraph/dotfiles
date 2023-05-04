@@ -12,7 +12,7 @@ _start_agent() {
 	fi
 
 	SSH_AGENT_PID=$pid
-	SSH_AUTH_SOCK=$(find /tmp \
+	SSH_AUTH_SOCK=$(find /tmp/ssh-* \
 		-user "$USER" \
 		-type s \
 		-wholename '/tmp/ssh-*/agent.*' 2>/dev/null
