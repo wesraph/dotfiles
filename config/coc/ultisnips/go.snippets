@@ -24,6 +24,39 @@
 #
 # Online reference: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
 
+snippet newAction "Create a new action" b
+var ${1} = &cobra.Command{
+	Use:  "${1}",
+	Args: cobra.ExactArgs(1),
+	RunE: func(_ *cobra.Command, args []string) error {
+		${2}
+	},
+}
+endsnippet
+
+snippet gofunc "Parallelize" b
+type order struct {
+	${1}
+}
+chanOrder := make(chan *order)
+wg := sync.WaitGroup{}
+defer close(chanOrder)
+for i := 0; i < runtime.NumCPU(); i++ {
+	go func() {
+		for {
+			order, ok := <-chanOrder
+			if !ok {
+				return
+			}
+			${3}
+			wg.Done()
+		}
+	}()
+}
+${2}
+wg.Wait()
+endsnippet
+
 snippet dlp "dl.Println" b
 dl.Println("${1}")
 endsnippet
