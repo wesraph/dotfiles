@@ -5,7 +5,7 @@ font Deja Vu Sans Mono Nerd Font:monospace 14
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
+bindsym $mod+Return exec sh ~/.config/kitty/go_to_dir.sh
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -160,7 +160,7 @@ mode "file" {
 mode "password" {
         bindsym $mod+r exec sh  -c "pass -c Perso/ratiju && notify-send Password 'Password copied to clipboard'"
         bindsym $mod+c exec sh  ~/.scripts/password/copy_password
-        bindsym $mod+e exec alacritty -e sh  ~/.scripts/password/edit_password
+        bindsym $mod+e exec kitty sh  ~/.scripts/password/edit_password
         bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
 }
@@ -179,14 +179,16 @@ mode "screen" {
 }
 
 mode "crypto" {
+	bindsym $mod+c exec ~/.scripts/crypto/copyToGuest.sh
+	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
+	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
 	bindsym $mod+p exec ~/.scripts/crypto/openOnPoocoin.sh
+	bindsym $mod+t exec ~/.scripts/crypto/openOnTenderly.sh
+	bindsym $mod+v exec ~/.scripts/crypto/copyFromGuest.sh
+	bindsym $mod+w exec kitty sh ~/.scripts/crypto/startWallet.sh
+    bindsym $mod+a exec ~/.scripts/crypto/analyze.sh
     bindsym $mod+e exec ~/.scripts/crypto/openInExplorer.sh
     bindsym $mod+o exec ~/.scripts/crypto/openInOtterscan.sh
-    bindsym $mod+a exec ~/.scripts/crypto/analyze.sh
-	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
-	bindsym $mod+t exec ~/.scripts/crypto/openOnTenderly.sh
-	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
-	bindsym $mod+c exec ~/.scripts/crypto/doCalcul.sh
 	bindsym Escape mode "default"
 }
 
@@ -234,8 +236,8 @@ bindsym XF86AudioMicMute exec ~/.scripts/microphone/toggle_microphone
 
 bindsym Control+Space exec makoctl dismiss
 
-#titlebar_border_thickness 0
-#titlebar_padding 0
+titlebar_border_thickness 1
+titlebar_padding 1 1
 
 for_window [class="^.*"] border pixel 2
 client.focused #404552 #784e4e #cccccc #ff5757 #ff5757
@@ -271,7 +273,7 @@ output "DP-1" {
 }
 
 output "DP-2" {
-	scale 0.66666666
+	scale 1
 }
 
 output "DP-3" {
@@ -316,4 +318,4 @@ bar {
 	swaybar_command waybar
 }
 
-corner_radius 10
+#corner_radius 10
