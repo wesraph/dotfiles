@@ -66,6 +66,7 @@ Plug 'mattdf/vim-yul'
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 Plug 'joshdick/onedark.vim'
 Plug 'sheerun/vim-polyglot' " Highlight for all languages
+Plug 'sainnhe/gruvbox-material'
 
 " Git
 Plug 'tpope/vim-fugitive' " Git shit
@@ -107,7 +108,8 @@ syntax on
 set background=dark
 let gruvbox_contrast_dark="soft"
 let gruvbox_contrast_light="medium"
-colorscheme gruvbox
+let g:gruvbox_material_background = "soft"
+colorscheme gruvbox-material
 
 function SetLightTheme()
   set background=light
@@ -301,7 +303,7 @@ let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_server_use_mono = 1
 
 " Telescope
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files({ find_command = { 'rg', '--files', '-u' }})<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 
 " Treesitter enable syntax highlight
