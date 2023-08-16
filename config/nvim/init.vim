@@ -74,6 +74,8 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-gitgutter'
 
 " Misc
+Plug 'powerman/vim-plugin-AnsiEsc'
+Plug 'ggandor/leap.nvim'
 Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'csexton/trailertrash.vim'
 Plug 'scrooloose/nerdtree'
@@ -256,19 +258,27 @@ nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
 nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 
 " Ale
+function! FormatSolidity(buffer) abort
+    return {
+    \   'command': 'forge fmt --raw -'
+    \}
+endfunction
+
+execute ale#fix#registry#Add('forgefmt', 'FormatSolidity', ['solidity'], 'forge fmt for solidity')
+
 let g:ale_sign_error = '✗'
 let g:ale_sign_warning = '⚠'
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_fixers= {
-\ 'solidity': ['prettier'],
+\ 'solidity': ['forgefmt'],
 \ 'typescript': ['eslint'],
 \ 'rust': ['rustfmt', 'trim_whitespace', 'remove_trailing_lines']
 \}
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
 \ 'go': ['gobuild', 'staticcheck', 'gofmt', 'golint', 'gosimple', 'govet'],
-\ 'solidity': ['solhint', 'solc', 'solium'],
+\ 'solidity': [],
 \ 'rust': ['analyzer'],
 \}
 
@@ -309,7 +319,7 @@ nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 " Treesitter enable syntax highlight
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-ensure_installed = {"c", "lua", "go", "javascript"},
+ensure_installed = {"c", "lua", "go", "javascript", "solidity"},
   highlight = {
     enable = true,
   },
@@ -359,6 +369,8 @@ inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 " <C-g>u breaks current undo, please make your own choice.
 inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
                               \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+lua require('leap').add_default_mappings()
 
 function! CheckBackspace() abort
   let col = col('.') - 1
