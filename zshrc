@@ -9,13 +9,13 @@ source $ZSH/oh-my-zsh.sh
 export PATH=/opt/local/bin:/opt/local/sbin:$PATH
 export PATH=$PATH:/usr/local/go/bin
 
-[ -d /usr/bin/go ] && {
+if [ -d /usr/bin/go ]; then
   export GOROOT=/usr/bin/go
-} || [ -d /usr/local/go  ] && {
+elif [ -d /usr/local/go  ]; then
   export GOROOT=/usr/local/go
-} || [ -d /usr/lib/go  ] && {
+elif  [ -d /usr/lib/go  ]; then
   export GOROOT=/usr/lib/go
-}
+fi
 
 export GOPATH=$HOME/go
 export VIMRC=$HOME/.config/nvim/init.vim
