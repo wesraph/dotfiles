@@ -3,7 +3,7 @@
     "height": 40, // Waybar height
     "modules-left": ["sway/workspaces", "sway/mode", "custom/mic", "custom/soulseek"],
     "modules-center": [],
-    "modules-right": ["pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
+    "modules-right": ["image#bnb" , "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -98,6 +98,39 @@
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/microphone/get_mic_state"
+    },
+    "custom/eth": {
+        "format": " {} ",
+        "max-length": 40,
+        "interval": 5, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh ETHUSDT"
+    },
+    "image#bnb":{
+        "path": "/home/raph/.config/waybar/imgs/bnb.svg",
+        "size": 28,
+        "interval": 1
+    },
+    "image#btc":{
+        "path": "/home/raph/.config/waybar/imgs/btc.svg",
+        "size": 28,
+        "interval": 1
+    },
+    "image#eth":{
+        "path": "/home/raph/.config/waybar/imgs/eth.svg",
+        "size": 28,
+        "interval": 1
+    },
+    "custom/btc": {
+        "format": " {} ",
+        "max-length": 40,
+        "interval": 5, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BTCUSDT"
+    },
+    "custom/bnb": {
+        "format": " {} ",
+        "max-length": 40,
+        "interval": 5, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BNBUSDT"
     },
     "custom/agent": {
         "format": "🔒 {} mn",
