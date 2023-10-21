@@ -12,4 +12,4 @@ else
 	ENDPOINT=$POLYGON_ENDPOINT
 fi
 
-cd "$HOME/.local/bin/bscanalyzer" && ./bscanalyzer -chain "$(cat $HOME/.scripts/crypto/mode)" -rpcEndpoint "$ENDPOINT" -stage admin -action "analyzeSandwichAndOpenLink,$tx"
+cd "$HOME/.local/bin/bscanalyzer" && ./bscanalyzer --chain "$(cat $HOME/.scripts/crypto/mode)" --rpcEndpoint "$ENDPOINT" --stage admin actions cli analyzeSandwichAndOpenLink "$tx"

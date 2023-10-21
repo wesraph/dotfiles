@@ -2,4 +2,4 @@
 set -e
 . $HOME/.scripts/crypto/config
 
-cd ~/.local/bin/bscanalyzer/ && ./bscanalyzer -rpcEndpoint "$ENDPOINT" -action "openOnPoocoin,$(wl-paste)"
+cd ~/.local/bin/bscanalyzer/ && ./bscanalyzer --rpcEndpoint "$ENDPOINT" actions cli  openOnPooCoin "$(wl-paste)"

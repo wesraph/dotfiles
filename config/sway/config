@@ -5,7 +5,7 @@ font Deja Vu Sans Mono Nerd Font:monospace 14
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec sh ~/.config/kitty/go_to_dir.sh
+bindsym $mod+Return exec sh ~/.config/alacritty/go_to_dir.sh
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -160,7 +160,7 @@ mode "file" {
 mode "password" {
         bindsym $mod+r exec sh  -c "pass -c Perso/ratiju && notify-send Password 'Password copied to clipboard'"
         bindsym $mod+c exec sh  ~/.scripts/password/copy_password
-        bindsym $mod+e exec kitty sh  ~/.scripts/password/edit_password
+        bindsym $mod+e exec alacritty -e sh  ~/.scripts/password/edit_password
         bindsym $mod+h exec sh  ~/.scripts/show_helper password
         bindsym Escape mode "default"
 }
@@ -183,9 +183,10 @@ mode "crypto" {
 	bindsym $mod+h exec ~/.scripts/crypto/convertHexToDec.sh
 	bindsym $mod+m exec ~/.scripts/crypto/changeMode.sh
 	bindsym $mod+p exec ~/.scripts/crypto/openOnPoocoin.sh
-	bindsym $mod+t exec ~/.scripts/crypto/openOnTenderly.sh
+	bindsym $mod+t exec ~/.scripts/crypto/openOnPhalcon.sh
+	bindsym $mod+l exec ~/.scripts/crypto/findLinkedTransaction.sh
 	bindsym $mod+v exec ~/.scripts/crypto/copyFromGuest.sh
-	bindsym $mod+w exec kitty sh ~/.scripts/crypto/startWallet.sh
+	bindsym $mod+w exec alacritty -e sh ~/.scripts/crypto/startWallet.sh
     bindsym $mod+a exec ~/.scripts/crypto/analyze.sh
     bindsym $mod+e exec ~/.scripts/crypto/openInExplorer.sh
     bindsym $mod+o exec ~/.scripts/crypto/openInOtterscan.sh
@@ -257,10 +258,15 @@ bindsym $mod+Shift+p exec swaylock -s stretch -i ~/Wallpapers/lockscreen.png
 exec_always swayidle -w  before-sleep 'swaylock -s stretch -i ~/Wallpapers/lockscreen.png'
 exec swayidle -w  before-sleep 'swaylock -s stretch -i ~/Wallpapers/lockscreen.png'
 
-exec_always /usr/bin/easyeffects --gapplication-service
-exec /usr/bin/easyeffects --gapplication-service
-
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+
+# Startup sequence
+workspace 10
+workspace_layout tabbed
+exec telegram-desktop
+exec "/usr/bin/discord --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
+exec "/usr/bin/slack --ozone-platform=wayland --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
+workspace 1
 
 output "eDP-1" {
 	scale 1
@@ -268,36 +274,9 @@ output "eDP-1" {
 	#max_render_time 8
 }
 
-output "DP-1" {
-	scale 0.66666666
-}
-
-output "DP-2" {
-	scale 1
-}
-
-output "DP-3" {
-	scale 0.66666666
-}
-
-output "DP-4" {
-	scale 0.66666666
-}
-
-output "DP-5" {
-	scale 0.66666666
-}
-
-output "DP-6" {
-	scale 0.66666666
-}
-
-output "DP-7" {
-	scale 0.66666666
-}
-
-output "DP-*" {
-	scale 0.66666666
+output DP-6 {
+	scale 0.8
+	mode 2560x1440@165Hz
 }
 
 output "HDMI-*"  {

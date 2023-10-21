@@ -27,5 +27,4 @@ bluetoothctl connect "$mac" || {
     exit
 }
 
-notify-send "Bluetooth" "Bluetooth connected"
 rm "$LOCK"
