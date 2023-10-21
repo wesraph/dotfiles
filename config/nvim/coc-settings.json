@@ -10,7 +10,10 @@
   "coc.source.file.priority": 999,
   "coc.source.around.priority": 1000,
   "coc.source.ultisnips.priority": 998,
-  "go.enable": false,
+  "go.enable": true,
+  "go.goplsOptions": {
+    "staticcheck": true
+  },
   "languageserver": {
     "ccls": {
       "command": "ccls",
@@ -25,7 +28,6 @@
     "golang": {
       "command": "gopls",
       "rootPatterns": ["go.mod"],
-      "completeUnimported": true,
       "filetypes": ["go"],
       "diagnostic.enable": false,
       "initializationOptions": {
