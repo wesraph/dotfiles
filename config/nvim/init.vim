@@ -62,6 +62,9 @@ Plug 'vim-perl/vim-perl', {'for': 'perl', 'do': 'make clean carp dancer highligh
 " Yul
 Plug 'mattdf/vim-yul'
 
+" Rust
+Plug 'rust-lang/rust.vim'
+
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
 Plug 'joshdick/onedark.vim'
@@ -96,15 +99,18 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
-Plug 'w0rp/ale'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'SirVer/ultisnips'
-Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+Plug 'hrsh7th/nvim-cmp', { 'branch': 'main' }
+Plug 'rafamadriz/friendly-snippets'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'mfussenegger/nvim-jdtls'
+Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
 call plug#end()
 
 " No mouse
@@ -266,31 +272,6 @@ let $NVIM_TUI_ENABLE_CURSOR_SHAPE = 0
 nnoremap <leader>scfr :setlocal spell spelllang=fr<CR>
 nnoremap <leader>scus :setlocal spell spelllang=en<CR>
 
-" Ale
-function! FormatSolidity(buffer) abort
-    return {
-    \   'command': 'forge fmt --raw -'
-    \}
-endfunction
-
-execute ale#fix#registry#Add('forgefmt', 'FormatSolidity', ['solidity'], 'forge fmt for solidity')
-
-let g:ale_sign_error = '✗'
-let g:ale_sign_warning = '⚠'
-let g:ale_lint_on_text_changed = 'never'
-let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-let g:ale_fixers= {
-\ 'solidity': ['forgefmt'],
-\ 'typescript': ['eslint'],
-\ 'rust': ['rustfmt', 'trim_whitespace', 'remove_trailing_lines']
-\}
-let g:ale_linters = {
-\ 'cs': ['OmniSharp'],
-\ 'go': ['gobuild', 'staticcheck', 'gofmt', 'golint', 'gosimple', 'govet'],
-\ 'solidity': [],
-\ 'rust': ['analyzer'],
-\}
-
 "Configure vim for latex
 let g:vimtex_view_general_viewer = 'zathura'
 
@@ -341,13 +322,6 @@ let g:go_fmt_fail_silently = 1
 " Do not print "SUCCESS" when GoTo definition
 let g:go_echo_command_info = 0
 
-" Solidity
-autocmd BufWritePre *.sol ALEFix
-
-" JS import
-noremap <Leader>if <Plug>(JsFileImport)
-autocmd BufWritePre *.ts ALEFix
-autocmd BufWritePre *.js ALEFix
 
 " C#
 autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
@@ -391,18 +365,47 @@ function! EnableAutism()
   map <Down>  <C-W>-
 endfunction
 
+let g:coq_settings = { 'auto_start': 'shut-up' }
+
+" Vsnip configuration
+" Expand
+"imap <expr> <C-j>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-j>'
+"smap <expr> <C-j>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-j>'
+
+" Expand or jump
+imap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
+smap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
+
+" Jump forward or backward
+imap <expr> <C-j>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+smap <expr> <C-j>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+imap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+smap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+
+
 lua <<EOF
+  -- Set up mason
+  require("mason").setup()
+  require("mason-lspconfig").setup()
+
+  local has_words_before = function()
+    unpack = unpack or table.unpack
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+  end
+
+  local feedkey = function(key, mode)
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
+  end
+
+
   -- Set up nvim-cmp.
   local cmp = require'cmp'
 
   cmp.setup({
     snippet = {
-      -- REQUIRED - you must specify a snippet engine
       expand = function(args)
-        --vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-        vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+      vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
       end,
     },
     window = {
@@ -415,13 +418,30 @@ lua <<EOF
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.abort(),
       ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif vim.fn["vsnip#available"](1) == 1 then
+        feedkey("<Plug>(vsnip-expand-or-jump)", "")
+      elseif has_words_before() then
+        cmp.complete()
+      else
+        fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
+      end
+    end, { "i", "s" }),
+
+    ["<S-Tab>"] = cmp.mapping(function()
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif vim.fn["vsnip#jumpable"](-1) == 1 then
+        feedkey("<Plug>(vsnip-jump-prev)", "")
+      end
+    end, { "i", "s" }),
     }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      --{ name = 'vsnip' }, -- For vsnip users.
-      -- { name = 'luasnip' }, -- For luasnip users.
-      { name = 'ultisnips' }, -- For ultisnips users.
-      -- { name = 'snippy' }, -- For snippy users.
+      { name = 'vsnip' }, -- For vsnip users.
     }, {
       { name = 'buffer' },
     })
@@ -454,13 +474,21 @@ lua <<EOF
     })
   })
 
+
   -- Set up lspconfig.
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
-  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
---  require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
- --   capabilities = capabilities
-  --}
-  require'lspconfig'.gopls.setup{
+  local lsp = require'lspconfig'
+  lsp.jdtls.setup{
+
+  }
+  require'lspconfig'.solidity.setup{
+  capabilities = capabilities,
+  }
+  require'lspconfig'.rust_analyzer.setup{
+  capabilities = capabilities,
+  }
+
+  lsp.gopls.setup{
   capabilities = capabilities,
   settings = {
     gopls = {

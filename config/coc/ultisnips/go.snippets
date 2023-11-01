@@ -23,6 +23,44 @@
 #		endsnippet
 #
 # Online reference: https://github.com/SirVer/ultisnips/blob/master/doc/UltiSnips.txt
+snippet newCli
+cli, err := client.GetNewClient()
+if err != nil {
+	return ${1}
+}
+defer cli.Close()
+endsnippet
+
+snippet newWcli
+wcli, err := w3.Dial(client.RPCAddr)
+if err != nil {
+	t.Fatal(err)
+}
+defer wcli.Close()
+endsnippet
+
+snippet newSim "Simulates a transaction" b
+var resp sim.Response
+msg, err := (&w3types.Message{}).SetTx(${1}, transaction.SignerForDecoding)
+if err != nil {
+	return err
+}
+err = wcli.Call(
+	sim.Simulate(
+		[]*w3types.Message{
+			msg,
+		},
+		nil,
+		nil,
+		nil,
+		nil,
+		false,
+	).Returns(&resp),
+)
+if err != nil {
+	return err
+}
+endsnippet
 
 snippet newAction "Create a new action" b
 var ${1} = &cobra.Command{
@@ -38,22 +76,51 @@ snippet gofunc "Parallelize" b
 type order struct {
 	${1}
 }
-chanOrder := make(chan *order)
 wg := sync.WaitGroup{}
+chanOrder := make(chan *order)
 defer close(chanOrder)
+
+chanResult := make(chan *PairWithVolume)
+defer close(chanResult)
+
+chanErr := make(chan error)
+
+wg.Add(len(hvps))
+var results []*${2}
+
 for i := 0; i < runtime.NumCPU(); i++ {
 	go func() {
 		for {
 			order, ok := <-chanOrder
-			if !ok {
-				return
-			}
-			${3}
+				if !ok {
+					return
+				}
+
 			wg.Done()
 		}
 	}()
 }
-${2}
+go func() {
+	defer close(chanErr)
+	for _, o := range ${3} {
+		chanOrder <- ${4}
+	}
+}()
+go func() {
+	for r := range chanResult {
+		if r == nil {
+			wg.Done()
+			continue
+		}
+		results = append(results, r)
+		wg.Done()
+	}
+}()
+for err := range chanErr {
+	if err != nil {
+		return nil, err
+	}
+}
 wg.Wait()
 endsnippet
 
