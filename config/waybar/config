@@ -2,7 +2,7 @@
     "layer": "top", // Waybar at top layer
     "height": 12, // Waybar height
     "font": 11,
-    "modules-left": ["hyprland/workspaces", "custom/mic", "custom/soulseek"],
+    "modules-left": ["hyprland/workspaces", "custom/mic", "custom/soulseek", "hyprland/submap"],
     "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth"],
     "modules-right": [  "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
@@ -126,6 +126,10 @@
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/fetchPriceBinance.sh BTCUSDT"
+    },
+    "hyprland/submap": {
+        "format": "{} ",
+        "max-length": 40,
     },
     "custom/bnb": {
         "format": "{} ",
