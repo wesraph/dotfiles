@@ -285,6 +285,7 @@ output DP-6 {
 }
 
 output "HDMI-*"  {
+    #scale 0.66666666
     scale 0.66666666
 	pos 2560 0
 }

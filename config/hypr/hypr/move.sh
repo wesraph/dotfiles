@@ -1,0 +1,1 @@
+/home/raph/.dotfiles/config/hypr/move.sh

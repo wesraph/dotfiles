@@ -1,3 +1,3 @@
 #!/bin/sh
 
-alacritty -e sh -c 'wf-recorder -t -a'"$(pactl list sources | grep Name | grep output | cut -d":" -f2 | sed 's/ //g' | head -n1)"' -g "$(slurp)" || sleep 1'
+alacritty -e sh -c 'wf-recorder -t -a'"$(pactl list sources | grep Name | grep output | cut -d":" -f2 | sed 's/ //g' | head -n1)"' -g "$(slurp) -c h264_vaapi -f ~/recording.mp4" || sleep 1'

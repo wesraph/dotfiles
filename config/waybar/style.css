@@ -1,8 +1,10 @@
+@define-color mauve #cba6f7;
+
 * {
     border: none;
     border-radius: 0;
     font-family: "Ubuntu Nerd Font";
-    font-size: 20px;
+    font-size: 11px;
     min-height: 0;
 }
 
@@ -15,23 +17,6 @@ window#waybar {
     font-weight: bold;
     font-family: "Ubuntu";
 }
-/*
-#workspaces {
-    padding: 0 5px;
-}
-*/
-
-#workspaces button {
-    padding: 0 5px;
-    background: transparent;
-    color: white;
-    border-top: 2px solid transparent;
-}
-
-#workspaces button.focused {
-    color: #c9545d;
-    border-top: 2px solid #c9545d;
-}
 
 #mode {
     background: #64727D;
@@ -39,7 +24,7 @@ window#waybar {
 }
 
 #clock, #battery, #cpu, #memory, #network, #pulseaudio, #custom-spotify, #tray, #mode , #custom-ovh, #custom-soulseek, #custom-fan, #custom-temperature, #custom-mic, #temperature, #custom-agent{
-    padding: 0 7px;
+    padding: 0 4px;
     margin: 0 2px;
     color: white;
 }
@@ -94,6 +79,10 @@ window#waybar {
     color: rgb(102, 220, 105);
 }
 
+#image {
+  padding: 0 4px
+}
+
 #custom-mic{
     color: rgb(255, 220, 105);
 }
@@ -103,4 +92,45 @@ window#waybar {
 
 #custom-soulseek {
     color: #02aeff
+}
+
+#workspaces button:hover {
+  background-color: #ffffff;
+}
+
+#workspaces button.active {
+  /*color: @surface0;
+    border-radius: 1rem;
+    padding: 0rem 10px;*/
+  background: radial-gradient(
+    circle,
+    rgba(203, 166, 247, 1)
+  );
+  background-size: 400% 400%;
+  animation: gradient_f 20s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.55, -0.68, 0.48, 1.682);
+}
+
+
+/* =============================== */
+/* Workspaces */
+#workspaces {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#workspaces * {
+  font-size: 11px;
+}
+
+#workspaces button {
+  background-color: @surface3;
+  color: #ffffff;
+  border-radius: 100%;
+  min-height: 12px;
+  min-width: 14px;
+  margin: 5px 8px;
+  padding: 0px;
+  /*transition: all 0.5s cubic-bezier(0.33, 1.0, 0.68, 1.0); easeInOutCubic */
+  transition: all 0.5s cubic-bezier(0.55, -0.68, 0.48, 1.68);
 }

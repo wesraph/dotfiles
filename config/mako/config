@@ -3,18 +3,18 @@ markup=1
 anchor=top-right
 background-color=#1E1E28CF
 text-color=#DADAE8
-width=450
+width=200
 height=200
 max-icon-size=96
 icon-location=right
-margin=20,20,20
-padding=15,15,15
+margin=10,10,10
+padding=3,3,3
 border-size=2
 border-color=#a4b9ef
 border-radius=15
 progress-color=over #332E41
 default-timeout=10000
-format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%b</span>
+format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="8000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="8000">%b</span>
 
 [grouped]
 format=<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%s</span>\n<span font="Deja Vu Sans Mono Nerd Font:monospace" size="15000">%b</span>

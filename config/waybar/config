@@ -1,9 +1,10 @@
 {
     "layer": "top", // Waybar at top layer
-    "height": 40, // Waybar height
-    "modules-left": ["sway/workspaces", "sway/mode", "custom/mic", "custom/soulseek"],
-    "modules-center": [],
-    "modules-right": ["image#bnb" , "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
+    "height": 12, // Waybar height
+    "font": 11,
+    "modules-left": ["hyprland/workspaces", "custom/mic", "custom/soulseek"],
+    "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth"],
+    "modules-right": [  "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -27,7 +28,7 @@
         "format": "<span style=\"italic\">{}</span>"
     },
     "tray": {
-        // "icon-size": 21,
+        "icon-size": 12,
         "spacing": 10
     },
     "clock": {
@@ -100,42 +101,55 @@
         "exec": "~/.scripts/microphone/get_mic_state"
     },
     "custom/eth": {
-        "format": " {} ",
+        "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/fetchPriceBinance.sh ETHUSDT"
     },
     "image#bnb":{
         "path": "/home/raph/.config/waybar/imgs/bnb.svg",
-        "size": 28,
+        "size": 14,
         "interval": 1
     },
     "image#btc":{
         "path": "/home/raph/.config/waybar/imgs/btc.svg",
-        "size": 28,
+        "size": 14,
         "interval": 1
     },
     "image#eth":{
         "path": "/home/raph/.config/waybar/imgs/eth.svg",
-        "size": 28,
+        "size": 14,
         "interval": 1
     },
     "custom/btc": {
-        "format": " {} ",
+        "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/fetchPriceBinance.sh BTCUSDT"
     },
     "custom/bnb": {
-        "format": " {} ",
+        "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/fetchPriceBinance.sh BNBUSDT"
     },
     "custom/agent": {
         "format": "🔒 {} mn",
-        "max-length": 40,
+        "max-length": 100,
         "interval": 60, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/sway/remainingAgentTime.sh"
     },
+    "hyprland/workspaces": {
+        "disable-scroll": false,
+        "on-scroll-up": "hyprctl dispatch workspace -1",
+        "on-scroll-down": "hyprctl dispatch workspace +1",
+        "format": "{name}",
+        "on-click": "activate",
+        "format-icons": {
+            "urgent": "󰗖",
+            "active": "󰝥",
+            "default": "󰝦"
+        },
+        "sort-by-number": true
+    }
 }
