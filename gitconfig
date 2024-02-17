@@ -16,6 +16,7 @@
     current-branch = rev-parse --abbrev-ref HEAD
     pushbr = !git push --set-upstream origin `git current-branch`
     st = status
+    bc = !"git fetch -p && for branch in $(git branch -vv | grep ': gone]' | awk '{print $1}'); do git branch -D $branch; done"
     ci = commit
     br = branch
     co = checkout
