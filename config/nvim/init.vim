@@ -25,6 +25,7 @@ set smartcase     " ignore case if search pattern is all lowercase,
 set hlsearch      " highlight search terms
 set incsearch     " show search matches as you type
 set linebreak
+set scl=yes " Stop all the text moving everytime there is an error
 
 if (has("nvim"))
   let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -41,7 +42,6 @@ Plug 'epilande/vim-react-snippets', {'for': ['js']}
 Plug 'alvan/vim-closetag', {'for': ['html']}
 Plug 'moll/vim-node', {'for': ['js', 'html']}
 Plug 'prettier/vim-prettier', {'for': ['js', 'html', 'solidity'], 'do': 'yarn install', 'branch': 'release/0.x'}
-Plug 'ap/vim-css-color'
 Plug 'morhetz/gruvbox'
 
 " Solidity
@@ -61,6 +61,9 @@ Plug 'vim-perl/vim-perl', {'for': 'perl', 'do': 'make clean carp dancer highligh
 
 " Yul
 Plug 'mattdf/vim-yul'
+
+" Huff
+Plug 'marktoda/vim-huff'
 
 " Rust
 Plug 'rust-lang/rust.vim'
@@ -91,6 +94,7 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'nvim-treesitter/nvim-treesitter-context'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
+Plug 'HakonHarnes/img-clip.nvim'
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
@@ -484,9 +488,32 @@ lua <<EOF
   lspconfig.solidity.setup{
     capabilities = capabilities,
   }
-  lspconfig.rust_analyzer.setup{
+
+  lspconfig.rust_analyzer.setup({
+  on_attach=on_attach,
+  settings = {
+    ["rust-analyzer"] = {
+      imports = {
+        granularity = {
+          group = "module",
+          },
+          prefix = "self",
+          },
+          cargo = {
+            buildScripts = {
+              enable = true,
+            },
+            },
+            procMacro = {
+              enable = true
+            },
+    }
+    }
+  })
+
+  lspconfig.ccls.setup({
     capabilities = capabilities,
-  }
+  })
 
   lspconfig.solidity.setup({
     -- on_attach = on_attach, -- probably you will need this.
