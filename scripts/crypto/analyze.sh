@@ -3,7 +3,7 @@ set -e
 
 . $HOME/.scripts/crypto/config
 
-tx=$(wl-paste)
+tx="$(wl-paste | sed -E 's/hash=//g')"
 notify-send "Opening $tx"
 
 if [ "$(cat $HOME/.scripts/crypto/mode)" = "bsc" ]; then
