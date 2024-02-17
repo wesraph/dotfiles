@@ -25,6 +25,7 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.bin/:$PATH
 export PATH=$HOME/.node/bin:$PATH
+export PATH=/opt/cuda/bin:$PATH
 export NODE_PATH="$HOME/.node/lib/node_modules:$NODE_PATH"
 
 #No more display problem
@@ -51,6 +52,7 @@ export LESS_TERMCAP_se=$'\e[0m'
 export LESS_TERMCAP_so=$'\e[01;33m'
 export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[1;4;31m'
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 
 #Fuzzy password-store
 fpass () {pass $@ "$(find $HOME/.password-store -iname '*.gpg' | sed -e 's/.*password-store\///g' | sed -e 's/\.gpg$//g'| fzf)"}
@@ -87,3 +89,5 @@ alias update_arch_mirrors="curl -s 'https://archlinux.org/mirrorlist/?country=FR
 export PATH="$PATH:/home/raph/.foundry/bin"
 
 export PATH="$PATH:/home/raph/.bifrost/bin"
+
+export PATH="$PATH:/home/raph/.huff/bin"
