@@ -2,8 +2,8 @@
     "layer": "top", // Waybar at top layer
     "height": 12, // Waybar height
     "font": 11,
-    "modules-left": ["hyprland/workspaces", "custom/mic", "custom/soulseek", "hyprland/submap"],
-    "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth"],
+    "modules-left": ["hyprland/workspaces", "image#mic", "custom/soulseek", "hyprland/submap"],
+    "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "image#tia", "custom/tia"],
     "modules-right": [  "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
@@ -94,17 +94,30 @@
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/music/is_watcher_running"
     },
-    "custom/mic": {
-        "format": "MIC OFF",
+    "custom/tia": {
+        "format": "{} ",
         "max-length": 40,
-        "interval": 1, // Remove this if your script is endless and write in loop
-        "exec": "~/.scripts/microphone/get_mic_state"
+        "interval": 5, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh TIAUSDT",
+        "on-click": "~/.scripts/crypto/openChart.sh TIAUSDT"
     },
     "custom/eth": {
         "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
-        "exec": "~/.scripts/crypto/fetchPriceBinance.sh ETHUSDT"
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh ETHUSDT",
+        "on-click": "~/.scripts/crypto/openChart.sh ETHUSDT"
+    },
+    "image#mic": {
+        "path": "/home/raph/.config/waybar/imgs/micoff.png",
+        "size": 16,
+        "interval": 1, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/microphone/get_mic_state"
+    },
+    "image#tia":{
+        "path": "/home/raph/.config/waybar/imgs/tia.png",
+        "size": 14,
+        "interval": 1
     },
     "image#bnb":{
         "path": "/home/raph/.config/waybar/imgs/bnb.svg",
@@ -125,7 +138,8 @@
         "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
-        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BTCUSDT"
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BTCUSDT",
+        "on-click": "~/.scripts/crypto/openChart.sh BTCUSDT"
     },
     "hyprland/submap": {
         "format": "{} ",
@@ -135,7 +149,8 @@
         "format": "{} ",
         "max-length": 40,
         "interval": 5, // Remove this if your script is endless and write in loop
-        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BNBUSDT"
+        "exec": "~/.scripts/crypto/fetchPriceBinance.sh BNBUSDT",
+        "on-click": "~/.scripts/crypto/openChart.sh BNBUSDT"
     },
     "custom/agent": {
         "format": "🔒 {} mn",
