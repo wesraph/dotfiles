@@ -67,6 +67,7 @@ Plug 'marktoda/vim-huff'
 
 " Rust
 Plug 'rust-lang/rust.vim'
+"Plug 'mrcjkb/rustaceanvim'
 
 " Themes
 Plug 'drewtempelmeyer/palenight.vim', { 'as': 'palenight' }
@@ -104,6 +105,7 @@ Plug 'nvim-telescope/telescope.nvim'
 
 " Autocomplete/linter
 Plug 'neovim/nvim-lspconfig'
+Plug 'simrat39/rust-tools.nvim'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
@@ -313,7 +315,7 @@ nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 " Treesitter enable syntax highlight
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-ensure_installed = {"c", "lua", "go", "javascript", "solidity"},
+ensure_installed = {"c", "lua", "go", "javascript", "solidity", "rust", "html"},
   highlight = {
     enable = true,
   },
@@ -445,6 +447,7 @@ lua <<EOF
     }),
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
+      { name = 'nvim_lsp_signature_help'},
       { name = 'vsnip' }, -- For vsnip users.
     }, {
       { name = 'buffer' },
@@ -478,9 +481,10 @@ lua <<EOF
     })
   })
 
-
   -- Set up lspconfig.
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+
   local lsp = require'lspconfig'
   lsp.jdtls.setup{
   }
@@ -489,27 +493,60 @@ lua <<EOF
     capabilities = capabilities,
   }
 
-  lspconfig.rust_analyzer.setup({
-  on_attach=on_attach,
-  settings = {
-    ["rust-analyzer"] = {
-      imports = {
-        granularity = {
-          group = "module",
-          },
-          prefix = "self",
-          },
-          cargo = {
-            buildScripts = {
-              enable = true,
-            },
-            },
-            procMacro = {
-              enable = true
-            },
-    }
-    }
-  })
+
+--  local rt = require("rust-tools")
+--  rt.setup({
+--  server = {
+--    on_attach = function(_, bufnr)
+--    -- Hover actions
+--    vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+--    -- Code action groups
+--    vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+--    end,
+--  },
+--  })
+
+ lspconfig.rust_analyzer.setup({
+ on_attach = function ()
+   local keymap_opts = { buffer = buffer }
+   -- Code navigation and shortcuts
+   vim.keymap.set("n", "<c-]>", vim.lsp.buf.definition, keymap_opts)
+   vim.keymap.set("n", "K", vim.lsp.buf.hover, keymap_opts)
+   vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
+   vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
+   vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
+   vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
+   vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)
+   vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, keymap_opts)
+   vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
+ end,
+ settings = {
+   ["rust-analyzer"] = {
+     capabilities = capabilities,
+     completion  = {
+       callable = {
+         snippets  = {
+           fill_arguments = true,
+           },
+         },
+       },
+     imports = {
+       granularity = {
+         group = "module",
+       },
+       prefix = "self",
+     },
+     cargo = {
+       buildScripts = {
+         enable = true,
+       },
+     },
+     procMacro = {
+       enable = true
+     },
+   }
+   }
+ })
 
   lspconfig.ccls.setup({
     capabilities = capabilities,
