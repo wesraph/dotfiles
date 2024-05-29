@@ -309,7 +309,7 @@ let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_server_use_mono = 1
 
 " Telescope
-nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files({ find_command = { 'rg', '--files', '-u' }})<cr>
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 
 " Treesitter enable syntax highlight
@@ -391,6 +391,7 @@ smap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab
 
 lua <<EOF
   -- Set up mason
+  require("telescope").setup()
   require("mason").setup()
   require("mason-lspconfig").setup()
 
