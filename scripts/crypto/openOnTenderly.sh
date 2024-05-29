@@ -1,3 +1,9 @@
 #!/bin/sh
 
-firefox "https://explorer.phalcon.xyz/tx/bsc/$(wl-paste)"
+link="$(wl-paste | sed -E 's/hash=|txHash=//g')"
+
+if [ "$(cat "$HOME/.scripts/crypto/mode")" = "bsc" ]; then
+	firefox "https://explorer.phalcon.xyz/tx/bsc/$link"
+elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "ethereum" ]; then
+	firefox "https://explorer.phalcon.xyz/tx/eth/$link"
+fi

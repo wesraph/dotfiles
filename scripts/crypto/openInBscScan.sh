@@ -1,5 +1,5 @@
 #!/bin/sh
-link="$(wl-paste | sed -E 's/hash=//g')"
+link="$(wl-paste | sed 's/^.*0x/0x/g')"
 
 if [ "$(cat "$HOME/.scripts/crypto/mode")" = "bsc" ]; then
 	firefox "https://bscscan.com/search?f=0&q=$link"
