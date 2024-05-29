@@ -25,10 +25,10 @@ _start_agent
 agent() {
 	local key
 	local timeout=10800 # 3h
-	if [ -f ~/.ssh/id_ed25519 ]; then
-		key=~/.ssh/id_ed25519
-	    	ssh-add -t "$timeout" "$key"
-	fi
+	#if [ -f ~/.ssh/id_ed25519 ]; then
+		#key=~/.ssh/id_ed25519
+			#ssh-add -t "$timeout" "$key"
+	#fi
 	if [ -f ~/.ssh/id_rsa ]; then
 		key=~/.ssh/id_rsa
 		ssh-add -t "$timeout" "$key"
