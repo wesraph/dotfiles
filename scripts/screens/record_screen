@@ -1,3 +1,3 @@
 #!/bin/sh
 
-alacritty -e sh -c 'wf-recorder -a '"$(pactl list sources | grep Name | grep output | cut -d":" -f2 | sed 's/ //g' | head -n1)"' -c libvpx -p b=2M -f "/home/raph/recording.mkv"'
+alacritty -e sh -c 'wf-recorder -a '"$(pactl list sources | grep Name | grep output | cut -d":" -f2 | sed 's/ //g' | head -n1)"' -c h264_vaapi -f "/home/raph/recording.mp4"'
