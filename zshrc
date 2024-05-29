@@ -36,6 +36,16 @@ export LANG=en_US.UTF-8
 #Color in ip command
 alias ip="ip -c "
 
+alias ta="task"
+alias taa="task add"
+alias tas="task sync"
+alias tae="task edit"
+alias tad="task done"
+alias tal="task list"
+alias tab="task add project:Blanc"
+alias taf="task list | fzf"
+alias tadf='task done $(task list | fzf | awk "{print $1}")'
+
 export EDITOR=nvim
 export VISUAL=nvim
 export BROWSER=firefox
@@ -84,10 +94,8 @@ scalehidpi() {
 
 alias update_arch_mirrors="curl -s 'https://archlinux.org/mirrorlist/?country=FR&country=GB&protocol=https&use_mirror_status=on' | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - | sudo tee  /etc/pacman.d/mirrorlist"
 
-#zprof
-
 export PATH="$PATH:/home/raph/.foundry/bin"
-
 export PATH="$PATH:/home/raph/.bifrost/bin"
-
 export PATH="$PATH:/home/raph/.huff/bin"
+
+#zprof
