@@ -8,5 +8,5 @@ elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "cronos" ]; then
 elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "polygon" ]; then
 	firefox "https://polygonscan.com/search?f=0&q=$link"
 elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "ethereum" ]; then
-	firefox "https://etherscan.com/search?f=0&q=$link"
+	firefox "https://etherscan.io/search?f=0&q=$link"
 fi
