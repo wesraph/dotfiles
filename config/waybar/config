@@ -2,7 +2,7 @@
     "layer": "top", // Waybar at top layer
     "height": 12, // Waybar height
     "font": 11,
-    "modules-left": ["hyprland/workspaces", "image#mic", "custom/soulseek", "hyprland/submap"],
+    "modules-left": ["hyprland/workspaces",  "custom/soulseek", "hyprland/submap", "custom/ping"],
     "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "image#tia", "custom/tia"],
     "modules-right": [  "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
     "sway/workspaces": {
@@ -63,12 +63,12 @@
     "pulseaudio": {
         //"scroll-step": 1,
         "format": "{volume}% {icon}",
-        "format-bluetooth": "{volume}% {icon}",
+        "format-bluetooth": "{volume}% ",
         "format-muted": "",
         "format-icons": {
-            "headphones": "",
-            "handsfree": "",
-            "headset": "",
+            "headphones": "",
+            "handsfree": "",
+            "headset": "",
             "phone": "",
             "portable": "",
             "car": "",
@@ -76,23 +76,24 @@
         },
         "on-click": "pavucontrol"
     },
-    "custom/fan": {
-        "format": "{} ",
-        "max-length": 40,
-        "interval": 1,
-        "exec": "cat /sys/devices/platform/applesmc.768/fan1_input"
-    },
-    "custom/temperature": {
-        "format": "{}°C",
+    "custom/ping": {
+        "format": "{}",
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
-        "exec": "~/.scripts/shortcuts.sh get_temp"
+        "exec": "ping  -w 1 1.1.1.1 | grep -oE 'time=.*ms'  | sed -s 's/time=//g' | tail -n1"
     },
     "custom/soulseek": {
         "format": "SLSK",
         "max-length": 40,
         "interval": 1, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/music/is_watcher_running"
+    },
+    "custom/massa": {
+        "format": "{} ",
+        "max-length": 40,
+        "interval": 5, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/crypto/fetchPriceBitget.sh MASUSDT",
+        "on-click": "~/.scripts/crypto/openChart.sh TIAUSDT"
     },
     "custom/tia": {
         "format": "{} ",
