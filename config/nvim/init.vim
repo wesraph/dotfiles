@@ -77,11 +77,12 @@ Plug 'sainnhe/gruvbox-material'
 
 " Git
 Plug 'tpope/vim-fugitive' " Git shit
+Plug 'tpope/vim-rhubarb'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-gitgutter'
 
 " Misc
-Plug 'dpayne/CodeGPT.nvim'
+Plug 'David-Kunz/gen.nvim'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'ggandor/leap.nvim'
 Plug 'martinda/Jenkinsfile-vim-syntax'
@@ -96,6 +97,8 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'nvim-treesitter/nvim-treesitter-context'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'HakonHarnes/img-clip.nvim'
+Plug 'nvim-tree/nvim-web-devicons'
+Plug 'lervag/vimtex'
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
@@ -117,6 +120,7 @@ Plug 'hrsh7th/vim-vsnip'
 Plug 'mfussenegger/nvim-jdtls'
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'pasky/claude.vim'
 call plug#end()
 
 " No mouse
@@ -186,6 +190,8 @@ set noeol
 
 " Close all tabs to the right
 noremap <leader>dtr .+1,$tabdo :tabc<CR>
+
+noremap ga :Telescope diagnostics theme=dropdown prompt_title=diagnostics previewer=true<CR>
 
 " jk or kj to quit insert mode
 imap jk <Esc>
@@ -388,7 +394,6 @@ smap <expr> <C-j>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab
 imap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 smap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 
-
 lua <<EOF
   -- Set up mason
   require("telescope").setup()
@@ -405,6 +410,31 @@ lua <<EOF
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
   end
 
+  -- Set up gen.nvim
+  require('gen').setup({
+        --model = "gemma2:9b", -- The default model to use.
+        model = "llama3.1", -- The default model to use.
+        -- model = "codestral:22b-v0.1-q4_0", -- The default model to use.
+        host = "100.73.57.3", -- The host running the Ollama service.
+        port = "11434", -- The port on which the Ollama service is listening.
+        quit_map = "q", -- set keymap for close the response window
+        retry_map = "<c-r>", -- set keymap to re-send the current prompt
+        -- Function to initialize Ollama
+        command = function(options)
+            local body = {model = options.model, stream = true}
+            return "curl --silent --no-buffer -X POST http://" .. options.host .. ":" .. options.port .. "/api/chat -d $body"
+        end,
+        -- The command for the Ollama service. You can use placeholders $prompt, $model and $body (shellescaped).
+        -- This can also be a command string.
+        -- The executed command must return a JSON object with { response, context }
+        -- (context property is optional).
+        -- list_models = '<omitted lua function>', -- Retrieves a list of model names
+        display_mode = "float", -- The display mode. Can be "float" or "split" or "horizontal-split".
+        show_prompt = false, -- Shows the prompt submitted to Ollama.
+        show_model = false, -- Displays which model you are using at the beginning of your chat session.
+        no_auto_close = false, -- Never closes the window automatically.
+        debug = false -- Prints errors and the command which is run.
+  })
 
   -- Set up nvim-cmp.
   local cmp = require'cmp'
@@ -495,59 +525,96 @@ lua <<EOF
   }
 
 
---  local rt = require("rust-tools")
---  rt.setup({
---  server = {
---    on_attach = function(_, bufnr)
---    -- Hover actions
---    vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
---    -- Code action groups
---    vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
---    end,
---  },
---  })
+  -- Function to check if a file is a Rust file
+local function is_rust_file(bufnr)
+  local file_type = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+  return file_type == 'rust'
+end
 
- lspconfig.rust_analyzer.setup({
- on_attach = function ()
-   local keymap_opts = { buffer = buffer }
-   -- Code navigation and shortcuts
-   vim.keymap.set("n", "<c-]>", vim.lsp.buf.definition, keymap_opts)
-   vim.keymap.set("n", "K", vim.lsp.buf.hover, keymap_opts)
-   vim.keymap.set("n", "gD", vim.lsp.buf.implementation, keymap_opts)
-   vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, keymap_opts)
-   vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, keymap_opts)
-   vim.keymap.set("n", "gr", vim.lsp.buf.references, keymap_opts)
-   vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, keymap_opts)
-   vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, keymap_opts)
-   vim.keymap.set("n", "gd", vim.lsp.buf.definition, keymap_opts)
- end,
- settings = {
-   ["rust-analyzer"] = {
-     capabilities = capabilities,
-     completion  = {
-       callable = {
-         snippets  = {
-           fill_arguments = true,
-           },
-         },
-       },
-     imports = {
-       granularity = {
-         group = "module",
-       },
-       prefix = "self",
-     },
-     cargo = {
-       buildScripts = {
-         enable = true,
-       },
-     },
-     procMacro = {
-       enable = true
-     },
-   }
-   }
- })
+-- Function to format Rust files
+local function format_rust_file()
+  if is_rust_file(0) then
+    vim.lsp.buf.format({ async = false })
+  else
+    print("Not a Rust file, skipping format")
+  end
+end
+
+local rt = require("rust-tools")
+
+rt.setup({
+  server = {
+    on_attach = function(_, bufnr)
+      -- Hover actions
+      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+      -- Code action groups
+      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+
+      -- Enable formatting on save
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = vim.api.nvim_create_augroup("RustFormat", { clear = true }),
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = bufnr })
+        end,
+      })
+
+      -- Other keybindings
+      local opts = { noremap = true, silent = true, buffer = bufnr }
+      vim.keymap.set("n", "<c-]>", vim.lsp.buf.definition, opts)
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+      vim.keymap.set("n", "gD", vim.lsp.buf.implementation, opts)
+      vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, opts)
+      vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, opts)
+      vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+      vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, opts)
+      vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, opts)
+      vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+
+      print("rust-tools attached")
+    end,
+    capabilities = capabilities,
+    settings = {
+      ["rust-analyzer"] = {
+        assist = {
+          importGranularity = "module",
+          importPrefix = "self",
+        },
+        cargo = {
+          loadOutDirsFromCheck = true
+        },
+        procMacro = {
+          enable = true
+        },
+        checkOnSave = {
+          command = "clippy"
+        },
+        completion = {
+          postfix = {
+            enable = true,
+          },
+          callable = {
+            snippets = {
+              fill_arguments = true,
+            },
+          },
+        },
+      }
+    },
+  },
+  tools = {
+    -- Autoformat on save
+    autoSetHints = true,
+    inlay_hints = {
+      show_parameter_hints = true,
+      parameter_hints_prefix = "",
+      other_hints_prefix = "",
+    },
+  },
+})
+
+-- Manual formatting command
+vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
 
   lspconfig.ccls.setup({
     capabilities = capabilities,
@@ -585,4 +652,17 @@ lua <<EOF
     },
   },
   }
+
+  local status, nvim_lsp = pcall(require, "lspconfig")
+  if (not status) then return end
+
+    local protocol = require('vim.lsp.protocol')
+
+
+    -- TypeScript
+    nvim_lsp.ts_ls.setup {
+      filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
+      cmd = { "typescript-language-server", "--stdio" }
+    }
+
 EOF
