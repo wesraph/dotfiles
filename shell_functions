@@ -36,6 +36,17 @@ agent() {
 	date -d "$(date) + $timeout seconds" "+%H:%M:%S"  > /tmp/agentTime
 }
 
+agented() {
+	local key
+	local timeout=10800 # 3h
+	if [ -f ~/.ssh/id_ed25519 ]; then
+		key=~/.ssh/id_ed25519
+		ssh-add -t "$timeout" "$key"
+	fi
+	date -d "$(date) + $timeout seconds" "+%H:%M:%S"  > /tmp/agentTime
+}
+
+
 killagent() {
 	pgrep -u "$USER" ssh-agent | xargs kill
 	_start_agent
