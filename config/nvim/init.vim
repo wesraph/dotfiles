@@ -394,6 +394,8 @@ smap <expr> <C-j>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab
 imap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 smap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 
+autocmd BufRead,BufNewFile *.tsx set filetype=typescriptreact
+
 lua <<EOF
   -- Set up mason
   require("telescope").setup()
@@ -412,18 +414,31 @@ lua <<EOF
 
   -- Set up gen.nvim
   require('gen').setup({
-        --model = "gemma2:9b", -- The default model to use.
-        model = "llama3.1", -- The default model to use.
-        -- model = "codestral:22b-v0.1-q4_0", -- The default model to use.
-        host = "100.73.57.3", -- The host running the Ollama service.
-        port = "11434", -- The port on which the Ollama service is listening.
+        model = "deepseek-chat", -- The default model to use.
+        host = "https://api.deepseek.com/chat/completions", -- The host running the Ollama service.
+
+        --model = "qwen2.5-coder:32b-instruct-q4_K_M", -- The default model to use.
+        --model = "hf.co/bartowski/Mistral-Small-24B-Instruct-2501-GGUF", -- The default model to use.
+
+        --host = "http://taildesk:11434/api/chat", -- The host running the Ollama service.
+
         quit_map = "q", -- set keymap for close the response window
         retry_map = "<c-r>", -- set keymap to re-send the current prompt
         -- Function to initialize Ollama
-        command = function(options)
-            local body = {model = options.model, stream = true}
-            return "curl --silent --no-buffer -X POST http://" .. options.host .. ":" .. options.port .. "/api/chat -d $body"
-        end,
+        command = function(opts)
+          -- Prepare the body with prompt dynamically included
+          local body = vim.fn.json_encode({
+              model = opts.model,
+              stream = true,
+              --options = {num_ctx = 20000},
+              options = {num_ctx = 32768 },
+              messages = {
+                  {role = "user", content = opts.prompt} -- Include the prompt here
+              }
+          })
+          -- Generate the curl command with the serialized body
+          return "curl --silent --no-buffer -X POST -H \"Content-Type: application/json\" -H \"Authorization: ".. os.getenv("DEEPSEEK_KEY") .. "\" " .. opts.host .. " -d " .. vim.fn.shellescape(body)
+      end ,
         -- The command for the Ollama service. You can use placeholders $prompt, $model and $body (shellescaped).
         -- This can also be a command string.
         -- The executed command must return a JSON object with { response, context }
@@ -432,6 +447,7 @@ lua <<EOF
         display_mode = "float", -- The display mode. Can be "float" or "split" or "horizontal-split".
         show_prompt = false, -- Shows the prompt submitted to Ollama.
         show_model = false, -- Displays which model you are using at the beginning of your chat session.
+        options = {num_ctx = 16392},
         no_auto_close = false, -- Never closes the window automatically.
         debug = false -- Prints errors and the command which is run.
   })
@@ -629,6 +645,8 @@ vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
     },
   })
 
+  lsp.solidity_ls.setup{}
+
   lsp.gopls.setup{
   capabilities = capabilities,
   settings = {
@@ -653,16 +671,21 @@ vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
   },
   }
 
-  local status, nvim_lsp = pcall(require, "lspconfig")
+  vim.filetype.add({
+  extension = {
+    tsx = "typescriptreact",
+  }})
+
+  -- TypeScript
+  lsp.ts_ls.setup {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    filetypes = {  "typescriptreact", "typescript", "typescript.tsx" },
+    cmd = { "typescript-language-server", "--stdio" },
+    root_dir = lsp.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
+  }
+
   if (not status) then return end
-
     local protocol = require('vim.lsp.protocol')
-
-
-    -- TypeScript
-    nvim_lsp.ts_ls.setup {
-      filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
-      cmd = { "typescript-language-server", "--stdio" }
-    }
 
 EOF
