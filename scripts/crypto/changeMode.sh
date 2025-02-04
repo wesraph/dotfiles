@@ -5,9 +5,9 @@ if [ "$mode" = "bsc" ]; then
 	notify-send "Crypto" "Switching mode to polygon"
 	echo -n "polygon" > "$HOME/.scripts/crypto/mode"
 elif [ "$mode" = "polygon" ]; then
-	notify-send "Crypto" "Switching mode to cronos"
-	echo -n "cronos" > "$HOME/.scripts/crypto/mode"
-elif [ "$mode" = "cronos" ]; then
+	notify-send "Crypto" "Switching mode to optimism"
+	echo -n "optimism" > "$HOME/.scripts/crypto/mode"
+elif [ "$mode" = "optimism" ]; then
 	notify-send "Crypto" "Switching mode to ethereum"
 	echo -n "ethereum" > "$HOME/.scripts/crypto/mode"
 else
