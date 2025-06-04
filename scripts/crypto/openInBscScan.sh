@@ -11,4 +11,8 @@ elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "ethereum" ]; then
 	firefox "https://etherscan.io/search?f=0&q=$link"
 elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "optimism" ]; then
 	firefox "https://optimistic.etherscan.io/search?f=0&q=$link"
+elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "arbitrum" ]; then
+	firefox "https://arbiscan.io/search?f=0&q=$link"
+elif [ "$(cat "$HOME/.scripts/crypto/mode")" = "base" ]; then
+	firefox "https://basescan.org/search?f=0&q=$link"
 fi

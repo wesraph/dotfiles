@@ -1,0 +1,9 @@
+TagLib: MPEG::Header::parse() -- data is too short for an MPEG frame header.
+TagLib: MPEG::Properties::read() -- Could not find an MPEG frame in the stream.
+TagLib: MPEG::Header::parse() -- data is too short for an MPEG frame header.
+TagLib: MPEG::Properties::read() -- Could not find an MPEG frame in the stream.
+TagLib: MPEG::Header::parse() -- data is too short for an MPEG frame header.
+TagLib: MPEG::Properties::read() -- Could not find an MPEG frame in the stream.
+TagLib: MP4: No audio tracks
+TagLib: MP4: No audio tracks
+TagLib: MP4: No audio tracks

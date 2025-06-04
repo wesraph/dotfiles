@@ -82,7 +82,6 @@ Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-gitgutter'
 
 " Misc
-Plug 'David-Kunz/gen.nvim'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'ggandor/leap.nvim'
 Plug 'martinda/Jenkinsfile-vim-syntax'
@@ -120,7 +119,11 @@ Plug 'hrsh7th/vim-vsnip'
 Plug 'mfussenegger/nvim-jdtls'
 Plug 'williamboman/mason.nvim'
 Plug 'williamboman/mason-lspconfig.nvim'
-Plug 'pasky/claude.vim'
+Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
+
+" Deps of avante
+Plug 'stevearc/dressing.nvim'
+Plug 'MeanderingProgrammer/render-markdown.nvim'
 call plug#end()
 
 " No mouse
@@ -397,10 +400,168 @@ smap <expr> <C-k> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab
 autocmd BufRead,BufNewFile *.tsx set filetype=typescriptreact
 
 lua <<EOF
+  vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+  vim.keymap.set("n", "gD", vim.lsp.buf.implementation, opts)
+  vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+  vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, opts)
+  vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, opts)
+  vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+
   -- Set up mason
   require("telescope").setup()
   require("mason").setup()
   require("mason-lspconfig").setup()
+  require('avante').setup (
+  {
+    ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
+    provider = "aihubmix", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+    mode = "legacy", -- The default mode for interaction. "agentic" uses tools to automatically generate code, "legacy" uses the old planning method to generate code.
+    -- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
+    -- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
+    -- Of course, you can reduce the request frequency by increasing `suggestion.debounce`.
+    -- auto_suggestions_provider = "claude",
+    cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
+    vendors = {
+      llamacpp = {
+        __inherited_from = 'openai',
+          --model = "JollyLlama/GLM-4-32B-0414-Q4_K_M:latest",
+          endpoint = "http://taildesk:11434/v1",
+          --disable_tools = true, -- Open-source models often do not support tools.
+      },
+      localllama = {
+          __inherited_from = 'ollama',
+          model = "gemma3:4b-it-qat",
+          --model = "JollyLlama/GLM-4-32B-0414-Q4_K_M:latest",
+          endpoint = "http://localhost:11434",
+          --disable_tools = true, -- Open-source models often do not support tools.
+      },
+    },
+    aihubmix = {
+      __inherited_from = 'openai',
+      model = "deepseek-ai/DeepSeek-V3-0324",
+      --model = "gemini-2.5-pro-preview-05-06-search",
+      --model = "claude-3-7-sonnet-20250219",
+      --model = "gemini-2.5-flash-preview-04-17",
+      max_completion_tokens = 12288,
+          --disable_tools = true, -- disable tools!
+      endpoint = "https://aihubmix.com/v1",
+      api_key_name = 'AIHUBMIX_API_KEY',
+    },
+    ollama = {
+      --model = "qwen2.5-coder:32b-instruct-q4_K_M",
+      --model = "gemma3:27b-it-qat",
+      --model = "qwen3:32b",
+      model = "deepseek-r1:8b",
+      --model = "hf.co/unsloth/Qwen3-30B-A3B-GGUF",
+      options = {
+        num_ctx = 32000,
+        temperature = 0.6,
+      },
+      endpoint = "http://taildesk:11434",
+    },
+    behaviour = {
+      auto_suggestions = false, -- Experimental stage
+      auto_set_highlight_group = true,
+      auto_set_keymaps = true,
+      auto_apply_diff_after_generation = false,
+      support_paste_from_clipboard = false,
+      minimize_diff = true, -- Whether to remove unchanged lines when applying a code block
+      enable_token_counting = true, -- Whether to enable token counting. Default to true.
+      enable_cursor_planning_mode = false, -- Whether to enable Cursor Planning Mode. Default to false.
+      enable_claude_text_editor_tool_mode = false, -- Whether to enable Claude Text Editor Tool Mode.
+    },
+    mappings = {
+      --- @class AvanteConflictMappings
+      diff = {
+        ours = "co",
+        theirs = "ct",
+        all_theirs = "ca",
+        both = "cb",
+        cursor = "cc",
+        next = "]x",
+        prev = "[x",
+      },
+      suggestion = {
+        accept = "<M-l>",
+        next = "<M-]>",
+        prev = "<M-[>",
+        dismiss = "<C-]>",
+      },
+      jump = {
+        next = "]]",
+        prev = "[[",
+      },
+      submit = {
+        normal = "<CR>",
+        insert = "<C-s>",
+      },
+      cancel = {
+        normal = { "<C-c>", "<Esc>", "q" },
+        insert = { "<C-c>" },
+      },
+      sidebar = {
+        apply_all = "A",
+        apply_cursor = "a",
+        retry_user_request = "r",
+        edit_user_request = "e",
+        switch_windows = "<Tab>",
+        reverse_switch_windows = "<S-Tab>",
+        remove_file = "d",
+        add_file = "@",
+        close = { "<Esc>", "q" },
+        close_from_input = nil, -- e.g., { normal = "<Esc>", insert = "<C-d>" }
+      },
+    },
+    hints = { enabled = true },
+    windows = {
+      ---@type "right" | "left" | "top" | "bottom"
+      position = "right", -- the position of the sidebar
+      wrap = true, -- similar to vim.o.wrap
+      width = 30, -- default % based on available width
+      sidebar_header = {
+        enabled = true, -- true, false to enable/disable the header
+        align = "center", -- left, center, right for title
+        rounded = true,
+      },
+      input = {
+        prefix = "> ",
+        height = 8, -- Height of the input window in vertical layout
+      },
+      edit = {
+        border = "rounded",
+        start_insert = true, -- Start insert mode when opening the edit window
+      },
+      ask = {
+        floating = false, -- Open the 'AvanteAsk' prompt in a floating window
+        start_insert = true, -- Start insert mode when opening the ask window
+        border = "rounded",
+        ---@type "ours" | "theirs"
+        focus_on_apply = "ours", -- which diff to focus after applying
+      },
+    },
+    highlights = {
+      ---@type AvanteConflictHighlights
+      diff = {
+        current = "DiffText",
+        incoming = "DiffAdd",
+      },
+    },
+    --- @class AvanteConflictUserConfig
+    diff = {
+      autojump = true,
+      ---@type string | fun(): any
+      list_opener = "copen",
+      --- Override the 'timeoutlen' setting while hovering over a diff (see :help timeoutlen).
+      --- Helps to avoid entering operator-pending mode with diff mappings starting with `c`.
+      --- Disable by setting to -1.
+      override_timeoutlen = 500,
+    },
+    suggestion = {
+      debounce = 600,
+      throttle = 600,
+    },
+  }
+  )
 
   local has_words_before = function()
     unpack = unpack or table.unpack
@@ -412,45 +573,16 @@ lua <<EOF
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
   end
 
-  -- Set up gen.nvim
-  require('gen').setup({
-        model = "deepseek-chat", -- The default model to use.
-        host = "https://api.deepseek.com/chat/completions", -- The host running the Ollama service.
+  vim.keymap.set('n', '<C-s>j', ':silent! lnext<CR>:silent! cnext<CR>zz', { noremap = true, silent = true })
+  vim.keymap.set('n', '<C-s>k', ':silent! lprev<CR>:silent! cprev<CR>zz', { noremap = true, silent = true })
 
-        --model = "qwen2.5-coder:32b-instruct-q4_K_M", -- The default model to use.
-        --model = "hf.co/bartowski/Mistral-Small-24B-Instruct-2501-GGUF", -- The default model to use.
-
-        --host = "http://taildesk:11434/api/chat", -- The host running the Ollama service.
-
-        quit_map = "q", -- set keymap for close the response window
-        retry_map = "<c-r>", -- set keymap to re-send the current prompt
-        -- Function to initialize Ollama
-        command = function(opts)
-          -- Prepare the body with prompt dynamically included
-          local body = vim.fn.json_encode({
-              model = opts.model,
-              stream = true,
-              --options = {num_ctx = 20000},
-              options = {num_ctx = 32768 },
-              messages = {
-                  {role = "user", content = opts.prompt} -- Include the prompt here
-              }
-          })
-          -- Generate the curl command with the serialized body
-          return "curl --silent --no-buffer -X POST -H \"Content-Type: application/json\" -H \"Authorization: ".. os.getenv("DEEPSEEK_KEY") .. "\" " .. opts.host .. " -d " .. vim.fn.shellescape(body)
-      end ,
-        -- The command for the Ollama service. You can use placeholders $prompt, $model and $body (shellescaped).
-        -- This can also be a command string.
-        -- The executed command must return a JSON object with { response, context }
-        -- (context property is optional).
-        -- list_models = '<omitted lua function>', -- Retrieves a list of model names
-        display_mode = "float", -- The display mode. Can be "float" or "split" or "horizontal-split".
-        show_prompt = false, -- Shows the prompt submitted to Ollama.
-        show_model = false, -- Displays which model you are using at the beginning of your chat session.
-        options = {num_ctx = 16392},
-        no_auto_close = false, -- Never closes the window automatically.
-        debug = false -- Prints errors and the command which is run.
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "qf",
+    callback = function()
+    vim.keymap.set("n", "<CR>", "<CR>:silent! redraw!<CR>", { buffer = true, silent = true })
+    end,
   })
+
 
   -- Set up nvim-cmp.
   local cmp = require'cmp'
@@ -536,9 +668,6 @@ lua <<EOF
   lsp.jdtls.setup{
   }
   local lspconfig = require'lspconfig'
-  lspconfig.solidity.setup{
-    capabilities = capabilities,
-  }
 
 
   -- Function to check if a file is a Rust file
@@ -577,16 +706,6 @@ rt.setup({
 
       -- Other keybindings
       local opts = { noremap = true, silent = true, buffer = bufnr }
-      vim.keymap.set("n", "<c-]>", vim.lsp.buf.definition, opts)
-      vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-      vim.keymap.set("n", "gD", vim.lsp.buf.implementation, opts)
-      vim.keymap.set("n", "<c-k>", vim.lsp.buf.signature_help, opts)
-      vim.keymap.set("n", "1gD", vim.lsp.buf.type_definition, opts)
-      vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-      vim.keymap.set("n", "g0", vim.lsp.buf.document_symbol, opts)
-      vim.keymap.set("n", "gW", vim.lsp.buf.workspace_symbol, opts)
-      vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-
       print("rust-tools attached")
     end,
     capabilities = capabilities,
@@ -635,17 +754,6 @@ vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
   lspconfig.ccls.setup({
     capabilities = capabilities,
   })
-
-  lspconfig.solidity.setup({
-    -- on_attach = on_attach, -- probably you will need this.
-    capabilities = capabilities,
-    settings = {
-      -- example of global remapping
-      solidity = { includePath = '', remapping = { ["@OpenZeppelin/"] = 'OpenZeppelin/openzeppelin-contracts@4.6.0/' } }
-    },
-  })
-
-  lsp.solidity_ls.setup{}
 
   lsp.gopls.setup{
   capabilities = capabilities,

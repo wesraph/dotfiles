@@ -4,7 +4,7 @@
     "font": 11,
     "modules-left": ["hyprland/workspaces",  "custom/soulseek", "hyprland/submap", "custom/ping"],
     "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "image#tia", "custom/tia", "image#rcc", "custom/rcc"],
-    "modules-right": [  "pulseaudio", "cpu", "memory", "custom/agent", "battery", "temperature", "tray", "clock"],
+    "modules-right": [  "pulseaudio", "cpu", "memory", "battery", "custom/headset", "temperature",  "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -53,7 +53,8 @@
         "format-icons": ["", "", "", "", ""]
     },
     "temperature": {
-        "format": "{temperatureC}°C"
+        "format": "{temperatureC}°C",
+        "hwmon-path": "/sys/class/hwmon/hwmon5/temp1_input"
     },
     "network": {
         "interface": "wlp170s0", // (Optional) To force the use of this interface
@@ -158,6 +159,11 @@
         "interval": 5, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/fetchPriceBinance.sh BNBUSDT",
         "on-click": "~/.scripts/crypto/openChart.sh BNBUSDT"
+    },
+    "custom/headset": {
+        "format": "{} ",
+        "interval": 5,
+        "exec": "~/.scripts/music/get_battery_level",
     },
     "custom/rcc": {
         "format": "{} ",
