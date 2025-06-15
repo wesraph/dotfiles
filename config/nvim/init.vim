@@ -195,6 +195,7 @@ set noeol
 noremap <leader>dtr .+1,$tabdo :tabc<CR>
 
 noremap ga :Telescope diagnostics theme=dropdown prompt_title=diagnostics previewer=true<CR>
+noremap ,sp :AvanteSwitchProvider
 
 " jk or kj to quit insert mode
 imap jk <Esc>
@@ -414,7 +415,7 @@ lua <<EOF
   require('avante').setup (
   {
     ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-    provider = "aihubmix", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+    provider = "gemini", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
     mode = "legacy", -- The default mode for interaction. "agentic" uses tools to automatically generate code, "legacy" uses the old planning method to generate code.
     -- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
     -- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
@@ -422,12 +423,12 @@ lua <<EOF
     -- auto_suggestions_provider = "claude",
     cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
     vendors = {
-      llamacpp = {
-        __inherited_from = 'openai',
-          --model = "JollyLlama/GLM-4-32B-0414-Q4_K_M:latest",
-          endpoint = "http://taildesk:11434/v1",
-          --disable_tools = true, -- Open-source models often do not support tools.
-      },
+    },
+    providers = {
+      gemini = {
+        -- Specify the Gemini 1.5 Pro model
+        model = "gemini-2.5-pro-preview-06-05",
+        },
       localllama = {
           __inherited_from = 'ollama',
           model = "gemma3:4b-it-qat",
@@ -435,29 +436,33 @@ lua <<EOF
           endpoint = "http://localhost:11434",
           --disable_tools = true, -- Open-source models often do not support tools.
       },
-    },
-    aihubmix = {
-      __inherited_from = 'openai',
-      model = "deepseek-ai/DeepSeek-V3-0324",
-      --model = "gemini-2.5-pro-preview-05-06-search",
-      --model = "claude-3-7-sonnet-20250219",
-      --model = "gemini-2.5-flash-preview-04-17",
-      max_completion_tokens = 12288,
-          --disable_tools = true, -- disable tools!
-      endpoint = "https://aihubmix.com/v1",
-      api_key_name = 'AIHUBMIX_API_KEY',
-    },
-    ollama = {
-      --model = "qwen2.5-coder:32b-instruct-q4_K_M",
-      --model = "gemma3:27b-it-qat",
-      --model = "qwen3:32b",
-      model = "deepseek-r1:8b",
-      --model = "hf.co/unsloth/Qwen3-30B-A3B-GGUF",
-      options = {
-        num_ctx = 32000,
-        temperature = 0.6,
+      aihubmix = {
+        __inherited_from = 'openai',
+        model = "DeepSeek-V3",
+        --model = "gemini-2.5-pro-preview-05-06-search",
+        --model = "claude-3-7-sonnet-20250219",
+        --model = "gemini-2.5-flash-preview-04-17",
+        max_completion_tokens = 12288,
+        --disable_tools = true, -- disable tools!
+        endpoint = "https://aihubmix.com/v1",
+        api_key_name = 'AIHUBMIX_API_KEY',
       },
-      endpoint = "http://taildesk:11434",
+      ollama = {
+        --model = "qwen2.5-coder:32b-instruct-q4_K_M",
+        --model = "gemma3:27b-it-qat",
+        --model = "qwen3:32b",
+        -- model = "deepseek-r1:8b",
+         model = "magistral:24b",
+        --model = "hf.co/unsloth/Qwen3-30B-A3B-GGUF",
+        extra_request_body = {
+          options = {
+            num_ctx = 32000,
+            temperature = 0.6,
+            },
+          },
+        endpoint = "http://taildesk:11434",
+      },
+
     },
     behaviour = {
       auto_suggestions = false, -- Experimental stage
