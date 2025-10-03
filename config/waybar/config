@@ -1,5 +1,7 @@
 {
     "layer": "top", // Waybar at top layer
+    "exclusive": true,
+    "ipc": true,
     "height": 12, // Waybar height
     "font": 11,
     "modules-left": ["hyprland/workspaces",  "custom/soulseek", "hyprland/submap", "custom/ping"],

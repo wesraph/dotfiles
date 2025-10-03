@@ -9,6 +9,7 @@ max-icon-size=30
 icon-location=right
 margin=10,10,10
 padding=5,5,5
+#on-notify=exec makoctl menu wofi -d -p 'Choose Action: '
 border-size=2
 border-color=#a4b9ef
 border-radius=15

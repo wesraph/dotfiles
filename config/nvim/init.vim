@@ -428,7 +428,12 @@ lua <<EOF
       gemini = {
         -- Specify the Gemini 1.5 Pro model
         model = "gemini-2.5-pro-preview-06-05",
-        },
+      },
+      llamacpp = {
+        __inherited_from = "openai",
+        endpoint = "http://taildesk:11434",
+        model = "mistralai_Mistral-Small-24B-Base-2501-Q4_K_M.gguf",
+      },
       localllama = {
           __inherited_from = 'ollama',
           model = "gemma3:4b-it-qat",
@@ -438,11 +443,11 @@ lua <<EOF
       },
       aihubmix = {
         __inherited_from = 'openai',
-        model = "DeepSeek-V3",
+        model = "Z/glm-4.5",
         --model = "gemini-2.5-pro-preview-05-06-search",
         --model = "claude-3-7-sonnet-20250219",
         --model = "gemini-2.5-flash-preview-04-17",
-        max_completion_tokens = 12288,
+        --max_completion_tokens = 12288,
         --disable_tools = true, -- disable tools!
         endpoint = "https://aihubmix.com/v1",
         api_key_name = 'AIHUBMIX_API_KEY',
@@ -452,14 +457,13 @@ lua <<EOF
         --model = "gemma3:27b-it-qat",
         --model = "qwen3:32b",
         -- model = "deepseek-r1:8b",
-         model = "magistral:24b",
-        --model = "hf.co/unsloth/Qwen3-30B-A3B-GGUF",
-        extra_request_body = {
-          options = {
-            num_ctx = 32000,
-            temperature = 0.6,
-            },
-          },
+         model = "hf.co/unsloth/Mistral-Small-3.2-24B-Instruct-2506-GGUF:UD-Q4_K_XL",
+--        extra_request_body = {
+--          options = {
+--            num_ctx = 32000,
+--            temperature = 0.6,
+--            },
+--          },
         endpoint = "http://taildesk:11434",
       },
 

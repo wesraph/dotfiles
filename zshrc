@@ -98,4 +98,14 @@ export PATH="$PATH:/home/raph/.foundry/bin"
 export PATH="$PATH:/home/raph/.bifrost/bin"
 export PATH="$PATH:/home/raph/.huff/bin"
 
-#zprof
+hfaria () {
+        url="$1"
+        filename=$(basename "$(echo "$url" | sed -e 's/?.*//')")
+        if [ -z "$filename" ]
+        then
+                echo "Could not extract filename. Please check the URL."
+                return 1
+        fi
+        aria2c -s16 -x16 -o "$filename" "$url"
+}
+
