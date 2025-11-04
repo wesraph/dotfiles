@@ -5,7 +5,7 @@
     "height": 12, // Waybar height
     "font": 11,
     "modules-left": ["hyprland/workspaces",  "custom/soulseek", "hyprland/submap", "custom/ping"],
-    "modules-center": ["image#bnb", "custom/bnb", "image#btc", "custom/btc", "image#eth","custom/eth", "image#tia", "custom/tia", "image#rcc", "custom/rcc"],
+    "modules-center": [ "custom/bnb",  "custom/btc", "custom/eth",  "custom/tia", "custom/rcc"],
     "modules-right": [  "pulseaudio", "cpu", "memory", "battery", "custom/headset", "temperature",  "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
