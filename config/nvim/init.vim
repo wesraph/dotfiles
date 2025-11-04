@@ -358,7 +358,6 @@ vnoremap <leader>h y:echo str2nr('<C-r>0', 16)<CR>
 
 set completeopt=menu,menuone,noselect
 
-lua require('leap').add_default_mappings()
 
 function! CheckBackspace() abort
   let col = col('.') - 1
@@ -673,10 +672,6 @@ lua <<EOF
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-  local lsp = require'lspconfig'
-  lsp.jdtls.setup{
-  }
-  local lspconfig = require'lspconfig'
 
 
   -- Function to check if a file is a Rust file
@@ -694,77 +689,64 @@ local function format_rust_file()
   end
 end
 
-local rt = require("rust-tools")
+-- Set up rust-analyzer using the new API
+vim.lsp.config('rust_analyzer', {
+  capabilities = capabilities,
+  on_attach = function(_, bufnr)
+    -- Enable formatting on save
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      group = vim.api.nvim_create_augroup("RustFormat", { clear = true }),
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.format({ bufnr = bufnr })
+      end,
+    })
 
-rt.setup({
-  server = {
-    on_attach = function(_, bufnr)
-      -- Hover actions
-      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-      -- Code action groups
-      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-
-      -- Enable formatting on save
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = vim.api.nvim_create_augroup("RustFormat", { clear = true }),
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format({ bufnr = bufnr })
-        end,
-      })
-
-      -- Other keybindings
-      local opts = { noremap = true, silent = true, buffer = bufnr }
-      print("rust-tools attached")
-    end,
-    capabilities = capabilities,
-    settings = {
-      ["rust-analyzer"] = {
-        assist = {
-          importGranularity = "module",
-          importPrefix = "self",
+    -- Other keybindings
+    local opts = { noremap = true, silent = true, buffer = bufnr }
+    print("rust-analyzer attached")
+  end,
+  settings = {
+    ["rust-analyzer"] = {
+      assist = {
+        importGranularity = "module",
+        importPrefix = "self",
+      },
+      cargo = {
+        loadOutDirsFromCheck = true
+      },
+      procMacro = {
+        enable = true
+      },
+      checkOnSave = {
+        command = "clippy"
+      },
+      completion = {
+        postfix = {
+          enable = true,
         },
-        cargo = {
-          loadOutDirsFromCheck = true
-        },
-        procMacro = {
-          enable = true
-        },
-        checkOnSave = {
-          command = "clippy"
-        },
-        completion = {
-          postfix = {
-            enable = true,
-          },
-          callable = {
-            snippets = {
-              fill_arguments = true,
-            },
+        callable = {
+          snippets = {
+            fill_arguments = true,
           },
         },
-      }
-    },
-  },
-  tools = {
-    -- Autoformat on save
-    autoSetHints = true,
-    inlay_hints = {
-      show_parameter_hints = true,
-      parameter_hints_prefix = "",
-      other_hints_prefix = "",
-    },
+      },
+    }
   },
 })
+
+-- Enable rust-analyzer
+vim.lsp.enable('rust_analyzer')
 
 -- Manual formatting command
 vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
 
-  lspconfig.ccls.setup({
+  vim.lsp.config('ccls',{
     capabilities = capabilities,
   })
+  vim.lsp.enable('ccls')
 
-  lsp.gopls.setup{
+  vim.lsp.config('gopls', {
   capabilities = capabilities,
   settings = {
     gopls = {
@@ -786,7 +768,8 @@ vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
       usePlaceholders = true,
     },
   },
-  }
+  })
+  vim.lsp.enable('gopls')
 
   vim.filetype.add({
   extension = {
@@ -794,15 +777,11 @@ vim.api.nvim_create_user_command("RustFormat", format_rust_file, {})
   }})
 
   -- TypeScript
-  lsp.ts_ls.setup {
+  vim.lsp.config('ts_ls',{
     capabilities = capabilities,
-    on_attach = on_attach,
     filetypes = {  "typescriptreact", "typescript", "typescript.tsx" },
     cmd = { "typescript-language-server", "--stdio" },
-    root_dir = lsp.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
-  }
-
-  if (not status) then return end
-    local protocol = require('vim.lsp.protocol')
+  })
+  vim.lsp.enable('ts_ls')
 
 EOF
