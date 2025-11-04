@@ -3,28 +3,37 @@
 # shellcheck disable=1090
 
 _start_agent() {
-	local pid
-	pid=$(pgrep -u "$USER" 'ssh-agent' | head -n 1)
-	if [ -z "$pid" ]; then
-		# Start the ssh-agent
-		eval "$(ssh-agent -s)" >/dev/null
-		return 0
-	fi
+    local pid
+    pid=$(pgrep -u "$USER" 'ssh-agent' | head -n 1)
+    if [ -z "$pid" ]; then
+        # Start the ssh-agent
+        eval "$(ssh-agent -s)" >/dev/null
+        return 0
+    fi
+    SSH_AGENT_PID=$pid
 
-	SSH_AGENT_PID=$pid
-	SSH_AUTH_SOCK=$(find /tmp/ssh-* \
-		-user "$USER" \
-		-type s \
-		-wholename '/tmp/ssh-*/agent.*' 2>/dev/null
-	)
-	export SSH_AUTH_SOCK
-	export SSH_AGENT_PID
+    # Check new location first (~/.ssh/agent/)
+    SSH_AUTH_SOCK=$(find ~/.ssh/agent/ \
+        -user "$USER" \
+        -type s \
+        2>/dev/null | head -n 1)
+
+    # Fallback to old location if not found
+    if [ -z "$SSH_AUTH_SOCK" ]; then
+        SSH_AUTH_SOCK=$(find /tmp/ssh-* \
+            -user "$USER" \
+            -type s \
+            -wholename '/tmp/ssh-*/agent.*' 2>/dev/null | head -n 1)
+    fi
+
+    export SSH_AUTH_SOCK
+    export SSH_AGENT_PID
 }
 _start_agent
 
 agent() {
 	local key
-	local timeout=10800 # 3h
+	local timeout=21600 # 6h
 	#if [ -f ~/.ssh/id_ed25519 ]; then
 		#key=~/.ssh/id_ed25519
 			#ssh-add -t "$timeout" "$key"
@@ -38,7 +47,7 @@ agent() {
 
 agented() {
 	local key
-	local timeout=10800 # 3h
+	local timeout=21600 # 6h
 	if [ -f ~/.ssh/id_ed25519 ]; then
 		key=~/.ssh/id_ed25519
 		ssh-add -t "$timeout" "$key"
