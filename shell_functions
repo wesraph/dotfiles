@@ -13,17 +13,21 @@ _start_agent() {
     SSH_AGENT_PID=$pid
 
     # Check new location first (~/.ssh/agent/)
+    # Sort by modification time and get the newest
     SSH_AUTH_SOCK=$(find ~/.ssh/agent/ \
         -user "$USER" \
         -type s \
-        2>/dev/null | head -n 1)
+        -printf '%T@ %p\n' 2>/dev/null | \
+        sort -rn | head -n 1 | cut -d' ' -f2)
 
     # Fallback to old location if not found
     if [ -z "$SSH_AUTH_SOCK" ]; then
         SSH_AUTH_SOCK=$(find /tmp/ssh-* \
             -user "$USER" \
             -type s \
-            -wholename '/tmp/ssh-*/agent.*' 2>/dev/null | head -n 1)
+            -wholename '/tmp/ssh-*/agent.*' \
+            -printf '%T@ %p\n' 2>/dev/null | \
+            sort -rn | head -n 1 | cut -d' ' -f2)
     fi
 
     export SSH_AUTH_SOCK
