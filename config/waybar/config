@@ -172,7 +172,7 @@
         "max-length": 40,
         "interval": 120, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/getRCCAPY.sh",
-        "on-click": "firefox https://grafana.westphal.fr/d/aduj7miej0agwa/raph-s-crypto-capital?orgId=1&from=now-24h&to=now&timezone=browser&var-account=raph"
+        "on-click": "chromium https://grafana.westphal.fr/d/aduj7miej0agwa/raph-s-crypto-capital?orgId=1&from=now-24h&to=now&timezone=browser&var-account=raph"
     },
     "custom/agent": {
         "format": "🔒 {} mn",

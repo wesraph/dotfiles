@@ -104,6 +104,11 @@ window#waybar {
   background-color: #ffffff;
 }
 
+#workspaces button.urgent {
+  background: radial-gradient(circle, #ff6b6b);
+  color: #ffffff;
+}
+
 #workspaces button.active {
   /*color: @surface0;
     border-radius: 1rem;
