@@ -1,0 +1,10 @@
+agent/run-history.jsonl
+agent/cache/
+agent/.lazy-cache/
+agent/mcp-cache.json
+agent/mcp-npx-cache.json
+agent/mcp-oauth/
+agent/bin/
+agent/git/
+agent/vibes
+agent/sessions/
