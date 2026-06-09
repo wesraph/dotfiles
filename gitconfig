@@ -23,6 +23,9 @@
     df = diff
     dc = diff --cached
     ls = ls-files
+    wl = worktree list
+    wa = worktree add
+    wd = worktree remove
 
 [push]
     default = tracking
@@ -37,6 +40,15 @@
 	helper = store
 [pull]
 	rebase = true
-
-[url "ssh://git@github.com/"]
-	insteadOf = https://github.com/
+[commit]
+	gpgsign = true
+[safe]
+	directory = /qemu
+[core]
+	hooksPath = /home/raph/.git-hooks
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
