@@ -48,7 +48,7 @@ alias tadf='task done $(task list | fzf | awk "{print $1}")'
 
 export EDITOR=nvim
 export VISUAL=nvim
-export BROWSER=firefox
+export BROWSER=chromium
 
 [ -e ~/.shell_functions ] && . ~/.shell_functions
 [ -e ~/.shell_local  ] && . ~/.shell_local
