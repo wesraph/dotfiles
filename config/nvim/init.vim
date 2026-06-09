@@ -98,6 +98,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'HakonHarnes/img-clip.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'lervag/vimtex'
+Plug 'sindrets/diffview.nvim'
 
 " Explore easily with ,ff and ,fg
 Plug 'nvim-lua/popup.nvim'
@@ -321,6 +322,29 @@ let g:OmniSharp_server_use_mono = 1
 " Telescope
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+
+" Diffview toggle against main/master
+lua <<EOF
+function _G.diffview_toggle_base()
+  local view = require('diffview.lib').get_current_view()
+  if view then
+    vim.cmd('DiffviewClose')
+    return
+  end
+  local function has_branch(name)
+    return vim.fn.system({'git', 'show-ref', '--verify', '--quiet', 'refs/heads/' .. name}) == ''
+      and vim.v.shell_error == 0
+  end
+  local base = has_branch('main') and 'main' or (has_branch('master') and 'master' or nil)
+  if not base then
+    vim.notify('No main or master branch found', vim.log.levels.ERROR)
+    return
+  end
+  vim.cmd('DiffviewOpen ' .. base)
+end
+EOF
+nnoremap <leader>dfo <cmd>lua diffview_toggle_base()<cr>
+nnoremap <leader>fo <cmd>:foldopen<cr>
 
 " Treesitter enable syntax highlight
 lua <<EOF
