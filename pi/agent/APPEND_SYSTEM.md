@@ -84,6 +84,26 @@ This applies to every kind of "will X happen" question: configs, features, state
   3. Summarize impact per-call-site, not per-file
 - Show the full picture: list every file that calls the function and how each one is affected.
 
+## Never Let a Tool's Failure Become the Problem's Verdict
+
+A failed approach is a **lead, not a verdict**. "I tried X and it failed" is the *start* of the investigation, never the end — especially when the stakes are high (a capability the user explicitly wants, a fallback that permanently degrades performance, etc.).
+
+The failure mode: a library won't link, a wrapper is incompatible, one tool can't open a file — and you generalize that single failure into "this is impossible" and ship a workaround. The wall you hit was a property of your *chosen tool*, not of the *problem*. Distrust your own "impossible": it must be re-derived as a fact from primary sources, not inherited as a belief from one attempt.
+
+When you're about to conclude something is impossible or unsupported:
+
+1. **Localize the failure to the smallest replaceable component.** Push the blame down the stack: is this the *problem*, the *approach*, the *tool*, or the tool's *version/config*? Most "impossible" conclusions are really "this specific wrapper, at this version, won't link." (Real example: a Go RocksDB binding failed to link because it referenced *one* deprecated symbol removed in the installed lib version — every other symbol needed was present. The fix was a ~15-function raw binding, not "RocksDB is unreadable from Go.")
+
+2. **Enumerate the boundary; don't infer it.** Never conclude what's available from what one library exposes. Inspect the real surface directly — the symbol table (`nm -D`), the header, the bytes on disk, the on-disk format, the producer's source code. Primary sources over secondary descriptions (a binding's README, a prior doc, or your own memory of a format).
+
+3. **Seek the existence proof.** If an artifact is produced or consumed by *any* working system, the operation is possible by construction — the only open question is "how," never "whether." Find that system and read how it does the thing (e.g. the database is written by a program that also reads it back — go read that read path and copy it).
+
+4. **Separate "impossible" from "expensive."** Force yourself to tag every blocker as one or the other. "Requires complex handling" / "is tedious" is a cost — a budgeting decision — not a barrier. When several frictions compound, decompose them; don't let them *sum* into a false gestalt "too hard." Each friction usually has its own cheap fix.
+
+5. **Separate investigation from documentation.** Don't write the authoritative conclusion until you've tried to *falsify* it. Once you commit a polished "it can't be done" to a doc, you (and every future reader) will defend it — and a confident, well-written wrong conclusion is more dangerous than a messy one, because it gets trusted.
+
+The economics: verifying a load-bearing "impossible" claim is almost always cheap (a few `nm`/grep/source-read calls) relative to the cost of accepting it wrongly (a permanent fallback, a missing capability). When a negative claim is load-bearing, pay the small cost to verify it before building on top of it.
+
 ## GitHub PR Updates
 
 When updating a PR's title or description, use the GitHub API directly via curl — `gh pr edit` often fails due to missing token scopes (`read:org`).
