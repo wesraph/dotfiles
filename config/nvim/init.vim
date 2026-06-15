@@ -83,14 +83,14 @@ Plug 'airblade/vim-gitgutter'
 
 " Misc
 Plug 'powerman/vim-plugin-AnsiEsc'
-Plug 'ggandor/leap.nvim'
+Plug 'https://codeberg.org/andyg/leap.nvim'
 Plug 'martinda/Jenkinsfile-vim-syntax'
 Plug 'csexton/trailertrash.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'junegunn/vim-easy-align'
 Plug 'pearofducks/ansible-vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate', 'branch': 'main'}
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'nvim-treesitter/nvim-treesitter-context'
@@ -346,14 +346,19 @@ EOF
 nnoremap <leader>dfo <cmd>lua diffview_toggle_base()<cr>
 nnoremap <leader>fo <cmd>:foldopen<cr>
 
-" Treesitter enable syntax highlight
+" Treesitter enable syntax highlight (nvim-treesitter 'main' branch API)
 lua <<EOF
-require'nvim-treesitter.configs'.setup {
-ensure_installed = {"c", "lua", "go", "javascript", "solidity", "rust", "html"},
-  highlight = {
-    enable = true,
-  },
+require('nvim-treesitter').setup {}
+
+require('nvim-treesitter').install {
+  'c', 'lua', 'go', 'javascript', 'solidity', 'rust', 'html',
+  'markdown', 'markdown_inline',
 }
+
+-- Enable Neovim's native treesitter highlighting for any filetype that has a parser.
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function(args) pcall(vim.treesitter.start, args.buf) end,
+})
 EOF
 
 " Golang
