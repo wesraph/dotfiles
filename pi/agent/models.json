@@ -14,6 +14,12 @@
           "name": "GLM-5.1 (Renaud)",
           "reasoning": true,
           "contextWindow": 180000
+        },
+        {
+          "id": "glm-5.2",
+          "name": "GLM-5.2 (Renaud)",
+          "reasoning": true,
+          "contextWindow": 180000
         }
       ]
     },
@@ -22,10 +28,9 @@
       "api": "openai-completions",
       "apiKey": "LLAMACPP_API_KEY",
       "models": [
-        { "id": "Qwen3.6-35B" , "contextWindow": 200000 },
-        { "id": "Qwen3.6-35B-Vision" , "contextWindow": 150000, "input": ["image"] },
         { "id": "Qwen3.6-27B" , "contextWindow": 200000 },
         { "id": "qwen3.6-27b-fp8", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true } },
+        { "id": "diffusiongemma-26b-a4b", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true } },
         { "id": "qwen3.6-27b-autoround", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true}}
       ]
     }

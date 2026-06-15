@@ -1,14 +1,15 @@
 {
   "lastChangelogVersion": "0.73.1",
-  "defaultProvider": "llamacpp",
-  "defaultModel": "qwen3.6-27b-fp8",
+  "defaultProvider": "zai-renaud",
+  "defaultModel": "glm-5.2",
   "packages": [
     "git:github.com/nicobailon/pi-subagents@3ee17de53d1a430b71519889741569c3991f99b7",
     "git:github.com/nicobailon/pi-powerline-footer@18c50ddd7cfcfd9e886146d5e63a26e8e4819018",
     "git:github.com/nicobailon/pi-mcp-adapter@662595ef00ae5ba19c0e859e32f20a2a7595dbd3",
     "git:github.com/juicesharp/rpiv-mono@651192fbb675e1a1112d0983390a2957467e2b7f",
     "npm:@ifi/oh-pi-themes@0.5.1",
-    "npm:pi-lens"
+    "npm:pi-lens",
+    "npm:@ff-labs/pi-fff"
   ],
   "editorPaddingX": 0,
   "terminal": {
@@ -36,7 +37,9 @@
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "zai-renaud/glm-5.1",
-    "qwen3.6-27b-fp8"
+    "zai-renaud/glm-5.2",
+    "qwen3.6-27b-fp8",
+    "diffusiongemma-26b-a4b"
   ],
   "hideThinkingBlock": false,
   "images": {
