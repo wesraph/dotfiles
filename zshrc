@@ -109,3 +109,6 @@ hfaria () {
         aria2c -s16 -x16 -o "$filename" "$url"
 }
 
+
+# Pi
+export PATH="/home/raph/.local/share/pi-node/node-v22.22.3-linux-x64/bin:$PATH"
