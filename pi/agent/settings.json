@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.73.1",
+  "lastChangelogVersion": "0.79.0",
   "defaultProvider": "zai-renaud",
   "defaultModel": "glm-5.2",
   "packages": [
@@ -10,6 +10,8 @@
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff"
+    "npm:@narumitw/pi-goal",
+    "npm:@tintinweb/pi-tasks"
   ],
   "editorPaddingX": 0,
   "terminal": {

@@ -1,9 +1,9 @@
 {
   "providers": {
-     "zai-renaud": {
+    "zai-renaud": {
       "baseUrl": "https://api.z.ai/api/coding/paas/v4",
       "api": "openai-completions",
-      "apiKey": "ZAI_RENAUD_API_KEY",
+      "apiKey": "$ZAI_RENAUD_API_KEY",
       "compat": {
         "supportsDeveloperRole": false,
         "thinkingFormat": "zai"
@@ -24,14 +24,45 @@
       ]
     },
     "llamacpp": {
-      "baseUrl": "http://taildesk:11434/v1",
+      "baseUrl": "http://localhost:11434/v1",
       "api": "openai-completions",
-      "apiKey": "LLAMACPP_API_KEY",
+      "apiKey": "local",
       "models": [
-        { "id": "Qwen3.6-27B" , "contextWindow": 200000 },
-        { "id": "qwen3.6-27b-fp8", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true } },
-        { "id": "diffusiongemma-26b-a4b", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true } },
-        { "id": "qwen3.6-27b-autoround", "contextWindow": 200000, "reasoning": true, "compat": { "thinkingFormat": "qwen-chat-template", "supportsDeveloperRole": false, "zaiToolStream": true}}
+        {
+          "id": "Qwen3.6-35B",
+          "contextWindow": 200000
+        },
+        {
+          "id": "Qwen3.6-35B-Vision",
+          "contextWindow": 150000,
+          "input": [
+            "image"
+          ]
+        },
+        {
+          "id": "Qwen3.6-27B",
+          "contextWindow": 200000
+        },
+        {
+          "id": "qwen3.6-27b-fp8",
+          "contextWindow": 200000,
+          "reasoning": true,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsDeveloperRole": false,
+            "zaiToolStream": true
+          }
+        },
+        {
+          "id": "qwen3.6-27b-autoround",
+          "contextWindow": 200000,
+          "reasoning": true,
+          "compat": {
+            "thinkingFormat": "qwen-chat-template",
+            "supportsDeveloperRole": false,
+            "zaiToolStream": true
+          }
+        }
       ]
     }
   }
