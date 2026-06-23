@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--headless", "--browser", "chromium"]
+    },
+    "notion": {
+      "url": "https://mcp.notion.com/mcp"
+    },
+    "cloakbrowser": {
+      "command": "cloakbrowser-mcp",
+      "args": []
+    }
+  }
+}
