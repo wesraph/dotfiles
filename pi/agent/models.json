@@ -24,7 +24,7 @@
       ]
     },
     "llamacpp": {
-      "baseUrl": "http://localhost:11434/v1",
+      "baseUrl": "http://taildesk:11434/v1",
       "api": "openai-completions",
       "apiKey": "local",
       "models": [

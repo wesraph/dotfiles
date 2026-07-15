@@ -41,7 +41,6 @@
     "zai-renaud/glm-5.1",
     "zai-renaud/glm-5.2",
     "qwen3.6-27b-fp8",
-    "diffusiongemma-26b-a4b"
   ],
   "hideThinkingBlock": false,
   "images": {

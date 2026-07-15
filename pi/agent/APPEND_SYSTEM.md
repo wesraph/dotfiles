@@ -45,6 +45,28 @@ Modify your system prompt by editing `~/.pi/agent/APPEND_SYSTEM.md` (this file).
 - If the project uses a specific format (e.g., `type(scope): description`), follow it strictly.
 - Never force-commit with a malformed message — if in doubt, ask the user.
 
+## Working Directory Boundary — Hard Rule
+
+**NEVER run commands that touch, read, or search paths outside the current working directory unless the user explicitly asks you to.** This is a hard rule — no exceptions.
+
+This applies especially (but not only) to filesystem search and enumeration tools:
+
+- `find` — never run without a path argument rooted in the cwd (e.g. ✅ `find . -name foo`, ❌ `find / -name foo`, ❌ bare `find` walking up).
+- `grep` / `rg` / `ffgrep` — scope to the cwd. Never grep into `/`, `$HOME`, parent directories, or sibling repos unless asked.
+- `ls`, `fd`, `tree`, `du`, `locate`, `wc`, `head`/`tail`/`cat` on absolute or `../` paths outside cwd.
+- Bash globs and pipes that escape cwd (e.g. `cat ../other-repo/file`, `grep -r ~`).
+- Reading files via `read`/`bash` outside cwd.
+
+**Why:** the repo is a sibling of other private repos (`../phone_agent`, `../flowlyne_webapp`, `../cloud_functions`). Walked-up `find`/`grep` commands silently leak unrelated source, secrets, and config into context, and can be slow or destructive.
+
+**Allowed exceptions (no user action needed):**
+- Writing/editing `~/.pi/agent/APPEND_SYSTEM.md` (this file) — that is the documented mechanism for editing the system prompt.
+- Reading pi's own docs/examples under `/home/raph/.node/lib/node_modules/@earendil-works/pi-coding-agent/...` when the user asks about pi itself.
+- Commands the user explicitly requested, or that operate on paths the user named.
+- `git`/`make`/`go`/`bun` invocations that internally traverse parents but don't expose foreign file contents into context.
+
+**If you genuinely need to look outside the cwd, ASK first** — do not silently `find`/`grep` your way out.
+
 ## Blockchain Queries
 
 - When you need to query blockchain data (balances, contract state, transactions, logs, etc.), use the `cast` CLI tool from Foundry instead of writing temporary test files or scripts. `cast` is installed and available.
@@ -144,6 +166,28 @@ curl -s "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
 - The `draft` field is read-only via the API — users must click "Ready for review" in the UI.
 - The body can be markdown. Use double-escaped single quotes (`'") inside JSON strings.
 - Always use the token with `read:org` scope to avoid GraphQL scope errors.
+
+## Pull Requests — Proof, Not Test Plans
+
+**When creating or updating a PR, NEVER include a "Test Plan" section.** Do not write planned/intended steps that you have not yet run (e.g. "will run tests", "manual verification"). A test plan is a promise; reviewers want evidence.
+
+Instead, include a **"Proof" / "Verification"** section that shows the **actual evidence of what you ran and observed** to confirm the PR works. Concrete evidence only:
+
+- Exact commands executed (test commands, build commands, linters, `make verify`, manual repro steps)
+- The real output that confirms success — quotes of test pass lines (e.g. `ok ... 0.45s`, `PASS`, exit code 0), relevant log lines, or before/after output
+- Regression check: proof that existing tests still pass
+
+**Do:**
+- Run the tests/build/verify first, then paste the real output
+- Quote the decisive lines (pass line, exit code, key assertion)
+- Tie each proof line back to a claim in the PR description
+
+**Don't:**
+- Write "Test Plan:" with unchecked steps
+- Claim "tested" without showing the output
+- Describe intended verification you haven't actually performed
+
+If something was NOT tested, state that explicitly under "Proof" rather than dressing it up as a plan. Unverified = say so honestly.
 
 ## Subagent Conventions
 
