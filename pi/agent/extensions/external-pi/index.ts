@@ -18,6 +18,7 @@ import { randomBytes } from "node:crypto";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
+	ExtensionUIDialogOptions,
 } from "@earendil-works/pi-coding-agent";
 
 const ENV_URL = "EXTERNAL_PI_URL";
@@ -51,6 +52,16 @@ interface OutStream {
 		delta: string;
 		toolName: string;
 	};
+}
+// A pending ui.confirm() dialog surfaced to the web UI (must match daemon Confirm).
+interface OutConfirm {
+	type: "confirm";
+	confirm: { id: string; title: string; message: string };
+}
+// The dialog resolved locally (TUI answered) — web UI should dismiss it.
+interface OutConfirmClear {
+	type: "confirm_clear";
+	confirmId: string;
 }
 
 // State payload pushed to the daemon (must match daemon ServerState).
@@ -87,9 +98,11 @@ interface AgentEntry {
 
 // Inbound command from the daemon (must match daemon DaemonMsg).
 interface InMessage {
-	type: "welcome" | "sendMessage";
+	type: "welcome" | "sendMessage" | "confirm_answer";
 	text?: string;
 	ref?: string;
+	confirmId?: string;
+	result?: boolean;
 }
 
 /** stable-ish id for this process so reconnects replace, not duplicate. */
@@ -334,6 +347,79 @@ function extractStreamDelta(ev: {
 	return { kind, delta, toolName };
 }
 
+/* A ui.confirm() function shape. */
+type ConfirmFn = (
+	title: string,
+	message: string,
+	opts?: ExtensionUIDialogOptions,
+) => Promise<boolean>;
+
+/* A bridge that races the local TUI confirm against a remote (web UI) answer.
+ *
+ * Whichever resolves first wins:
+ *  - TUI answers → resolve with that value, dismiss the web dialog (onSettled).
+ *  - Web answers → abort the local TUI dialog (so it dismisses), resolve with
+ *    the web value, then onSettled.
+ *
+ * A caller-supplied opts.signal (e.g. an extension's own AbortController or a
+ * timeout) is forwarded into the controller passed to the local dialog, so an
+ * external abort still dismisses everything.
+ *
+ * Pure (side effects only via the injected callbacks), so it is unit-testable.
+ * `randomId` is injectable so tests can pin confirm ids. */
+export function makeConfirmBridge(
+	orig: ConfirmFn,
+	onOpen: (id: string, title: string, message: string) => void,
+	onSettled: (id: string) => void,
+	randomId: () => string,
+): { wrapped: ConfirmFn; resolveFromWeb: (id: string, result: boolean) => void } {
+	const pending = new Map<
+		string,
+		{ deliver: (r: boolean) => void; tui: AbortController }
+	>();
+
+	const wrapped: ConfirmFn = (title, message, opts) => {
+		const id = randomId();
+		onOpen(id, title, message);
+
+		// Controller to dismiss the TUI dialog when the web answers first.
+		const tui = new AbortController();
+		const callerSignal = opts?.signal;
+		if (callerSignal) {
+			if (callerSignal.aborted) tui.abort();
+			else
+				callerSignal.addEventListener("abort", () => tui.abort(), {
+					once: true,
+				});
+		}
+
+		return new Promise<boolean>((resolve) => {
+			let settled = false;
+			const finish = (src: "tui" | "web", value: boolean): void => {
+				if (settled) return;
+				settled = true;
+				if (src === "web") tui.abort(); // dismiss the local TUI dialog
+				pending.delete(id);
+				onSettled(id);
+				resolve(value);
+			};
+			pending.set(id, {
+				deliver: (r) => finish("web", r),
+				tui,
+			});
+			orig(title, message, { ...opts, signal: tui.signal }).then(
+				(r) => finish("tui", r),
+			);
+		});
+	};
+
+	const resolveFromWeb = (id: string, result: boolean): void => {
+		pending.get(id)?.deliver(result);
+	};
+
+	return { wrapped, resolveFromWeb };
+}
+
 /* Concatenate text parts of a message content into a single string. */
 function textOf(content: unknown): string {
 	if (typeof content === "string") return content;
@@ -362,7 +448,14 @@ export default function (pi: ExtensionAPI): void {
 	let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 	const send = (
-		msg: OutRegister | OutState | OutStatus | OutBye | OutStream,
+		msg:
+			| OutRegister
+			| OutState
+			| OutStatus
+			| OutBye
+			| OutStream
+			| OutConfirm
+			| OutConfirmClear,
 	): void => {
 		if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
 	};
@@ -391,6 +484,11 @@ export default function (pi: ExtensionAPI): void {
 			// delivered after the agent finishes. Never interrupts in-flight work.
 			const opts = { deliverAs: "followUp" as const, triggerTurn: true };
 			pi.sendUserMessage(msg.text, opts);
+		}
+		if (msg.type === "confirm_answer" && msg.confirmId) {
+			// Web UI answered a pending dialog. No-op if the wrap isn't installed
+			// yet (e.g. answer raced ahead of session_start) or already settled.
+			resolveFromWeb?.(msg.confirmId, msg.result === true);
 		}
 	};
 
@@ -431,10 +529,35 @@ export default function (pi: ExtensionAPI): void {
 		reconnectTimer = setTimeout(connect, RECONNECT_DELAY_MS);
 	};
 
+	// Mirror ui.confirm() to the web UI so a remote operator can answer it.
+	// Installed once against the shared ctx.ui (the runner hands every
+	// extension the same uiContext), so this intercepts every extension's
+	// confirm calls. `resolveFromWeb` stays null until installed; a web answer
+	// arriving before install is a harmless no-op.
+	let resolveFromWeb: ((id: string, result: boolean) => void) | null = null;
+	let confirmInstalled = false;
+	const installConfirm = (ctx: ExtensionContext): void => {
+		if (confirmInstalled) return;
+		confirmInstalled = true;
+		const bridge = makeConfirmBridge(
+			ctx.ui.confirm,
+			(id, title, message) =>
+				send({ type: "confirm", confirm: { id, title, message } }),
+			(id) => send({ type: "confirm_clear", confirmId: id }),
+			() => randomBytes(8).toString("hex"),
+		);
+		ctx.ui.confirm = bridge.wrapped;
+		resolveFromWeb = bridge.resolveFromWeb;
+	};
+
 	// Push state on lifecycle events.
-	pi.on("session_start", async (_e, ctx) => pushState(ctx, "idle"));
+	pi.on("session_start", async (_e, ctx) => {
+		installConfirm(ctx);
+		await pushState(ctx, "idle");
+	});
 	pi.on("session_tree", async (_e, ctx) => pushState(ctx, "idle"));
 	pi.on("turn_start", async (_e, ctx) => {
+		installConfirm(ctx);
 		pushStatus("busy");
 		await pushState(ctx, "busy");
 	});
@@ -479,4 +602,5 @@ export const __test = {
 	buildState,
 	readBranch,
 	extractStreamDelta,
+	makeConfirmBridge,
 };
