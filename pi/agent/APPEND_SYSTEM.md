@@ -42,28 +42,6 @@
 - Never force-commit with a malformed message — if in doubt, ask the user.
 - **Never add any LLM/AI as a co-author.** Do not add `Co-Authored-By` trailers for Claude, GPT, Gemini, or any other AI model. Do not append `Generated with Claude Code`, `🤖`, or any similar AI-attribution line. Commits must be attributed to the human author only.
 
-## Working Directory Boundary — Hard Rule
-
-**NEVER run commands that touch, read, or search paths outside the current working directory unless the user explicitly asks you to.** This is a hard rule — no exceptions.
-
-This applies especially (but not only) to filesystem search and enumeration tools:
-
-- `find` — never run without a path argument rooted in the cwd (e.g. ✅ `find . -name foo`, ❌ `find / -name foo`, ❌ bare `find` walking up).
-- `grep` / `rg` / `ffgrep` — scope to the cwd. Never grep into `/`, `$HOME`, parent directories, or sibling repos unless asked.
-- `ls`, `fd`, `tree`, `du`, `locate`, `wc`, `head`/`tail`/`cat` on absolute or `../` paths outside cwd.
-- Bash globs and pipes that escape cwd (e.g. `cat ../other-repo/file`, `grep -r ~`).
-- Reading files via `read`/`bash` outside cwd.
-
-**Why:** the repo is a sibling of other private repos (`../phone_agent`, `../flowlyne_webapp`, `../cloud_functions`). Walked-up `find`/`grep` commands silently leak unrelated source, secrets, and config into context, and can be slow or destructive.
-
-**Allowed exceptions (no user action needed):**
-- Writing/editing `~/.pi/agent/APPEND_SYSTEM.md` (this file) — that is the documented mechanism for editing the system prompt.
-- Reading pi's own docs/examples under `/home/raph/.node/lib/node_modules/@earendil-works/pi-coding-agent/...` when the user asks about pi itself.
-- Commands the user explicitly requested, or that operate on paths the user named.
-- `git`/`make`/`go`/`bun` invocations that internally traverse parents but don't expose foreign file contents into context.
-
-**If you genuinely need to look outside the cwd, ASK first** — do not silently `find`/`grep` your way out.
-
 ## Blockchain Queries
 
 - When you need to query blockchain data (balances, contract state, transactions, logs, etc.), use the `cast` CLI tool from Foundry instead of writing temporary test files or scripts. `cast` is installed and available.
