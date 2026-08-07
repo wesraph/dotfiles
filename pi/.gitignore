@@ -8,3 +8,4 @@ agent/bin/
 agent/git/
 agent/vibes
 agent/sessions/
+agent/trust.json
