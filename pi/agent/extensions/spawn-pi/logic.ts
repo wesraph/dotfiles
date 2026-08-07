@@ -19,15 +19,19 @@ export const VALID_TARGETS = ["auto", "pane", "tab", "terminal"] as const;
 /** Env vars injected into a spawned pi so it joins the mesh with a known identity. */
 export const ENV_NODE_ID = "PI_SPAWN_NODE_ID";
 export const ENV_PARENT_ID = "PI_SPAWN_PARENT_ID";
+/** Optional human-readable name stamped at spawn; the child uses it verbatim as its mesh label. */
+export const ENV_NODE_NAME = "PI_SPAWN_NODE_NAME";
 
 /** Read mesh identity from the environment (set by spawn-pi when this pi was spawned). */
 export function parseMeshEnv(env: NodeJS.ProcessEnv = process.env): {
 	nodeId?: string;
 	parentId?: string;
+	name?: string;
 } {
 	const nodeId = env[ENV_NODE_ID]?.trim() || undefined;
 	const parentId = env[ENV_PARENT_ID]?.trim() || undefined;
-	return { nodeId, parentId };
+	const name = env[ENV_NODE_NAME]?.trim() || undefined;
+	return { nodeId, parentId, name };
 }
 
 /** Build the env for a spawned child, stamping its node id and recording its parent. */
@@ -214,12 +218,14 @@ export interface ParsedSpawnArgs {
 	prompt: string;
 	cwd?: string;
 	target: string;
+	name?: string;
 }
 
-/** Parse `/spawn` arg string: flags first (--cwd, --target), remainder is the prompt. */
+/** Parse `/spawn` arg string: flags first (--cwd, --target, --name), remainder is the prompt. */
 export function parseSpawnArgs(input: string): ParsedSpawnArgs {
 	const tokens = tokenize(input);
 	let cwd: string | undefined;
+	let name: string | undefined;
 	let target = "auto";
 	const rest: string[] = [];
 	for (let i = 0; i < tokens.length; i++) {
@@ -240,9 +246,17 @@ export function parseSpawnArgs(input: string): ParsedSpawnArgs {
 			target = t.slice("--target=".length);
 			continue;
 		}
+		if ((t === "--name" || t === "-n") && i + 1 < tokens.length) {
+			name = tokens[++i];
+			continue;
+		}
+		if (t.startsWith("--name=")) {
+			name = t.slice("--name=".length);
+			continue;
+		}
 		rest.push(t);
 	}
-	return { prompt: rest.join(" ").trim(), cwd, target };
+	return { prompt: rest.join(" ").trim(), cwd, target, name };
 }
 
 export interface SpawnDetails {

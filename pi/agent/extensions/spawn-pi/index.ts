@@ -34,16 +34,17 @@ import {
 	VALID_TARGETS,
 	ENV_NODE_ID,
 	ENV_PARENT_ID,
+	ENV_NODE_NAME,
 	isValidTarget,
 	resolveCwd,
 	canonicalizeCwd,
 	resolveTarget,
 	spawnPi,
 	parseSpawnArgs,
+	parseMeshEnv,
 } from "./logic.ts";
 import {
 	ensureMeshDirs,
-	parseMeshEnv,
 	defaultLabel,
 	makeNodeId,
 	writeNode,
@@ -81,6 +82,9 @@ export {
 	TMUX_BIN,
 	ENV_NODE_ID,
 	ENV_PARENT_ID,
+	ENV_NODE_NAME,
+	parseMeshEnv,
+	buildChildEnv,
 } from "./logic.ts";
 export {
 	ensureMeshDirs,
@@ -89,8 +93,6 @@ export {
 	socketFilePath,
 	makeNodeId,
 	defaultLabel,
-	parseMeshEnv,
-	buildChildEnv,
 	isPidAlive,
 	writeNode,
 	readNode,
@@ -121,8 +123,20 @@ export default function (pi: ExtensionAPI): void {
 		// Stable across session_start within the process; seeded from env on first start.
 		currentNodeId = currentNodeId ?? envId.nodeId ?? makeNodeId();
 		currentParentId = currentParentId ?? envId.parentId;
-		const sessionName = pi.getSessionName?.() ?? "";
-		currentLabel = defaultLabel(ctx.cwd, sessionName);
+		// An explicit spawn-time name is used verbatim (no hex suffix) and also drives
+		// pi's session name; otherwise derive a readable label from cwd/session name.
+		const explicitName = envId.name;
+		const sessionName = explicitName ?? pi.getSessionName?.() ?? "";
+		if (explicitName) {
+			currentLabel = explicitName;
+			try {
+				pi.setSessionName?.(explicitName);
+			} catch {
+				/* setting the session name is best-effort */
+			}
+		} else {
+			currentLabel = defaultLabel(ctx.cwd, sessionName);
+		}
 
 		writeNode(dirs.nodes, {
 			id: currentNodeId,
@@ -214,12 +228,14 @@ export default function (pi: ExtensionAPI): void {
 		rawTarget: string,
 		fallbackCwd: string,
 		env: NodeJS.ProcessEnv,
+		rawName?: string,
 	): Promise<{ details: Awaited<ReturnType<typeof spawnPi>>; summary: string }> => {
 		const prompt = rawPrompt.trim();
 		if (!prompt) throw new Error("prompt is required");
 		if (!isValidTarget(rawTarget)) {
 			throw new Error(`invalid target "${rawTarget}". Use one of: ${VALID_TARGETS.join(", ")}`);
 		}
+		const name = rawName?.trim() || undefined;
 		const resolved = resolveCwd(rawCwd, fallbackCwd);
 		let cwd = resolved;
 		try {
@@ -229,10 +245,12 @@ export default function (pi: ExtensionAPI): void {
 		}
 		const target = resolveTarget(rawTarget, env);
 
-		// Stamp the child with a mesh identity so it can message back.
+		// Stamp the child with a mesh identity so it can message back. An explicit
+		// name rides the same -e mechanism and is used verbatim as the child's label.
 		const childId = makeNodeId();
 		const extraEnv: Record<string, string> = { [ENV_NODE_ID]: childId };
 		if (currentNodeId) extraEnv[ENV_PARENT_ID] = currentNodeId;
+		if (name) extraEnv[ENV_NODE_NAME] = name;
 
 		const details = await spawnPi({ prompt, cwd, target, env, extraEnv });
 		details.childId = childId;
@@ -241,7 +259,8 @@ export default function (pi: ExtensionAPI): void {
 			target === "terminal"
 				? `a new ${details.terminal ?? "terminal"} window`
 				: `a new tmux ${target}`;
-		const summary = `Opened ${where} in ${cwd}\nPrompt: ${prompt}\nNode id: ${childId}`;
+		const asName = name ? ` as "${name}"` : "";
+		const summary = `Opened ${where}${asName} in ${cwd}\nPrompt: ${prompt}\nNode id: ${childId}`;
 		const fellBack = rawTarget !== "auto" && rawTarget !== target;
 		return {
 			details,
@@ -285,8 +304,14 @@ export default function (pi: ExtensionAPI): void {
 			target: Type.Optional(
 				StringEnum(VALID_TARGETS, {
 					description:
-						'Where to open. "auto" (default): tmux pane if inside tmux, else new terminal. "pane"/"tab" fall back to terminal when not in tmux.',
+					'Where to open. "auto" (default): tmux pane if inside tmux, else new terminal. "pane"/"tab" fall back to terminal when not in tmux.',
 					default: "auto",
+				}),
+			),
+			name: Type.Optional(
+				Type.String({
+					description:
+					'Human-readable name for the new node, shown in /nodes and incoming messages (e.g. "auth-feature"). Defaults to a cwd-derived label. Useful when spawning several pi instances to tell them apart.',
 				}),
 			),
 		}),
@@ -299,6 +324,7 @@ export default function (pi: ExtensionAPI): void {
 					params.target ?? "auto",
 					ctx.cwd,
 					process.env,
+					params.name,
 				);
 				return {
 					content: [{ type: "text", text: summary }],
@@ -311,6 +337,7 @@ export default function (pi: ExtensionAPI): void {
 
 		renderCall(args, theme, _context) {
 			const target = (args.target as string) ?? "auto";
+			const nameHint = args.name ? ` ${theme.fg("accent", String(args.name))}` : "";
 			const cwdHint = args.cwd ? ` in ${args.cwd}` : "";
 			const preview = args.prompt
 				? args.prompt.length > 60
@@ -320,6 +347,7 @@ export default function (pi: ExtensionAPI): void {
 			const text =
 				theme.fg("toolTitle", theme.bold("spawn_pi ")) +
 				theme.fg("accent", target) +
+				nameHint +
 				theme.fg("muted", cwdHint) +
 				"\n  " +
 				theme.fg("dim", preview);
@@ -420,12 +448,13 @@ export default function (pi: ExtensionAPI): void {
 
 	// --- commands ---
 	pi.registerCommand("spawn", {
-		description: "Open a new pi with a prompt. Usage: /spawn [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
+		description:
+			"Open a new pi with a prompt. Usage: /spawn [--name NAME] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
 		handler: async (args, ctx) => {
 			const parsed = parseSpawnArgs(args);
 			if (!parsed.prompt) {
 				ctx.ui.notify(
-					"Usage: /spawn [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
+					"Usage: /spawn [--name NAME] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
 					"warning",
 				);
 				return;
@@ -437,6 +466,7 @@ export default function (pi: ExtensionAPI): void {
 					parsed.target,
 					ctx.cwd,
 					process.env,
+					parsed.name,
 				);
 				ctx.ui.notify(summary, "info");
 			} catch (err) {

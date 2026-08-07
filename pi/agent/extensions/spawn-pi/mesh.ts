@@ -27,9 +27,9 @@ import {
 import { homedir, hostname } from "node:os";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
+import { ENV_NODE_ID, ENV_PARENT_ID, ENV_NODE_NAME } from "./logic.ts";
 
-export const ENV_NODE_ID = "PI_SPAWN_NODE_ID";
-export const ENV_PARENT_ID = "PI_SPAWN_PARENT_ID";
+export { ENV_NODE_ID, ENV_PARENT_ID, ENV_NODE_NAME };
 
 const SEND_TIMEOUT_MS = 3000;
 
@@ -124,27 +124,6 @@ export function deliveryOpts(isIdle: boolean): DeliveryOpts {
 /** Format how an incoming message is presented inside the receiving pi's conversation. */
 export function formatIncoming(fromLabel: string, text: string): string {
 	return `[message from pi "${fromLabel}"]: ${text}`;
-}
-
-/** Read mesh identity from the environment (set by spawn-pi at spawn time). */
-export function parseMeshEnv(env: NodeJS.ProcessEnv = process.env): {
-	nodeId?: string;
-	parentId?: string;
-} {
-	const nodeId = env[ENV_NODE_ID]?.trim() || undefined;
-	const parentId = env[ENV_PARENT_ID]?.trim() || undefined;
-	return { nodeId, parentId };
-}
-
-/** Build the env for a spawned child, stamping its node id and recording its parent. */
-export function buildChildEnv(
-	env: NodeJS.ProcessEnv,
-	childId: string,
-	parentId?: string,
-): NodeJS.ProcessEnv {
-	const out: NodeJS.ProcessEnv = { ...env, [ENV_NODE_ID]: childId };
-	if (parentId) out[ENV_PARENT_ID] = parentId;
-	return out;
 }
 
 /** True if a process is alive (signal 0 probe). */

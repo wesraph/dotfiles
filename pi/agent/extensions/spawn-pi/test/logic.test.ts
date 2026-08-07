@@ -21,6 +21,7 @@ import {
 
 const ENV_NODE_ID = "PI_SPAWN_NODE_ID";
 const ENV_PARENT_ID = "PI_SPAWN_PARENT_ID";
+const ENV_NODE_NAME = "PI_SPAWN_NODE_NAME";
 
 const ENV_NOTMUX: NodeJS.ProcessEnv = {};
 const ENV_TMUX: NodeJS.ProcessEnv = { TMUX: "/tmp/tmux-1000/default,1234,0" };
@@ -200,6 +201,28 @@ test("parseSpawnArgs: empty input", () => {
 	assert.equal(p.target, "auto");
 });
 
+// --- parseSpawnArgs: --name / -n -------------------------------------------
+
+test("parseSpawnArgs: --name flag", () => {
+	const p = parseSpawnArgs('--name auth-feature fix the bug');
+	assert.equal(p.name, "auth-feature");
+	assert.equal(p.prompt, "fix the bug");
+});
+
+test("parseSpawnArgs: -n short flag, = syntax, and spaced name via space form", () => {
+	assert.equal(parseSpawnArgs('-n short go').name, "short");
+	// = syntax takes only what's after '='
+	assert.equal(parseSpawnArgs('--name=auth fix bug').name, "auth");
+	// spaced name requires the space form (--name "...")
+	const q = parseSpawnArgs('--name "auth feature" fix the bug');
+	assert.equal(q.name, "auth feature");
+	assert.equal(q.prompt, "fix the bug");
+});
+
+test("parseSpawnArgs: name omitted when not provided", () => {
+	assert.equal(parseSpawnArgs('just a prompt').name, undefined);
+});
+
 // --- buildTmuxArgs with extraEnv (mesh identity) ---------------------------
 
 test("buildTmuxArgs: extraEnv injects one -e pair per key, before the prompt flag", () => {
@@ -232,11 +255,18 @@ test("buildTmuxArgs: no extraEnv → same layout as before", () => {
 // --- parseMeshEnv / buildChildEnv ------------------------------------------
 
 test("parseMeshEnv: reads trimmed env vars", () => {
-	assert.deepEqual(parseMeshEnv({}), { nodeId: undefined, parentId: undefined });
-	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), { nodeId: "abc", parentId: undefined });
+	assert.deepEqual(parseMeshEnv({}), { nodeId: undefined, parentId: undefined, name: undefined });
+	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), { nodeId: "abc", parentId: undefined, name: undefined });
 	assert.deepEqual(
 		parseMeshEnv({ [ENV_NODE_ID]: "child", [ENV_PARENT_ID]: "par" }),
-		{ nodeId: "child", parentId: "par" },
+		{ nodeId: "child", parentId: "par", name: undefined },
+	);
+});
+
+test("parseMeshEnv: reads explicit node name", () => {
+	assert.deepEqual(
+		parseMeshEnv({ [ENV_NODE_ID]: "x", [ENV_NODE_NAME]: " auth-feature " }),
+		{ nodeId: "x", parentId: undefined, name: "auth-feature" },
 	);
 });
 

@@ -14,8 +14,6 @@ import { join } from "node:path";
 import {
 	resolveTargets,
 	formatIncoming,
-	parseMeshEnv,
-	buildChildEnv,
 	isPidAlive,
 	writeNode,
 	readNode,
@@ -33,9 +31,13 @@ import {
 	type MeshNode,
 	type WireMessage,
 } from "../mesh.ts";
-
-const ENV_NODE_ID = "PI_SPAWN_NODE_ID";
-const ENV_PARENT_ID = "PI_SPAWN_PARENT_ID";
+import {
+	parseMeshEnv,
+	buildChildEnv,
+	ENV_NODE_ID,
+	ENV_PARENT_ID,
+	ENV_NODE_NAME,
+} from "../logic.ts";
 
 function tmpMesh(): { root: string; nodes: string; sockets: string } {
 	const root = mkdtempSync(join(tmpdir(), "spawnpi-mesh-"));
@@ -135,11 +137,18 @@ test("formatIncoming: wraps text with sender label", () => {
 });
 
 test("parseMeshEnv: reads trimmed env vars", () => {
-	assert.deepEqual(parseMeshEnv({}), { nodeId: undefined, parentId: undefined });
-	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), { nodeId: "abc", parentId: undefined });
+	assert.deepEqual(parseMeshEnv({}), { nodeId: undefined, parentId: undefined, name: undefined });
+	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), { nodeId: "abc", parentId: undefined, name: undefined });
 	assert.deepEqual(
 		parseMeshEnv({ [ENV_NODE_ID]: "child", [ENV_PARENT_ID]: "par" }),
-		{ nodeId: "child", parentId: "par" },
+		{ nodeId: "child", parentId: "par", name: undefined },
+	);
+});
+
+test("parseMeshEnv: reads explicit node name", () => {
+	assert.deepEqual(
+		parseMeshEnv({ [ENV_NODE_ID]: "x", [ENV_NODE_NAME]: " auth " }),
+		{ nodeId: "x", parentId: undefined, name: "auth" },
 	);
 });
 
