@@ -1,3 +1,8 @@
 #!/bin/sh
 
-alacritty -e sh -c 'wf-recorder -a '"$(pactl get-default-sink).monitor"' -c h264_vaapi -f "/home/raph/recording.mp4"'
+# Capture system output (the music you hear), not the microphone:
+# wf-recorder's -a takes an OPTIONAL arg, so the device MUST be attached
+# with no space (-a<device>). A space makes -a fall back to the default
+# source, which is the mic.
+monitor="$(pactl get-default-sink).monitor"
+alacritty -e wf-recorder -a"$monitor" -c h264_vaapi -f "/home/raph/recording.mp4"
