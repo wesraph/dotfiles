@@ -14,6 +14,13 @@ const execAsync = promisify(exec);
 
 const NOTIFICATION_WAV = "/home/raph/.pi/agent/extensions/notification.wav";
 const LOG_FILE = "/tmp/pi-stop-hook.log";
+const ENV_PLAY_SOUND = "PLAY_PI_NOTIFICATION";
+const SOUND_ON_VALUES = new Set(["1", "true", "yes", "on"]);
+
+/** Sound plays only when PLAY_PI_NOTIFICATION is explicitly on (1/true/yes/on). */
+function isSoundEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+	return SOUND_ON_VALUES.has((env[ENV_PLAY_SOUND] ?? "").trim().toLowerCase());
+}
 
 function log(msg: string): void {
   const ts = new Date().toISOString();
@@ -76,12 +83,16 @@ export default function (pi: import("@mariozechner/pi-coding-agent").ExtensionAP
         log(`notify-send failed: ${err.message}`);
       }
 
-      // Play notification sound in background
-      try {
-        execAsync(`paplay --volume=85000 "${NOTIFICATION_WAV}"`, { timeout: 5000 });
-        log("paplay started");
-      } catch (err: any) {
-        log(`paplay failed: ${err.message}`);
+      // Play notification sound only when PLAY_PI_NOTIFICATION is on
+      if (!isSoundEnabled()) {
+        log("sound skipped (PLAY_PI_NOTIFICATION not on)");
+      } else {
+        try {
+          execAsync(`paplay --volume=85000 "${NOTIFICATION_WAV}"`, { timeout: 5000 });
+          log("paplay started");
+        } catch (err: any) {
+          log(`paplay failed: ${err.message}`);
+        }
       }
 
       // Send bell character to terminal
