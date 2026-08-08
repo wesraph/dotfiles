@@ -352,7 +352,7 @@ require('nvim-treesitter').setup {}
 
 require('nvim-treesitter').install {
   'c', 'lua', 'go', 'javascript', 'solidity', 'rust', 'html',
-  'markdown', 'markdown_inline',
+  'markdown', 'markdown_inline', 'yaml', 'json'
 }
 
 -- Enable Neovim's native treesitter highlighting for any filetype that has a parser.
