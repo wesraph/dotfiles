@@ -10,8 +10,7 @@
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
-    "npm:@narumitw/pi-goal",
-    "npm:@tintinweb/pi-tasks"
+    "npm:@narumitw/pi-goal"
   ],
   "editorPaddingX": 0,
   "terminal": {
