@@ -10,7 +10,8 @@
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
-    "npm:@narumitw/pi-goal"
+    "npm:@narumitw/pi-goal",
+    "npm:pi-anthropic-oauth@0.2.4"
   ],
   "editorPaddingX": 0,
   "terminal": {
@@ -39,7 +40,10 @@
   "enabledModels": [
     "zai-renaud/glm-5.1",
     "zai-renaud/glm-5.2",
-    "qwen3.6-27b-fp8"
+    "qwen3.6-27b-fp8",
+    "anthropic/claude-opus-4-8",
+    "anthropic/claude-sonnet-4-6",
+    "anthropic/claude-fable-5"
   ],
   "hideThinkingBlock": false,
   "images": {
