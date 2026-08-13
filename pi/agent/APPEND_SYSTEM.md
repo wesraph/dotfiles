@@ -50,8 +50,8 @@
 
 ## Vision Tasks
 
-- If you need to analyze images, screenshots, diagrams, or any visual content, **always** invoke the `vision` subagent (`llamacpp/Qwen3.6-35B-Vision`). Do not attempt to reason about visual content without it.
-- Pass the image(s) to the vision agent via its task prompt. The vision agent has vision capabilities and will analyze the visual content for you.
+- If you need to analyze images, screenshots, diagrams, or any visual content, **always** spawn a subagent with a vision-capable model rather than reasoning about visual content directly.
+- Pass the image(s) to the spawned agent via its task prompt.
 
 ## Code Review — Verify Before Reporting
 
@@ -155,7 +155,7 @@ If something was NOT tested, state that explicitly under "Proof" rather than dre
 
 ## Subagent Conventions
 
-- **Agents**: `scout` (recon), `planner` (plans), `worker` (implementation), `reviewer` (review-and-fix), `oracle` (advisory review), `researcher` (web research), `verifier` (solution verification, 27B model), `doc-searcher` (finds and summarizes documentation for implementation context), `big-brain` (27B model — use when a task is too hard for the main agent), `vision` (vision analysis, Qwen3.6-35B-Vision)
+- **Agents**: `scout` (recon), `planner` (plans), `worker` (implementation), `reviewer` (review-and-fix), `oracle` (advisory review), `researcher` (web research), `doc-searcher` (finds and summarizes documentation for implementation context). Spawn whichever agent the task needs, using the current model — no dedicated heavy-reasoning or vision agents.
 - **Strong prompts**: include Goal, Context, Success criteria, Hard constraints, Validation, Output shape
 - **Keep writes single-threaded**: one `worker` + advisory/review children
 - **Child subagents cannot spawn their own subagents**; nesting depth is 2
