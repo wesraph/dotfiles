@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.79.4",
+  "lastChangelogVersion": "0.84.1",
   "defaultProvider": "zai-renaud",
-  "defaultModel": "glm-5.2",
+  "defaultModel": "glm-5.3",
   "packages": [
     "git:github.com/nicobailon/pi-subagents@3ee17de53d1a430b71519889741569c3991f99b7",
     "git:github.com/nicobailon/pi-powerline-footer@18c50ddd7cfcfd9e886146d5e63a26e8e4819018",
@@ -38,9 +38,10 @@
   "quietStartup": true,
   "defaultThinkingLevel": "high",
   "enabledModels": [
-    "zai-renaud/glm-5.1",
     "zai-renaud/glm-5.2",
+    "zai-renaud/glm-5.3",
     "qwen3.6-27b-fp8",
+    "anthropic/claude-opus-5",
     "anthropic/claude-opus-4-8",
     "anthropic/claude-sonnet-4-6",
     "anthropic/claude-fable-5"
