@@ -6,7 +6,8 @@
       "apiKey": "$ZAI_RENAUD_API_KEY",
       "compat": {
         "supportsDeveloperRole": false,
-        "thinkingFormat": "zai"
+        "thinkingFormat": "zai",
+        "supportsReasoningEffort": true
       },
       "models": [
         {
