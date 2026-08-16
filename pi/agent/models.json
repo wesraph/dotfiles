@@ -38,33 +38,9 @@
       "apiKey": "local",
       "models": [
         {
-          "id": "Qwen3.6-35B",
-          "contextWindow": 200000
-        },
-        {
-          "id": "Qwen3.6-35B-Vision",
-          "contextWindow": 150000,
-          "input": [
-            "image"
-          ]
-        },
-        {
-          "id": "Qwen3.6-27B",
-          "contextWindow": 200000
-        },
-        {
-          "id": "qwen3.6-27b-fp8",
-          "contextWindow": 200000,
-          "reasoning": true,
-          "compat": {
-            "thinkingFormat": "qwen-chat-template",
-            "supportsDeveloperRole": false,
-            "zaiToolStream": true
-          }
-        },
-        {
-          "id": "qwen3.6-27b-autoround",
-          "contextWindow": 200000,
+          "id": "qwen3.8-27b",
+          "name": "Qwen3.8-27B (Q6_K_XL)",
+          "contextWindow": 256000,
           "reasoning": true,
           "compat": {
             "thinkingFormat": "qwen-chat-template",

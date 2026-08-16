@@ -24,10 +24,10 @@
   "subagents": {
     "agentOverrides": {
       "reviewer": {
-        "model": "llamacpp/qwen3.6-27b-fp8"
+        "model": "llamacpp/qwen3.8-27b"
       },
       "planner": {
-        "model": "llamacpp/qwen3.6-27b-fp8"
+        "model": "llamacpp/qwen3.8-27b"
       },
       "researcher": {
         "disabled": true
@@ -40,7 +40,7 @@
   "enabledModels": [
     "zai-renaud/glm-5.2",
     "zai-renaud/glm-5.3",
-    "qwen3.6-27b-fp8",
+    "qwen3.8-27b",
     "anthropic/claude-opus-5",
     "anthropic/claude-opus-4-8",
     "anthropic/claude-sonnet-4-6",

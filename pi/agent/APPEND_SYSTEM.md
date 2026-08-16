@@ -3,6 +3,12 @@
 - **Always use a task list** for multi-step work.
 - **When you detect a subject change** (the user switches to a new, unrelated topic), **check the task list first**. If there are any tasks still present (especially completed ones from the previous topic), **clear the task list** before creating new tasks for the new subject. This keeps the task list relevant and uncluttered.
 
+## Background Tasks — No Sleep Polling
+
+- After starting a task with `bg_run` (or any background/spawned task), do NOT run `sleep`, `sleep N && ...`, or timed loops to wait for it.
+- The harness notifies automatically when the task finishes — end the turn and wait for the notification, then continue with `bg_logs`/`bg_status` if needed.
+- Only check a running task's output with `bg_logs` when you genuinely need progress mid-work, never as a wait mechanism.
+
 ## Build Agent Instructions
 
 - Always use a task list

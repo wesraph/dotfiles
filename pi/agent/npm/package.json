@@ -1,0 +1,7 @@
+{
+  "name": "pi-extensions",
+  "private": true,
+  "dependencies": {
+    "pi-anthropic-oauth": "^0.2.4"
+  }
+}
