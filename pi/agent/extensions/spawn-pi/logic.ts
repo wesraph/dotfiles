@@ -12,6 +12,7 @@ import { isAbsolute, resolve, delimiter } from "node:path";
 import { homedir } from "node:os";
 
 export const PROMPT_ENV = "PI_SPAWN_PROMPT";
+export const MODEL_ENV = "PI_SPAWN_MODEL";
 export const PI_BIN = "pi";
 export const TMUX_BIN = "tmux";
 export const VALID_TARGETS = ["auto", "pane", "tab", "terminal"] as const;
@@ -128,19 +129,24 @@ export function canonicalizeCwd(abs: string): string {
 }
 
 /**
- * Build tmux argv that runs `exec pi "$PI_SPAWN_PROMPT"` in a new pane (-d keeps main focused).
- * extraEnv is carried as additional tmux `-e KEY=VAL` literals (never parsed by a shell),
- * used to stamp the spawned pi's mesh identity.
+ * Build tmux argv that runs `exec pi ["--model" "$PI_SPAWN_MODEL"] "$PI_SPAWN_PROMPT"` in a new
+ * pane (-d keeps main focused). extraEnv is carried as additional tmux `-e KEY=VAL` literals
+ * (never parsed by a shell), used to stamp the spawned pi's mesh identity. The optional model
+ * rides the same env mechanism so it is never shell-parsed either.
  */
 export function buildTmuxArgs(
 	mode: "pane" | "tab",
 	cwd: string,
 	prompt: string,
 	extraEnv: Record<string, string> = {},
+	model?: string,
 ): string[] {
 	const subcommand = mode === "pane" ? "split-window" : "new-window";
 	const horizontalFlag = mode === "pane" ? ["-h"] : [];
-	const extraEnvArgs = Object.entries(extraEnv).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+	const envWithModel = model ? { ...extraEnv, [MODEL_ENV]: model } : extraEnv;
+	const extraEnvArgs = Object.entries(envWithModel).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+	const modelArgs = model ? [`--model "$${MODEL_ENV}"`] : [];
+	const command = ["exec", PI_BIN, ...modelArgs, `"$${PROMPT_ENV}"`].join(" ");
 	return [
 		subcommand,
 		...horizontalFlag,
@@ -150,13 +156,19 @@ export function buildTmuxArgs(
 		...extraEnvArgs,
 		"-e",
 		`${PROMPT_ENV}=${prompt}`,
-		`exec ${PI_BIN} "$${PROMPT_ENV}"`,
+		command,
 	];
 }
 
 /** Build terminal-emulator argv that execs pi directly with the prompt as one argv element. */
-export function buildTerminalArgs(spec: TerminalSpec, cwd: string, prompt: string): string[] {
-	return spec.buildArgs(cwd, [PI_BIN, prompt]);
+export function buildTerminalArgs(
+	spec: TerminalSpec,
+	cwd: string,
+	prompt: string,
+	model?: string,
+): string[] {
+	const piArgs = model ? [PI_BIN, "--model", model] : [PI_BIN];
+	return spec.buildArgs(cwd, [...piArgs, prompt]);
 }
 
 /** Tokenize a raw arg string, honoring single/double quotes and backslash escapes. */
@@ -219,6 +231,7 @@ export interface ParsedSpawnArgs {
 	cwd?: string;
 	target: string;
 	name?: string;
+	model?: string;
 }
 
 /** Parse `/spawn` arg string: flags first (--cwd, --target, --name), remainder is the prompt. */
@@ -226,6 +239,7 @@ export function parseSpawnArgs(input: string): ParsedSpawnArgs {
 	const tokens = tokenize(input);
 	let cwd: string | undefined;
 	let name: string | undefined;
+	let model: string | undefined;
 	let target = "auto";
 	const rest: string[] = [];
 	for (let i = 0; i < tokens.length; i++) {
@@ -254,9 +268,17 @@ export function parseSpawnArgs(input: string): ParsedSpawnArgs {
 			name = t.slice("--name=".length);
 			continue;
 		}
+		if ((t === "--model" || t === "-m") && i + 1 < tokens.length) {
+			model = tokens[++i];
+			continue;
+		}
+		if (t.startsWith("--model=")) {
+			model = t.slice("--model=".length);
+			continue;
+		}
 		rest.push(t);
 	}
-	return { prompt: rest.join(" ").trim(), cwd, target, name };
+	return { prompt: rest.join(" ").trim(), cwd, target, name, model };
 }
 
 export interface SpawnDetails {
@@ -267,6 +289,8 @@ export interface SpawnDetails {
 	requestedTarget: string;
 	/** Node id assigned to the spawned pi (present when mesh identity was injected). */
 	childId?: string;
+	/** Model pattern the spawned pi was forced to (pi --model). */
+	model?: string;
 }
 
 export function isValidTarget(value: string): boolean {
@@ -284,12 +308,13 @@ export async function spawnPi(options: {
 	target: SpawnTarget;
 	env: NodeJS.ProcessEnv;
 	extraEnv?: Record<string, string>;
+	model?: string;
 }): Promise<SpawnDetails> {
-	const { prompt, cwd, target, env, extraEnv } = options;
+	const { prompt, cwd, target, env, extraEnv, model } = options;
 
 	if (target === "pane" || target === "tab") {
 		return new Promise<SpawnDetails>((resolveP, reject) => {
-			const args = buildTmuxArgs(target, cwd, prompt, extraEnv);
+			const args = buildTmuxArgs(target, cwd, prompt, extraEnv, model);
 			const child = spawn(TMUX_BIN, args, { stdio: "ignore", shell: false });
 			child.on("error", (err) => reject(new Error(`tmux ${target} failed: ${err.message}`)));
 			child.on("exit", (code) => {
@@ -300,6 +325,7 @@ export async function spawnPi(options: {
 						inTmux: true,
 						requestedTarget: target,
 						childId: extraEnv?.[ENV_NODE_ID],
+						model,
 					});
 				} else {
 					reject(new Error(`tmux ${target} exited with code ${code}`));
@@ -314,7 +340,7 @@ export async function spawnPi(options: {
 			"No terminal emulator found. Install alacritty/kitty/wezterm/foot, or run inside tmux.",
 		);
 	}
-	const args = buildTerminalArgs(spec, cwd, prompt);
+	const args = buildTerminalArgs(spec, cwd, prompt, model);
 	const childEnv = extraEnv ? { ...env, ...extraEnv } : env;
 	const child = spawn(spec.bin, args, {
 		stdio: "ignore",
@@ -333,5 +359,6 @@ export async function spawnPi(options: {
 		inTmux: isInTmux(env),
 		requestedTarget: "terminal",
 		childId: extraEnv?.[ENV_NODE_ID],
+		model,
 	};
 }

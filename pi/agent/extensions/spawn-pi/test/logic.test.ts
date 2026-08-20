@@ -134,6 +134,18 @@ test("buildTmuxArgs: prompt with newlines and quotes survives in env value", () 
 	assert.equal(args[6], `PI_SPAWN_PROMPT=${tricky}`);
 });
 
+test("buildTmuxArgs: model rides env, referenced quoted by name", () => {
+	const args = buildTmuxArgs("pane", "/repo", "p", {}, "anthropic/claude-opus-5");
+	assert.ok(args.includes("PI_SPAWN_MODEL=anthropic/claude-opus-5"));
+	assert.equal(args[args.length - 1], 'exec pi --model "$PI_SPAWN_MODEL" "$PI_SPAWN_PROMPT"');
+});
+
+test("buildTmuxArgs: no model — command unchanged", () => {
+	const args = buildTmuxArgs("pane", "/repo", "p");
+	assert.ok(!args.some((a) => a.includes("PI_SPAWN_MODEL")));
+	assert.equal(args[args.length - 1], 'exec pi "$PI_SPAWN_PROMPT"');
+});
+
 // --- buildTerminalArgs -------------------------------------------------------
 
 test("buildTerminalArgs: execs pi directly with prompt as one argv element", () => {
@@ -141,6 +153,11 @@ test("buildTerminalArgs: execs pi directly with prompt as one argv element", () 
 	assert.deepEqual(args, ["--working-directory", "/repo", "-e", "pi", "do the thing"]);
 	assert.equal(args[3], "pi");
 	assert.equal(args[4], "do the thing");
+});
+
+test("buildTerminalArgs: model passed as --model before the prompt", () => {
+	const args = buildTerminalArgs(alacritty, "/repo", "go", "google/gemini-3-pro");
+	assert.deepEqual(args, ["--working-directory", "/repo", "-e", "pi", "--model", "google/gemini-3-pro", "go"]);
 });
 
 // --- tokenize ----------------------------------------------------------------

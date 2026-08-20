@@ -35,6 +35,7 @@ import {
 	ENV_NODE_ID,
 	ENV_PARENT_ID,
 	ENV_NODE_NAME,
+	MODEL_ENV,
 	isValidTarget,
 	resolveCwd,
 	canonicalizeCwd,
@@ -83,6 +84,7 @@ export {
 	ENV_NODE_ID,
 	ENV_PARENT_ID,
 	ENV_NODE_NAME,
+	MODEL_ENV,
 	parseMeshEnv,
 	buildChildEnv,
 } from "./logic.ts";
@@ -229,6 +231,7 @@ export default function (pi: ExtensionAPI): void {
 		fallbackCwd: string,
 		env: NodeJS.ProcessEnv,
 		rawName?: string,
+		rawModel?: string,
 	): Promise<{ details: Awaited<ReturnType<typeof spawnPi>>; summary: string }> => {
 		const prompt = rawPrompt.trim();
 		if (!prompt) throw new Error("prompt is required");
@@ -236,6 +239,7 @@ export default function (pi: ExtensionAPI): void {
 			throw new Error(`invalid target "${rawTarget}". Use one of: ${VALID_TARGETS.join(", ")}`);
 		}
 		const name = rawName?.trim() || undefined;
+		const model = rawModel?.trim() || undefined;
 		const resolved = resolveCwd(rawCwd, fallbackCwd);
 		let cwd = resolved;
 		try {
@@ -252,7 +256,7 @@ export default function (pi: ExtensionAPI): void {
 		if (currentNodeId) extraEnv[ENV_PARENT_ID] = currentNodeId;
 		if (name) extraEnv[ENV_NODE_NAME] = name;
 
-		const details = await spawnPi({ prompt, cwd, target, env, extraEnv });
+		const details = await spawnPi({ prompt, cwd, target, env, extraEnv, model });
 		details.childId = childId;
 
 		const where =
@@ -260,7 +264,8 @@ export default function (pi: ExtensionAPI): void {
 				? `a new ${details.terminal ?? "terminal"} window`
 				: `a new tmux ${target}`;
 		const asName = name ? ` as "${name}"` : "";
-		const summary = `Opened ${where}${asName} in ${cwd}\nPrompt: ${prompt}\nNode id: ${childId}`;
+		const withModel = model ? ` (model: ${model})` : "";
+		const summary = `Opened ${where}${asName}${withModel} in ${cwd}\nPrompt: ${prompt}\nNode id: ${childId}`;
 		const fellBack = rawTarget !== "auto" && rawTarget !== target;
 		return {
 			details,
@@ -284,7 +289,8 @@ export default function (pi: ExtensionAPI): void {
 			"Open a NEW, interactive pi session seeded with an initial prompt. The new pi runs in a",
 			"separate tmux pane/tab (when inside tmux) or a new terminal window, and stays open until",
 			"the user closes it. Use it to hand a self-contained task to a fresh context, optionally in",
-			"a different working directory (e.g. a git worktree). The spawned pi joins the mesh: use",
+			"a different working directory (e.g. a git worktree), optionally forcing a model via the",
+			'model parameter. The spawned pi joins the mesh: use',
 			"send_pi_message to talk to it (target 'children' or its returned node id).",
 		].join(" "),
 		promptSnippet: "Open another interactive pi in a tmux pane/tab or new terminal with a starting prompt",
@@ -314,6 +320,12 @@ export default function (pi: ExtensionAPI): void {
 					'Human-readable name for the new node, shown in /nodes and incoming messages (e.g. "auth-feature"). Defaults to a cwd-derived label. Useful when spawning several pi instances to tell them apart.',
 				}),
 			),
+			model: Type.Optional(
+				Type.String({
+					description:
+					'Model pattern or ID to force the spawned pi to use, passed as `pi --model` (e.g. "anthropic/claude-opus-5", "google/gemini-3-pro"). Omit to use the child\'s default model.',
+				}),
+			),
 		}),
 
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -325,6 +337,7 @@ export default function (pi: ExtensionAPI): void {
 					ctx.cwd,
 					process.env,
 					params.name,
+					params.model,
 				);
 				return {
 					content: [{ type: "text", text: summary }],
@@ -338,6 +351,7 @@ export default function (pi: ExtensionAPI): void {
 		renderCall(args, theme, _context) {
 			const target = (args.target as string) ?? "auto";
 			const nameHint = args.name ? ` ${theme.fg("accent", String(args.name))}` : "";
+			const modelHint = args.model ? ` ${theme.fg("accent", `@${String(args.model)}`)}` : "";
 			const cwdHint = args.cwd ? ` in ${args.cwd}` : "";
 			const preview = args.prompt
 				? args.prompt.length > 60
@@ -348,6 +362,7 @@ export default function (pi: ExtensionAPI): void {
 				theme.fg("toolTitle", theme.bold("spawn_pi ")) +
 				theme.fg("accent", target) +
 				nameHint +
+				modelHint +
 				theme.fg("muted", cwdHint) +
 				"\n  " +
 				theme.fg("dim", preview);
@@ -449,12 +464,12 @@ export default function (pi: ExtensionAPI): void {
 	// --- commands ---
 	pi.registerCommand("spawn", {
 		description:
-			"Open a new pi with a prompt. Usage: /spawn [--name NAME] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
+			"Open a new pi with a prompt. Usage: /spawn [--name NAME] [--model MODEL] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
 		handler: async (args, ctx) => {
 			const parsed = parseSpawnArgs(args);
 			if (!parsed.prompt) {
 				ctx.ui.notify(
-					"Usage: /spawn [--name NAME] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
+					"Usage: /spawn [--name NAME] [--model MODEL] [--cwd DIR] [--target auto|pane|tab|terminal] <prompt>",
 					"warning",
 				);
 				return;
@@ -467,6 +482,7 @@ export default function (pi: ExtensionAPI): void {
 					ctx.cwd,
 					process.env,
 					parsed.name,
+					parsed.model,
 				);
 				ctx.ui.notify(summary, "info");
 			} catch (err) {
