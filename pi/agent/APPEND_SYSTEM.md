@@ -3,10 +3,20 @@
 - **Always use a task list** for multi-step work.
 - **When you detect a subject change** (the user switches to a new, unrelated topic), **check the task list first**. If there are any tasks still present (especially completed ones from the previous topic), **clear the task list** before creating new tasks for the new subject. This keeps the task list relevant and uncluttered.
 
-## Background Tasks — No Sleep Polling
+## Waiting — Event-Driven, Never Sleep-Polling
 
-- After starting a task with `bg_run` (or any background/spawned task), do NOT run `sleep`, `sleep N && ...`, or timed loops to wait for it.
-- The harness notifies automatically when the task finishes — end the turn and wait for the notification, then continue with `bg_logs`/`bg_status` if needed.
+NEVER use `sleep`, `sleep N && ...`, or timed re-check loops to wait for something. Sleeping wastes turns/time and never knows the real moment. Instead, block on the event itself — the command returns exactly when the thing happened (like `tail -f`):
+
+- **Background/long-running commands** (`bg_run`): do NOT wait — end the turn. The harness notifies automatically on completion, then continue with `bg_logs`/`bg_status`.
+- **A process to exit** (not your child): `tail --pid=$PID -f /dev/null` — returns the moment PID dies. If it's a child of your shell: `wait $PID`.
+- **A file/dir to change or appear**: `inotifywait -e create,modify,close_write <path>` (Linux; pkg `inotify-tools`) / `fswatch -1 <path>` (macOS) / fallback with `entr`: `echo <file> | entr -n -z echo done` (blocks until file is written).
+- **A line/pattern to appear in a growing log**: `tail -n +1 -f app.log | grep -m1 "ready"` — blocks until first match, then exits. Or `awk '/ready/{exit}' app.log` for a finished file, `stdbuf` if buffering bites.
+- **A server/port to become ready**: use a single blocking readiness command with a timeout, e.g. `timeout 60 bash -c 'until curl -sf http://localhost:8080/health >/dev/null; do sleep 0.2; done'` — one foreground call that returns as soon as ready, NOT agent-level `sleep 5` → check → `sleep 5` → check cycles. Or just `bg_run` the server and grep its log for the ready line.
+- **A lock/release/ordering condition**: a named pipe (`mkfifo`) or `flock` rather than periodic checks.
+
+Rules:
+- Sleep may appear ONLY inside a single self-contained blocking wait command (as above), never as an agent-side "wait then look" step.
+- If no event primitive exists, use one bounded blocking wait with `timeout` — never repeated sleep-check cycles.
 - Only check a running task's output with `bg_logs` when you genuinely need progress mid-work, never as a wait mechanism.
 
 ## Build Agent Instructions
