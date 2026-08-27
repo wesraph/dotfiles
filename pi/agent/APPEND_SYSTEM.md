@@ -332,3 +332,12 @@ Resume caveman after the clear part is done.
 ### Boundaries
 
 Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persists until changed or session end.
+
+## Scout Model Selection
+
+Scout has no pinned model — it inherits the parent model by default. Before calling the `scout` agent, check `PI_MODEL`:
+
+- `claude-opus-*` or `claude-fable-*` → pass `model: "anthropic/claude-sonnet-5"` in the subagent call (recon does not need a frontier model).
+- Anything else (glm, qwen, sonnet, local) → omit `model` and inherit the parent.
+
+Applies only to `scout`. Other agents keep their configured models.
