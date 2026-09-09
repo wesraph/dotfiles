@@ -10,6 +10,13 @@
     "cloakbrowser": {
       "command": "cloakbrowser-mcp",
       "args": []
+    },
+    "gsheets": {
+      "command": "npx",
+      "args": ["-y", "gsheets-mcp"],
+      "env": {
+        "SERVICE_ACCOUNT_PATH": "/home/raph/.config/mcp/pi-drive-sa.json"
+      }
     }
   }
 }
