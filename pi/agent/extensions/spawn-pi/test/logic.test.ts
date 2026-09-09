@@ -77,7 +77,10 @@ test("detectTerminal: falls through preference order when hint absent/unmatched"
 });
 
 test("detectTerminal: returns null when nothing available", () => {
-	assert.equal(detectTerminal({}, () => null), null);
+	assert.equal(
+		detectTerminal({}, () => null),
+		null,
+	);
 });
 
 // --- expandTilde / resolveCwd ------------------------------------------------
@@ -129,15 +132,24 @@ test("buildTmuxArgs: tab uses new-window, no -h", () => {
 });
 
 test("buildTmuxArgs: prompt with newlines and quotes survives in env value", () => {
-	const tricky = 'line1\nline2 "q" \'sq\' $x';
+	const tricky = "line1\nline2 \"q\" 'sq' $x";
 	const args = buildTmuxArgs("pane", "/r", tricky);
 	assert.equal(args[6], `PI_SPAWN_PROMPT=${tricky}`);
 });
 
 test("buildTmuxArgs: model rides env, referenced quoted by name", () => {
-	const args = buildTmuxArgs("pane", "/repo", "p", {}, "anthropic/claude-opus-5");
+	const args = buildTmuxArgs(
+		"pane",
+		"/repo",
+		"p",
+		{},
+		"anthropic/claude-opus-5",
+	);
 	assert.ok(args.includes("PI_SPAWN_MODEL=anthropic/claude-opus-5"));
-	assert.equal(args[args.length - 1], 'exec pi --model "$PI_SPAWN_MODEL" "$PI_SPAWN_PROMPT"');
+	assert.equal(
+		args[args.length - 1],
+		'exec pi --model "$PI_SPAWN_MODEL" "$PI_SPAWN_PROMPT"',
+	);
 });
 
 test("buildTmuxArgs: no model — command unchanged", () => {
@@ -150,14 +162,33 @@ test("buildTmuxArgs: no model — command unchanged", () => {
 
 test("buildTerminalArgs: execs pi directly with prompt as one argv element", () => {
 	const args = buildTerminalArgs(alacritty, "/repo", "do the thing");
-	assert.deepEqual(args, ["--working-directory", "/repo", "-e", "pi", "do the thing"]);
+	assert.deepEqual(args, [
+		"--working-directory",
+		"/repo",
+		"-e",
+		"pi",
+		"do the thing",
+	]);
 	assert.equal(args[3], "pi");
 	assert.equal(args[4], "do the thing");
 });
 
 test("buildTerminalArgs: model passed as --model before the prompt", () => {
-	const args = buildTerminalArgs(alacritty, "/repo", "go", "google/gemini-3-pro");
-	assert.deepEqual(args, ["--working-directory", "/repo", "-e", "pi", "--model", "google/gemini-3-pro", "go"]);
+	const args = buildTerminalArgs(
+		alacritty,
+		"/repo",
+		"go",
+		"google/gemini-3-pro",
+	);
+	assert.deepEqual(args, [
+		"--working-directory",
+		"/repo",
+		"-e",
+		"pi",
+		"--model",
+		"google/gemini-3-pro",
+		"go",
+	]);
 });
 
 // --- tokenize ----------------------------------------------------------------
@@ -167,7 +198,7 @@ test("tokenize: basic whitespace", () => {
 });
 
 test("tokenize: single and double quotes", () => {
-	assert.deepEqual(tokenize('"a b" \'c d\' e'), ["a b", "c d", "e"]);
+	assert.deepEqual(tokenize("\"a b\" 'c d' e"), ["a b", "c d", "e"]);
 });
 
 test("tokenize: backslash escapes", () => {
@@ -193,14 +224,14 @@ test("parseSpawnArgs: prompt only", () => {
 });
 
 test("parseSpawnArgs: --cwd and --target flags", () => {
-	const p = parseSpawnArgs('--cwd /tmp/wt --target tab fix the bug');
+	const p = parseSpawnArgs("--cwd /tmp/wt --target tab fix the bug");
 	assert.equal(p.cwd, "/tmp/wt");
 	assert.equal(p.target, "tab");
 	assert.equal(p.prompt, "fix the bug");
 });
 
 test("parseSpawnArgs: = syntax and short -C", () => {
-	const p = parseSpawnArgs('--cwd=/a/b --target=pane -C /x go');
+	const p = parseSpawnArgs("--cwd=/a/b --target=pane -C /x go");
 	assert.equal(p.cwd, "/x"); // -C overrides earlier --cwd=
 	assert.equal(p.target, "pane");
 	assert.equal(p.prompt, "go");
@@ -221,15 +252,15 @@ test("parseSpawnArgs: empty input", () => {
 // --- parseSpawnArgs: --name / -n -------------------------------------------
 
 test("parseSpawnArgs: --name flag", () => {
-	const p = parseSpawnArgs('--name auth-feature fix the bug');
+	const p = parseSpawnArgs("--name auth-feature fix the bug");
 	assert.equal(p.name, "auth-feature");
 	assert.equal(p.prompt, "fix the bug");
 });
 
 test("parseSpawnArgs: -n short flag, = syntax, and spaced name via space form", () => {
-	assert.equal(parseSpawnArgs('-n short go').name, "short");
+	assert.equal(parseSpawnArgs("-n short go").name, "short");
 	// = syntax takes only what's after '='
-	assert.equal(parseSpawnArgs('--name=auth fix bug').name, "auth");
+	assert.equal(parseSpawnArgs("--name=auth fix bug").name, "auth");
 	// spaced name requires the space form (--name "...")
 	const q = parseSpawnArgs('--name "auth feature" fix the bug');
 	assert.equal(q.name, "auth feature");
@@ -237,7 +268,7 @@ test("parseSpawnArgs: -n short flag, = syntax, and spaced name via space form", 
 });
 
 test("parseSpawnArgs: name omitted when not provided", () => {
-	assert.equal(parseSpawnArgs('just a prompt').name, undefined);
+	assert.equal(parseSpawnArgs("just a prompt").name, undefined);
 });
 
 // --- buildTmuxArgs with extraEnv (mesh identity) ---------------------------
@@ -272,8 +303,16 @@ test("buildTmuxArgs: no extraEnv → same layout as before", () => {
 // --- parseMeshEnv / buildChildEnv ------------------------------------------
 
 test("parseMeshEnv: reads trimmed env vars", () => {
-	assert.deepEqual(parseMeshEnv({}), { nodeId: undefined, parentId: undefined, name: undefined });
-	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), { nodeId: "abc", parentId: undefined, name: undefined });
+	assert.deepEqual(parseMeshEnv({}), {
+		nodeId: undefined,
+		parentId: undefined,
+		name: undefined,
+	});
+	assert.deepEqual(parseMeshEnv({ [ENV_NODE_ID]: " abc " }), {
+		nodeId: "abc",
+		parentId: undefined,
+		name: undefined,
+	});
 	assert.deepEqual(
 		parseMeshEnv({ [ENV_NODE_ID]: "child", [ENV_PARENT_ID]: "par" }),
 		{ nodeId: "child", parentId: "par", name: undefined },

@@ -57,10 +57,26 @@ export interface TerminalSpec {
 
 // Preference order: alacritty first (user's primary), then common Wayland/X terminals.
 export const TERMINALS: TerminalSpec[] = [
-	{ name: "alacritty", bin: "alacritty", buildArgs: (cwd, cmd) => ["--working-directory", cwd, "-e", ...cmd] },
-	{ name: "kitty", bin: "kitty", buildArgs: (cwd, cmd) => [`--directory=${cwd}`, ...cmd] },
-	{ name: "wezterm", bin: "wezterm", buildArgs: (cwd, cmd) => ["start", "--cwd", cwd, ...cmd] },
-	{ name: "foot", bin: "foot", buildArgs: (cwd, cmd) => [`--working-directory=${cwd}`, ...cmd] },
+	{
+		name: "alacritty",
+		bin: "alacritty",
+		buildArgs: (cwd, cmd) => ["--working-directory", cwd, "-e", ...cmd],
+	},
+	{
+		name: "kitty",
+		bin: "kitty",
+		buildArgs: (cwd, cmd) => [`--directory=${cwd}`, ...cmd],
+	},
+	{
+		name: "wezterm",
+		bin: "wezterm",
+		buildArgs: (cwd, cmd) => ["start", "--cwd", cwd, ...cmd],
+	},
+	{
+		name: "foot",
+		bin: "foot",
+		buildArgs: (cwd, cmd) => [`--working-directory=${cwd}`, ...cmd],
+	},
 ];
 
 /** True when the current process is running inside a tmux session. */
@@ -69,7 +85,10 @@ export function isInTmux(env: NodeJS.ProcessEnv = process.env): boolean {
 }
 
 /** Resolve a requested target to a concrete one, honoring tmux availability. */
-export function resolveTarget(requested: string, env: NodeJS.ProcessEnv = process.env): SpawnTarget {
+export function resolveTarget(
+	requested: string,
+	env: NodeJS.ProcessEnv = process.env,
+): SpawnTarget {
 	if (requested === "terminal") return "terminal";
 	if (requested === "pane" || requested === "tab") {
 		return isInTmux(env) ? requested : "terminal";
@@ -78,11 +97,16 @@ export function resolveTarget(requested: string, env: NodeJS.ProcessEnv = proces
 }
 
 /** Default PATH lookup (no shell). Returns the resolved path or null. */
-export function which(bin: string, env: NodeJS.ProcessEnv = process.env): string | null {
+export function which(
+	bin: string,
+	env: NodeJS.ProcessEnv = process.env,
+): string | null {
 	const pathVar = env.PATH ?? "";
 	for (const dir of pathVar.split(delimiter)) {
 		if (!dir) continue;
-		const candidate = isAbsolute(dir) ? resolve(dir, bin) : resolve(homedir(), dir, bin);
+		const candidate = isAbsolute(dir)
+			? resolve(dir, bin)
+			: resolve(homedir(), dir, bin);
 		try {
 			accessSync(candidate, fsConstants.X_OK);
 			return candidate;
@@ -144,7 +168,10 @@ export function buildTmuxArgs(
 	const subcommand = mode === "pane" ? "split-window" : "new-window";
 	const horizontalFlag = mode === "pane" ? ["-h"] : [];
 	const envWithModel = model ? { ...extraEnv, [MODEL_ENV]: model } : extraEnv;
-	const extraEnvArgs = Object.entries(envWithModel).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+	const extraEnvArgs = Object.entries(envWithModel).flatMap(([k, v]) => [
+		"-e",
+		`${k}=${v}`,
+	]);
 	const modelArgs = model ? [`--model "$${MODEL_ENV}"`] : [];
 	const command = ["exec", PI_BIN, ...modelArgs, `"$${PROMPT_ENV}"`].join(" ");
 	return [
@@ -316,7 +343,9 @@ export async function spawnPi(options: {
 		return new Promise<SpawnDetails>((resolveP, reject) => {
 			const args = buildTmuxArgs(target, cwd, prompt, extraEnv, model);
 			const child = spawn(TMUX_BIN, args, { stdio: "ignore", shell: false });
-			child.on("error", (err) => reject(new Error(`tmux ${target} failed: ${err.message}`)));
+			child.on("error", (err) =>
+				reject(new Error(`tmux ${target} failed: ${err.message}`)),
+			);
 			child.on("exit", (code) => {
 				if (code === 0) {
 					resolveP({

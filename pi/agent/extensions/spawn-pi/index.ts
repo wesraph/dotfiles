@@ -26,7 +26,10 @@
  * unit-tested there.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Text } from "@earendil-works/pi-tui";
@@ -63,7 +66,12 @@ import {
 	type SendResult,
 } from "./mesh.ts";
 
-export type { SpawnDetails, SpawnTarget, TerminalSpec, ParsedSpawnArgs } from "./logic.ts";
+export type {
+	SpawnDetails,
+	SpawnTarget,
+	TerminalSpec,
+	ParsedSpawnArgs,
+} from "./logic.ts";
 export type { MeshNode, WireMessage, SendResult } from "./mesh.ts";
 export {
 	isInTmux,
@@ -187,7 +195,10 @@ export default function (pi: ExtensionAPI): void {
 		}
 	};
 
-	const selfMeta = () => ({ myId: currentNodeId ?? "", parentId: currentParentId });
+	const selfMeta = () => ({
+		myId: currentNodeId ?? "",
+		parentId: currentParentId,
+	});
 
 	const listMeshNodes = (): { self?: MeshNode; peers: MeshNode[] } => {
 		const dirs = ensureMeshDirs();
@@ -200,7 +211,10 @@ export default function (pi: ExtensionAPI): void {
 	const sendMesh = async (
 		target: string,
 		text: string,
-	): Promise<{ results: Array<{ id: string; label: string } & SendResult>; available: MeshNode[] }> => {
+	): Promise<{
+		results: Array<{ id: string; label: string } & SendResult>;
+		available: MeshNode[];
+	}> => {
 		const dirs = ensureMeshDirs();
 		const { nodes } = listNodes(dirs.nodes, dirs.sockets);
 		const resolved = resolveTargets(target, selfMeta(), nodes);
@@ -232,11 +246,16 @@ export default function (pi: ExtensionAPI): void {
 		env: NodeJS.ProcessEnv,
 		rawName?: string,
 		rawModel?: string,
-	): Promise<{ details: Awaited<ReturnType<typeof spawnPi>>; summary: string }> => {
+	): Promise<{
+		details: Awaited<ReturnType<typeof spawnPi>>;
+		summary: string;
+	}> => {
 		const prompt = rawPrompt.trim();
 		if (!prompt) throw new Error("prompt is required");
 		if (!isValidTarget(rawTarget)) {
-			throw new Error(`invalid target "${rawTarget}". Use one of: ${VALID_TARGETS.join(", ")}`);
+			throw new Error(
+				`invalid target "${rawTarget}". Use one of: ${VALID_TARGETS.join(", ")}`,
+			);
 		}
 		const name = rawName?.trim() || undefined;
 		const model = rawModel?.trim() || undefined;
@@ -256,7 +275,14 @@ export default function (pi: ExtensionAPI): void {
 		if (currentNodeId) extraEnv[ENV_PARENT_ID] = currentNodeId;
 		if (name) extraEnv[ENV_NODE_NAME] = name;
 
-		const details = await spawnPi({ prompt, cwd, target, env, extraEnv, model });
+		const details = await spawnPi({
+			prompt,
+			cwd,
+			target,
+			env,
+			extraEnv,
+			model,
+		});
 		details.childId = childId;
 
 		const where =
@@ -269,7 +295,9 @@ export default function (pi: ExtensionAPI): void {
 		const fellBack = rawTarget !== "auto" && rawTarget !== target;
 		return {
 			details,
-			summary: fellBack ? `${summary}\n(fell back to terminal: not inside tmux)` : summary,
+			summary: fellBack
+				? `${summary}\n(fell back to terminal: not inside tmux)`
+				: summary,
 		};
 	};
 
@@ -290,10 +318,11 @@ export default function (pi: ExtensionAPI): void {
 			"separate tmux pane/tab (when inside tmux) or a new terminal window, and stays open until",
 			"the user closes it. Use it to hand a self-contained task to a fresh context, optionally in",
 			"a different working directory (e.g. a git worktree), optionally forcing a model via the",
-			'model parameter. The spawned pi joins the mesh: use',
+			"model parameter. The spawned pi joins the mesh: use",
 			"send_pi_message to talk to it (target 'children' or its returned node id).",
 		].join(" "),
-		promptSnippet: "Open another interactive pi in a tmux pane/tab or new terminal with a starting prompt",
+		promptSnippet:
+			"Open another interactive pi in a tmux pane/tab or new terminal with a starting prompt",
 		promptGuidelines: [
 			"Use spawn_pi when the user asks to open/start/launch another pi in a new pane, tab, terminal, or worktree.",
 		],
@@ -310,20 +339,20 @@ export default function (pi: ExtensionAPI): void {
 			target: Type.Optional(
 				StringEnum(VALID_TARGETS, {
 					description:
-					'Where to open. "auto" (default): tmux pane if inside tmux, else new terminal. "pane"/"tab" fall back to terminal when not in tmux.',
+						'Where to open. "auto" (default): tmux pane if inside tmux, else new terminal. "pane"/"tab" fall back to terminal when not in tmux.',
 					default: "auto",
 				}),
 			),
 			name: Type.Optional(
 				Type.String({
 					description:
-					'Human-readable name for the new node, shown in /nodes and incoming messages (e.g. "auth-feature"). Defaults to a cwd-derived label. Useful when spawning several pi instances to tell them apart.',
+						'Human-readable name for the new node, shown in /nodes and incoming messages (e.g. "auth-feature"). Defaults to a cwd-derived label. Useful when spawning several pi instances to tell them apart.',
 				}),
 			),
 			model: Type.Optional(
 				Type.String({
 					description:
-					'Model pattern or ID to force the spawned pi to use, passed as `pi --model` (e.g. "anthropic/claude-opus-5", "google/gemini-3-pro"). Omit to use the child\'s default model.',
+						'Model pattern or ID to force the spawned pi to use, passed as `pi --model` (e.g. "anthropic/claude-opus-5", "google/gemini-3-pro"). Omit to use the child\'s default model.',
 				}),
 			),
 		}),
@@ -350,8 +379,12 @@ export default function (pi: ExtensionAPI): void {
 
 		renderCall(args, theme, _context) {
 			const target = (args.target as string) ?? "auto";
-			const nameHint = args.name ? ` ${theme.fg("accent", String(args.name))}` : "";
-			const modelHint = args.model ? ` ${theme.fg("accent", `@${String(args.model)}`)}` : "";
+			const nameHint = args.name
+				? ` ${theme.fg("accent", String(args.name))}`
+				: "";
+			const modelHint = args.model
+				? ` ${theme.fg("accent", `@${String(args.model)}`)}`
+				: "";
 			const cwdHint = args.cwd ? ` in ${args.cwd}` : "";
 			const preview = args.prompt
 				? args.prompt.length > 60
@@ -372,7 +405,8 @@ export default function (pi: ExtensionAPI): void {
 		renderResult(result, _opts, theme, _context) {
 			const text = result.content[0];
 			return new Text(
-				theme.fg("success", "✓ ") + (text?.type === "text" ? text.text : "spawned"),
+				theme.fg("success", "✓ ") +
+					(text?.type === "text" ? text.text : "spawned"),
 				0,
 				0,
 			);
@@ -408,7 +442,12 @@ export default function (pi: ExtensionAPI): void {
 					`- ${n.id}  (${n.label})  cwd=${n.cwd}${n.parentId === self?.id ? "  [child]" : ""}`,
 			);
 			return {
-				content: [{ type: "text", text: `${peers.length} node(s):\n${lines.join("\n")}` }],
+				content: [
+					{
+						type: "text",
+						text: `${peers.length} node(s):\n${lines.join("\n")}`,
+					},
+				],
 				details: { self, peers },
 			};
 		},
@@ -423,7 +462,8 @@ export default function (pi: ExtensionAPI): void {
 			'conversation as a user message (it triggers a turn). Target by node id, or use "parent",',
 			'"children", or "all". Typical use: a spawned pi reports "I am done with X" to its parent.',
 		].join(" "),
-		promptSnippet: "Send a message to another open pi (by id, parent, children, or all)",
+		promptSnippet:
+			"Send a message to another open pi (by id, parent, children, or all)",
 		promptGuidelines: [
 			"Use send_pi_message when the user wants one pi to tell another pi something (e.g. report completion, hand back a result).",
 		],
@@ -442,11 +482,15 @@ export default function (pi: ExtensionAPI): void {
 			if (!to) throw new Error("to is required");
 			const { results, available } = await sendMesh(to, text);
 			if (results.length === 0) {
-				const names = available.map((n) => `${n.id} (${n.label})`).join(", ") || "none";
-				throw new Error(`Could not resolve target "${to}". Available: ${names}`);
+				const names =
+					available.map((n) => `${n.id} (${n.label})`).join(", ") || "none";
+				throw new Error(
+					`Could not resolve target "${to}". Available: ${names}`,
+				);
 			}
 			const lines = results.map(
-				(r) => `- ${r.id} (${r.label}): ${r.ok ? "delivered" : `failed (${r.error})`}`,
+				(r) =>
+					`- ${r.id} (${r.label}): ${r.ok ? "delivered" : `failed (${r.error})`}`,
 			);
 			const okCount = results.filter((r) => r.ok).length;
 			return {
@@ -486,7 +530,10 @@ export default function (pi: ExtensionAPI): void {
 				);
 				ctx.ui.notify(summary, "info");
 			} catch (err) {
-				ctx.ui.notify(err instanceof Error ? err.message : String(err), "error");
+				ctx.ui.notify(
+					err instanceof Error ? err.message : String(err),
+					"error",
+				);
 			}
 		},
 	});
@@ -500,24 +547,32 @@ export default function (pi: ExtensionAPI): void {
 				return;
 			}
 			const lines = peers.map(
-				(n) => `${n.id} (${n.label}) cwd=${n.cwd}${n.parentId === self?.id ? " [child]" : ""}`,
+				(n) =>
+					`${n.id} (${n.label}) cwd=${n.cwd}${n.parentId === self?.id ? " [child]" : ""}`,
 			);
 			ctx.ui.notify(`${peers.length} node(s):\n${lines.join("\n")}`, "info");
 		},
 	});
 
 	pi.registerCommand("send", {
-		description: "Send a message to another pi. Usage: /send <id|parent|children|all> <message>",
+		description:
+			"Send a message to another pi. Usage: /send <id|parent|children|all> <message>",
 		handler: async (args, ctx) => {
 			const sp = args.indexOf(" ");
 			if (sp === -1) {
-				ctx.ui.notify("Usage: /send <id|parent|children|all> <message>", "warning");
+				ctx.ui.notify(
+					"Usage: /send <id|parent|children|all> <message>",
+					"warning",
+				);
 				return;
 			}
 			const to = args.slice(0, sp).trim();
 			const text = args.slice(sp + 1).trim();
 			if (!to || !text) {
-				ctx.ui.notify("Usage: /send <id|parent|children|all> <message>", "warning");
+				ctx.ui.notify(
+					"Usage: /send <id|parent|children|all> <message>",
+					"warning",
+				);
 				return;
 			}
 			const { results, available } = await sendMesh(to, text);
@@ -527,7 +582,10 @@ export default function (pi: ExtensionAPI): void {
 				return;
 			}
 			const ok = results.filter((r) => r.ok).length;
-			ctx.ui.notify(`Delivered ${ok}/${results.length}`, ok === results.length ? "info" : "warning");
+			ctx.ui.notify(
+				`Delivered ${ok}/${results.length}`,
+				ok === results.length ? "info" : "warning",
+			);
 		},
 	});
 }
