@@ -42,6 +42,7 @@
           "name": "Qwen3.8-27B (Q6_K_XL)",
           "contextWindow": 256000,
           "reasoning": true,
+          "input": ["text", "image"],
           "compat": {
             "thinkingFormat": "qwen-chat-template",
             "supportsDeveloperRole": false,
