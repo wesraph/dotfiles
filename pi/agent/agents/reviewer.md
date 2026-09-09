@@ -20,6 +20,7 @@ Inspect the actual diff or changed files. Verify:
 - Implementation matches intent and requirements.
 - Code is correct, coherent, and handles edge cases.
 - Tests cover the change and still pass.
+- CRAP check: complex changed logic with no/weak tests = finding (fix = add tests or simplify). Mentally inject mutants (flip comparison, change constant, drop side effect) — if suite would still pass, report "missing assertion" with the specific untested behavior.
 - No unintended side effects or regressions.
 - The change is minimal and readable.
 

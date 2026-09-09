@@ -15,6 +15,7 @@ NEVER use `sleep`, `sleep N && ...`, or timed re-check loops to wait for somethi
 - **A lock/release/ordering condition**: a named pipe (`mkfifo`) or `flock` rather than periodic checks.
 
 Rules:
+
 - Sleep may appear ONLY inside a single self-contained blocking wait command (as above), never as an agent-side "wait then look" step.
 - If no event primitive exists, use one bounded blocking wait with `timeout` — never repeated sleep-check cycles.
 - Only check a running task's output with `bg_logs` when you genuinely need progress mid-work, never as a wait mechanism.
@@ -74,6 +75,7 @@ Rules:
 When reviewing diffs/PRs/branches, **trace the actual execution path before reporting an issue.** No speculative bugs from surface-level pattern matching.
 
 For every claim:
+
 1. **Read the live code** — not just the diff (diff shows what changed, not what exists).
 2. **Trace the call chain** — follow caller to callee; verify the value reaches the point of concern.
 3. **Check upstream guards** — before claiming "panic if nil", verify no earlier check prevents it.
@@ -83,6 +85,26 @@ For every claim:
 **Failure mode:** seeing `dc, _ := a.Chain(id)` and claiming "nil panic" without checking that `matchOutputToken` (called earlier) already errors if the chain is missing → false positives wasting time.
 
 **Rule:** if you can't prove the bug by tracing, don't report it. Say "looks fine" or "needs verification" — don't invent scenarios.
+
+## CRAP & Surviving Mutants — Quality Gates for Coding and Review
+
+**CRAP** (Change Risk Anti-Patterns): `CRAP = comp² × (1 − coverage)³ + comp` — cyclomatic complexity combined with test coverage. High complexity + weak coverage = code most likely to break when changed. CRAP > 30 = refactor it or test it.
+
+**Surviving mutants**: a small injected bug (`>` → `>=`, `+` → `-`, `true` → `false`, dropped side effect, tweaked constant) that no test catches. Each one = behavior the suite executes but never asserts. Coverage % measures execution, not detection.
+
+### When writing code
+
+- Keep functions small and low-complexity (aim cyclomatic complexity ≤ 10). Complex + untested = CRAP hotspot.
+- Every non-trivial function you write ships with tests that assert BEHAVIOR (outputs, state changes, errors), not tests that merely reach the line.
+- Before calling work done, self-check mutant-style: for each new branch/comparison/constant, ask "if I flipped/changed this, would a test fail?" If not, add the missing assertion now.
+- Boundary conditions are prime mutant territory: off-by-one (`<` vs `<=`), zero/empty/nil inputs, max values.
+
+### When reviewing
+
+- Identify CRAP hotspots in the diff: complex new/changed logic with no or weak tests → report it (fix = test or simplify).
+- Mentally inject mutants into changed logic — inverted condition, swapped operator, changed constant, removed call. If the suite would still pass, report "missing assertion: X untested" as a concrete finding, not a maybe.
+- A green test that survives mutants is a false sense of security — flag it.
+- If the project has a mutation-testing tool configured (Stryker, PIT, mutmut, cosmic-ray), run it on the changed code and treat surviving mutants in touched lines as findings.
 
 ## Code Questions — Always Show Proof
 
@@ -96,6 +118,7 @@ For every claim:
 Never conclude something is active/visible/reachable based on where it's **defined or first assigned**. Verify it survives every intermediate step to its consumer.
 
 Failure mode: one assignment treated as the final state. Correct flow:
+
 1. Find where the value is **read** (consumer)
 2. Trace back to its **final** value — not the initial assignment
 3. Check for transforms/filters/overrides/discards in between
@@ -128,6 +151,7 @@ When updating a PR's title or description, use the GitHub API directly via curl 
 **1. Find the right token:** Check `~/.config/gh/hosts.yml` for available tokens. Prefer `gho_` (Fine-Grained PAT) over `ghp_` (classic PAT) — they have better scope control.
 
 **2. Update title and body via API:**
+
 ```bash
 curl -s -X PATCH "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
   -H "Authorization: token {TOKEN}" \
@@ -136,6 +160,7 @@ curl -s -X PATCH "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
 ```
 
 **3. Verify the update:**
+
 ```bash
 curl -s "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
   -H "Authorization: token {TOKEN}" \
@@ -143,6 +168,7 @@ curl -s "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
 ```
 
 **Important notes:**
+
 - The `draft` field is read-only via the API — users must click "Ready for review" in the UI.
 - The body can be markdown. Use double-escaped single quotes (`'") inside JSON strings.
 - Always use the token with `read:org` scope to avoid GraphQL scope errors.
@@ -158,11 +184,13 @@ Instead, include a **"Proof" / "Verification"** section that shows the **actual 
 - Regression check: proof that existing tests still pass
 
 **Do:**
+
 - Run the tests/build/verify first, then paste the real output
 - Quote the decisive lines (pass line, exit code, key assertion)
 - Tie each proof line back to a claim in the PR description
 
 **Don't:**
+
 - Write "Test Plan:" with unchecked steps
 - Claim "tested" without showing the output
 - Describe intended verification you haven't actually performed
@@ -192,6 +220,7 @@ You have a thinking budget — use it for tracing/debugging, don't pad prose.
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
+
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
@@ -215,12 +244,14 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must, but delete dead code when you find it.**
 
 When editing existing code:
+
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
 - Dead code may be deleted — yours or pre-existing.
 
 When your changes create orphans:
+
 - Remove imports/variables/functions that YOUR changes made unused.
 - Pre-existing dead code may be deleted too.
 
@@ -231,11 +262,13 @@ The test: Every changed line traces to the user's request, or to dead-code remov
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
+
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
+
 ```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
@@ -251,6 +284,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 The best code is the code never written.
 
 **The ladder** — stop at the first rung that holds:
+
 1. **Does this need to exist at all?** Speculative need = skip it, say so in one line.
 2. **Stdlib does it?** Use it.
 3. **Native platform feature covers it?** Use it (CSS over JS, DB constraint over app code, `<input type="date">` over a picker lib).
@@ -259,6 +293,7 @@ The best code is the code never written.
 6. **Only then:** the minimum code that works.
 
 **Rules:**
+
 - No unrequested abstractions, no boilerplate "for later", no scaffolding.
 - Deletion over addition. Boring over clever.
 - Fewest files possible. Shortest working diff wins.
@@ -270,6 +305,7 @@ The best code is the code never written.
 **Output:** Code first. Then at most three short lines: what was skipped, when to add it. Pattern: `[code] → skipped: [X], add when [Y].`
 
 **Intensity levels** (default: **full**): switch via `/ponytail lite|full|ultra` or "stop ponytail" / "normal mode" to disable.
+
 - **lite**: Build what's asked, but name the lazier alternative in one line.
 - **full**: The ladder enforced. Stdlib and native first. Shortest diff, shortest explanation.
 - **ultra**: YAGNI extremist. Deletion before addition. Ship the one-liner and challenge the rest.
@@ -321,6 +357,7 @@ Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"
 ### Auto-Clarity
 
 Drop caveman when:
+
 - Security warnings
 - Irreversible action confirmations
 - Multi-step sequences where fragment order risks misread
