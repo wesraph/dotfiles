@@ -11,3 +11,4 @@ agent/sessions/
 agent/trust.json
 /spawn-pi/
 /scratch/
+agent/auth.json
