@@ -74,6 +74,12 @@ todo(action: "create", subject: "Review loop pass 1", description: "Run branch-r
 This makes the cycle visible and gives a natural place to record the verdict of
 each pass.
 
+Also maintain `.pi/scratch/review-loop/notes.md`, **rewritten** (never
+appended) after every pass: confirmed issues (fixed / open), refuted
+hypotheses (with the proof that killed them), approaches tried, what remains.
+Cap it around 800 words — whatever you omit is gone, and that is the point:
+each pass starts from curated memory, not from an ever-growing pile of reports.
+
 ### Step 2 — Review pass
 
 Run the **full `branch-review` workflow**:
@@ -126,15 +132,24 @@ Only a fresh review pass, on the current diff, can detect these.
 
 Stop the loop when **any** of these is true:
 
-- **Clean pass.** A review pass finds **zero confirmed issues**. This is the
-  goal. Report the final grade and stop.
+- **Clean pass is not done.** Zero confirmed issues is a *candidate* exit, not
+  an exit. Before stopping, run the project's validation commands yourself
+  (`make test`, `make verify`, `go test ./...` — whatever applies) and paste the
+  decisive output lines into the final report. A red suite **invalidates** the
+  clean pass: the loop continues with the failures as confirmed issues,
+  regardless of what the review found. Reviewers miss things in both
+  directions; the test run is ground truth and overrides any review verdict.
 - **Safety cap.** The loop hits a maximum number of passes (default **5**). If
   you reach the cap without a clean pass, stop, report what remains, and flag
   that the cap was hit — the branch likely needs human judgement, not more
   iterations.
 - **No progress.** Two consecutive passes confirm the same set of issues
-  without any being resolved. Stop — you're stuck, not iterating. Surface the
-  blocker.
+  without any being resolved. Before stopping: spawn one fresh-context
+  `planner` subagent with the stuck diff, the fixes already attempted, and the
+  instruction "the current approach keeps failing — propose a genuinely
+  different approach" (feed it `notes.md`). Run ONE more pass with it if it
+  differs materially. If that pass still confirms the same issues — stop.
+  You're stuck, not iterating; surface the blocker.
 
 When the loop terminates, summarize every pass: issues found, issues fixed,
 grade. A clean run looks like `3 → 1 → 0`. A capped run looks like

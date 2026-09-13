@@ -289,7 +289,11 @@ subagent({
    your fix notes and rebuttals so graders can re-judge in context.
 4. Round count > 5 → escalate (see Loop safety).
 
-The loop exits ONLY on all-≥98 scores, user intervention, or the cap.
+The loop exits ONLY on: all-≥98 scores AND a green full-validation run
+(`make test`, `make verify` if they exist) whose decisive output lines are
+quoted in the final report — or user intervention, or the cap. All-≥98 with a
+red suite = **not done**: the suite's failures become proven findings and the
+loop reopens at step 3. Grader scores never override the test run.
 
 ## Final report
 
@@ -322,7 +326,13 @@ implementation · review <N rounds>
 - **Proof or silence.** Every reported finding, from you or a child, carries
   file:line evidence or a traced scenario. Speculative findings are discarded.
 - **Never enter Phase 5 with failing tests.** Never declare done with a score
-  below 98 without explicit user sign-off.
+  below 98 without explicit user sign-off. Never declare done with a red suite
+  at any score — the test run is ground truth and vetoes the grades.
+- **Recover partial child work.** When a subagent is killed, times out, or
+  returns truncated output, do not respawn it from scratch: read its session
+  dir (`subagent({ action: "status" })` → `sessionDir`) or its `output` file,
+  extract what it established, and seed the next attempt with it. A cut-off
+  child's partial reasoning is state, not garbage.
 - **Respect the caps.** Council ≤ 4 rounds, review ≤ 5 rounds, then escalate.
 - Keep a task list current: one task per phase, marked in_progress/completed
   as you go; add a task per proven review finding during fix rounds.
