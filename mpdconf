@@ -14,5 +14,4 @@ audio_output {
     type          "pulse"
     name          "Pulse audio"         ## Mettre ici n'importe quel nom, c'est au choix…
     mixer_control "Master"
-    format        "44100:16:1"
 }

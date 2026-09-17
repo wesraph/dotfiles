@@ -11,6 +11,14 @@
       "command": "cloakbrowser-mcp",
       "args": []
     },
+    "blender": {
+      "command": "uv",
+      "args": ["run", "--directory", "/home/raph/.local/share/blender-mcp/mcp", "blender-mcp"],
+      "env": {
+        "BLENDER_MCP_HOST": "127.0.0.1",
+        "BLENDER_MCP_PORT": "9876"
+      }
+    },
     "gsheets": {
       "command": "npx",
       "args": ["-y", "gsheets-mcp"],

@@ -3,3 +3,4 @@ tmux/resurrect/*
 config/ncmpcpp/*.log
 pi/.pi/
 pi/agent/models-store.json
+pi/*.log

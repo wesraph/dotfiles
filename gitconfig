@@ -23,7 +23,7 @@
     df = diff
     dc = diff --cached
     ls = ls-files
-    wl = worktree list
+	wl = !bash \"$HOME/.config/git/wl.sh\"
     wa = worktree add
     wd = worktree remove
 
