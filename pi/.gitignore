@@ -12,3 +12,4 @@ agent/trust.json
 /spawn-pi/
 /scratch/
 agent/auth.json
+agent/pi-blackhole/
