@@ -205,6 +205,7 @@ If something was NOT tested, state that explicitly under "Proof" rather than dre
 - **Child subagents cannot spawn their own subagents**; nesting depth is 2
 - **Use `context: "fork"` for branched advisory threads**, `context: "fresh"` for adversarial reviewers
 - **Management**: `subagent({action:"list"})`, `status`, `interrupt`, `resume`, `doctor`
+- **Sync vs async**: If the next step depends on the subagent's result (you must wait for it), run it synchronously (default `subagent` call) or use the `bash` tool. If you can keep working in parallel without the result, use `async: true` — then don't poll; you get notified on completion.
 - **Concurrent code-modifying agents**: When spawning multiple subagents that will modify code (e.g., parallel `worker` or `reviewer` tasks), always use `worktree: true` to isolate their filesystems. Each agent implements and verifies in its own worktree. After all parallel agents finish, clean up the worktrees (remove them) if changes were merged into the main branch.
 
 ## Thinking Budget
@@ -375,6 +376,7 @@ Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level p
 Scout has no pinned model — it inherits the parent model by default. Before calling the `scout` agent, check `PI_MODEL`:
 
 - `claude-opus-*` or `claude-fable-*` → pass `model: "anthropic/claude-sonnet-5"` in the subagent call (recon does not need a frontier model).
-- Anything else (glm, qwen, sonnet, local) → omit `model` and inherit the parent.
+- `qwen*` → NEVER substitute another model — not even for `scout`. Use Qwen for the parent AND every subagent, scout included (explicitly pass the same Qwen model via `model:` in each subagent call, or omit `model` so they inherit).
+- Anything else (glm, sonnet, local) → omit `model` and inherit the parent.
 
-Applies only to `scout`. Other agents keep their configured models.
+The claude rule applies only to `scout`. When running Qwen, ALL subagents must use Qwen — no exceptions.
