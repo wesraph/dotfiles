@@ -10,6 +10,7 @@ agent/vibes
 agent/sessions/
 agent/trust.json
 /spawn-pi/
+/.playwright-mcp/
 /scratch/
 agent/auth.json
 agent/pi-blackhole/
