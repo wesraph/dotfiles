@@ -59,6 +59,10 @@ Rules:
 - Never force-commit with a malformed message — if in doubt, ask the user.
 - **Never add any LLM/AI as a co-author.** Do not add `Co-Authored-By` trailers for Claude, GPT, Gemini, or any other AI model. Do not append `Generated with Claude Code`, `🤖`, or any similar AI-attribution line. Commits must be attributed to the human author only.
 
+## Git Worktrees
+
+- Whenever you create a git worktree — manually (`git worktree add`), as a `spawn_pi` cwd, or for any subagent task — always place it under `./worktrees/` inside the repo root (e.g. `./worktrees/<branch-or-task-name>`). This is the default location; only deviate when the user explicitly specifies another path.
+
 ## Blockchain Queries
 
 - When you need to query blockchain data (balances, contract state, transactions, logs, etc.), use the `cast` CLI tool from Foundry instead of writing temporary test files or scripts. `cast` is installed and available.
