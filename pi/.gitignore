@@ -14,3 +14,5 @@ agent/trust.json
 /scratch/
 agent/auth.json
 agent/pi-blackhole/
+/memories/
+agent/extensions/*/node_modules/

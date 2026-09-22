@@ -1,0 +1,7 @@
+{
+  "name": "pi-memory-extension",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}
