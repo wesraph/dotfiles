@@ -1,0 +1,6 @@
+{
+	"parallel": {
+		"concurrency": 12,
+		"maxTasks": 12
+	}
+}
