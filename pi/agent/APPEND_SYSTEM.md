@@ -379,8 +379,9 @@ Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level p
 
 Scout has no pinned model — it inherits the parent model by default. Before calling the `scout` agent, check `PI_MODEL`:
 
-- `claude-opus-*` or `claude-fable-*` → pass `model: "anthropic/claude-sonnet-5"` in the subagent call (recon does not need a frontier model).
+- `claude-opus-*` or `claude-fable-*` → pass `model: "anthropic/claude-haiku-4-5"` in the subagent call (code search/recon does not need a frontier model).
+- `glm-5.3` (exact, not already `glm-5.3-flash`) → pass `model: "zai-renaud/glm-5.3-flash"` in the subagent call.
 - `qwen*` → NEVER substitute another model — not even for `scout`. Use Qwen for the parent AND every subagent, scout included (explicitly pass the same Qwen model via `model:` in each subagent call, or omit `model` so they inherit).
-- Anything else (glm, sonnet, local) → omit `model` and inherit the parent.
+- Anything else (other glm, sonnet, local) → omit `model` and inherit the parent.
 
-The claude rule applies only to `scout`. When running Qwen, ALL subagents must use Qwen — no exceptions.
+The claude and glm rules apply only to `scout`. When running Qwen, ALL subagents must use Qwen — no exceptions.
