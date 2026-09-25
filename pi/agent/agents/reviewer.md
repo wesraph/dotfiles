@@ -6,6 +6,7 @@ thinking: high
 systemPromptMode: replace
 inheritProjectContext: true
 inheritSkills: false
+skills: branch-review
 output: false
 ---
 

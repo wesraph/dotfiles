@@ -23,15 +23,31 @@ careful engineer does manually.
 debugging a known runtime failure (use `debug` instead). This skill consumes a
 diff and drives it toward zero review findings.
 
+## Hard rule — review passes run in a subagent
+
+Every review pass MUST run inside a `reviewer` subagent spawned with
+`context: "fresh"`. The main session NEVER performs the review itself: it
+does not read the diff or trace code to hunt for issues. Its job is to
+orchestrate — detect the change surface, spawn the reviewer, receive the
+report, apply fixes to confirmed issues, run validation, and loop.
+
+- One fresh `reviewer` per pass. Never resume or reuse a previous pass's
+  reviewer: each pass must judge the current diff without inherited bias.
+- The reviewer never edits code. Fixes are applied in the main session (or a
+  single `worker`), then a NEW fresh reviewer grades the updated diff.
+- The main session may read code only to apply a fix to an issue the
+  reviewer CONFIRMED — never to generate or verify hypotheses.
+
 ## Prerequisites
 
-This skill **requires** the `branch-review` skill. Load it first:
+This skill **requires** the `branch-review` skill. The reviewer subagent runs
+it — the main session does not. Tell the reviewer to load it:
 
 ```
 read(/home/raph/.pi/agent/skills/branch-review/SKILL.md)
 ```
 
-Follow its workflow exactly during each review pass.
+and follow its workflow exactly during the pass.
 
 ## Workflow
 
@@ -80,9 +96,21 @@ hypotheses (with the proof that killed them), approaches tried, what remains.
 Cap it around 800 words — whatever you omit is gone, and that is the point:
 each pass starts from curated memory, not from an ever-growing pile of reports.
 
-### Step 2 — Review pass
+### Step 2 — Review pass (in a fresh subagent)
 
-Run the **full `branch-review` workflow**:
+Spawn one `reviewer` subagent with `context: "fresh"` (synchronous — the
+fixes depend on its result). Its prompt contains only:
+
+- the repo path (and worktree path, if working in one),
+- the change surface from Step 0 (base commit / exact diff command),
+- any user scope constraints (e.g. "only this PR's diff"),
+- the current `notes.md` (refuted hypotheses, so it does not re-report them),
+- the instruction to load and run `branch-review` verbatim, stay read-only,
+  and return the Phase 3 report (confirmed issues with proof, false
+  positives, grade).
+
+No conversation context beyond that. The subagent runs the **full
+`branch-review` workflow**:
 
 1. Phase 1 — capture diff + hypothesize issues.
 2. Phase 2 — verify each claim by tracing the call chain. Only **CONFIRMED**
@@ -157,6 +185,8 @@ grade. A clean run looks like `3 → 1 → 0`. A capped run looks like
 
 ## Constraints
 
+- **Review only in a fresh `reviewer` subagent.** A pass performed in the
+  main session does not count and must be redone in a subagent.
 - **Reuse `branch-review` verbatim** for the review phase. Do not invent a
   lighter review. The whole point is proven, traced findings.
 - **Fix only confirmed issues.** Never act on false positives or unverified

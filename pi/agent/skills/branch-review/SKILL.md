@@ -170,6 +170,10 @@ Verdict: CONFIRMED (minor) — deposits for permanently-failed chains are silent
 
 ## Constraints
 
+- **Diff is the only review surface.** Every issue must originate from a changed
+  line. Pre-existing bugs in untouched code found while tracing are listed at
+  most as "pre-existing, out of scope" notes — never as confirmed issues,
+  never graded.
 - **Never edit code.** This skill is read-only. Use `read`, `bash`, `grep`,
   `lsp_navigation`, `ast_grep_search` — never `edit` or `write` (except for
   task list).
