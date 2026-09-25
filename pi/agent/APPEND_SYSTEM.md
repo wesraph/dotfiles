@@ -33,7 +33,7 @@ Rules:
   - Write the feature and its tests
   - Run the tests to confirm that the feature works
   - Run the other tests to make sure that you broke nothing
-  - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100
+  - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100. Every review pass MUST be performed by a `reviewer` subagent spawned with `context: "fresh"`: the reviewer must NOT share or inherit the conversation context — its prompt contains only the feature that was asked for and the diff to grade. The reviewer never edits code; all fixes are applied by you in the main session, then a new fresh reviewer grades the updated diff
   - Run the tests again
 - If a "make build" command exists, you must run it during the build phase
 - If a "make verify" command exists, you must also always run it during the testing phase
@@ -240,6 +240,7 @@ Before implementing:
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
 - Do not add comments unless strictly necessary. Code should be self-documenting — clear names, simple logic. Only comment when the "why" is non-obvious and cannot be expressed in code (e.g., business rules, gotchas, non-intuitive constraints). Never comment the "what" — the code already says it.
+- A comment must only describe what the code does now (or why). Never reference the session, the change, or history: no "byte-identical to what it was before", "the old behaviour…", "unchanged from before", "now does X", "previously", "was changed to", "as requested", "fix for…". The reader sees only the current code — history belongs in the commit message.
 - If you write 200 lines and it could be 50, rewrite it.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.

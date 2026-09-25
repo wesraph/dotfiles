@@ -61,6 +61,13 @@ Issue categories to check:
 - **Behavior changes**: removed filters, changed error handling, altered semantics
 - **Call site breakage**: signature changes without updating callers
 - **Test coverage**: new logic without tests, tests that no longer match behavior
+- **Comments**: every added/changed comment must describe what the code does
+  (or why) — nothing else. Flag any comment that references the session,
+  the change, or history ("byte-identical to what it was before", "the old
+  behaviour…", "previously", "now does X", "unchanged from before", "fix
+  for…") and any comment that contradicts the code it sits on. These are
+  CONFIRMED by quoting the comment (and the code, for contradictions) — no
+  call-chain trace needed. Fix: rewrite to describe current behavior, or delete.
 
 Write the issue list.
 
