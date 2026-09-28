@@ -37,17 +37,34 @@ git diff $BASE..HEAD           # full diff
 
 If the diff is large (>500 lines), scope it: read only the files listed in
 `--stat`. Test files in the diff get reviewed as carefully as logic files — a
-weak test is a finding, not noise.
+weak test is a finding, not noise. Past ~400 changed lines, review
+effectiveness drops sharply — note it in the report and recommend a split;
+past ~2000, review in per-file batches with one running findings list.
+
+**Step 1b — Intent model.** Read the commit messages, PR description, and any
+linked issue. Write 2–3 sentences: what this branch claims to do. Then:
+
+- Every promised behavior must have code **and** a test. A promise with no
+  code is a lead — omissions are invisible in the diff, so the intent model
+  is the only place they surface.
+- Anything in the diff not serving that intent is an "unrequested scope"
+  lead (see bloat below).
+- The intent model goes in the report, so a reader can check code against
+  intent, not just code against tests.
 
 **Step 2 — Run build/lint.**
 
 ```bash
-make build   # if Makefile exists
-make verify  # if Makefile exists
+make build     # if Makefile exists
+make verify    # if Makefile exists
 go test ./...  # or project's test command
+go test -race ./...  # Go: race detector — races don't show in plain runs
 ```
 
 If these fail, note the failures — they're real issues, no verification needed.
+If the tests cannot run at all (no env, no runner), record it: `test_blocked`
+plus the blocking reason — the grade is capped and the residual risk stated.
+Never present an unrun suite as a green one.
 
 **Step 2b — Bloat signal.** Measure added comment density:
 
@@ -73,6 +90,15 @@ go test -v ./... 2>&1 | grep -E -- '--- (SKIP|FAIL)'   # or the project's equiva
 - If a changed production line's only guard is a skipped test, that is
   CONFIRMED "untested: <line>".
 
+**Step 2d — Debug leftovers.** Grep added lines for debug debris:
+
+```bash
+git diff $BASE..HEAD | grep -nE '^\+.*(fmt\.Print|console\.log|println\(|debugger|dbg\.|TODO|FIXME|XXX)'
+```
+
+Debug prints, leftover markers, and commented-out code in added lines are
+CONFIRMED by quoting the line — no trace needed.
+
 **Step 3 — Hypothesize issues.**
 
 Read the diff and list potential issues. For each, note:
@@ -83,11 +109,35 @@ Read the diff and list potential issues. For each, note:
 
 Issue categories to check:
 
-- **Concurrency**: data races, missing locks, lock ordering, TOCTOU
+- **Concurrency**: data races, missing locks, lock ordering, TOCTOU,
+  goroutine lifecycle (leaks, premature exit), context cancellation,
+  shutdown/initialization ordering
 - **Resource leaks**: unclosed connections, goroutines, files, temp state
 - **Nil/missing guards**: removed nil checks, ignored bool returns
 - **Behavior changes**: removed filters, changed error handling, altered semantics
 - **Call site breakage**: signature changes without updating callers
+- **Boundary conditions**: off-by-one (`<` vs `<=`), zero/empty/nil inputs,
+  max values, first/last element
+- **Error paths**: swallowed errors, wrong wrap/annotation, partial-failure
+  states, panics on paths that used to return errors
+- **Performance**: hot-path regressions, accidental O(n²), N+1 queries,
+  unbounded growth
+- **API/contract compatibility**: exported signature changes, breaking
+  serialization/schema/config formats for existing consumers
+- **Security**: diff touches input validation, query/HTML/shell construction
+  (injection sinks), authn/authz, crypto, or logging → check for new attack
+  vectors, weakened existing controls, trust boundaries crossed by new data
+  flows, hardcoded secrets (scan the diff), sensitive data in logs/errors.
+  Security regressions are traced like any behavior change — never assumed.
+- **Dependency changes**: go.mod/package.json/lockfiles in the diff → for each
+  new dep: license, known CVEs, version pinning, whether it's needed at all
+- **Docs consistency**: changes to how users build/test/run/release → README
+  and docs updated? Deleted/deprecated code → its docs deleted?
+- **Naming**: names must not lie (`Get*` that mutates, plural naming a single
+  thing).
+- **CL hygiene**: reformat-only hunks mixed into behavior changes;
+  intermediate commits that don't build (spot-check with
+  `git rebase --exec 'make build' $BASE` only when cheap).
 - **Test coverage**: for each changed production branch/query/condition, name
   the test that fails if it breaks. None, or only skipped ones → finding.
   Tests that no longer match behavior → finding.
@@ -166,6 +216,12 @@ Issue categories to check:
     readers. Prove with a zero-reference grep/LSP result.
   - **Redundant intermediates**: variables assigned and returned right away,
     duplicated logic, defensive copies that nothing mutates.
+  - **Semantic duplication**: two blocks with different syntax but equal
+    intent (a second, working hand-rolled sort next to the existing one).
+    Grep won't find it — compare each new logic block against neighbors with
+    the same responsibility.
+  - **Semantic dead code**: code that executes but affects no output —
+    computed, correct, and pointless.
   - **Unrequested scope**: features, logging, or refactors of untouched code
     that don't serve the branch's stated goal (check commit messages / PR
     title).
@@ -255,8 +311,11 @@ branch adds, and the test(s) claimed to cover it:
 
 1. `git worktree add ./worktrees/review-mutants HEAD` — never mutate the
    reviewed tree.
-2. Inject ONE mutant: revert the fix, flip the condition, force a switch both
-   ways (always / never), drop the call, change the constant.
+2. Inject ONE mutant from the operator set (PIT/Stryker defaults): negate a
+   conditional (`==`↔`!=`), boundary flip (`<`↔`<=`), logical swap (`&&`↔`||`),
+   boolean literal flip, empty string literal, return-value tampering
+   (zero-value/`nil`/`false`), block-body removal, side-effect call deletion,
+   constant tweak — or revert the whole fix.
 3. Run only the claimed test(s). It must fail **for the intended reason** —
    read the failure message, not just the exit code.
 4. `git -C ./worktrees/review-mutants checkout -- .`, next mutant.
@@ -278,15 +337,60 @@ Run the mutants in two directions:
   failed" in pass A never vouches for the other tests that claim the same
   guard. No cap on pass B: one run per in-scope test/case.
 
+**Classify every non-killed mutant** — they are not the same finding:
+
+- **survived** — code covered, assertion missing → "untested: <line>".
+- **no coverage** — mutant never executed → the behavior has no test path at
+  all; worse, and a different fix.
+- **timeout** — counts as caught (CI would hang).
+- **suppressed** — logging-only lines and behavior-identical (equivalent)
+  mutants: skip them and say why. Most raw mutants are noise; spend the
+  budget on logic lines.
+
+**Survivor remediation, both options always:** (A) the test that kills it,
+(B) the code simplification that removes the mutation axis. Equivalent
+mutant (the mutant IS the simpler form) → apply it to the source. Unkillable
+= no test can kill it AND the mutant can't be applied — say so explicitly.
+
+**Before writing the finding, check why it survived:** only one branch value
+tested; collection has one element; test data uses identical values where
+the code distinguishes; default parameter never exercised (every test passes
+it explicitly). The cause is the fix.
+
+**Anti-cheat:** never recommend deleting a mutation axis (syntax rewrite)
+when the expression lacks coverage — hiding the axis is not proving
+correctness.
+
+**Fix suggestions that add a test must be red-green proven**: run the
+suggested test against the mutant worktree (fix reverted) — it must fail for
+the intended reason, or don't suggest it.
+
+### Phase 2c — Re-derivation pass
+
+For every CONFIRMED issue, re-derive it from the diff and the cited lines
+**only** — no access to your Phase 1/2 reasoning trail. Reading your own
+narrative again re-manufactures its hallucinations; the point of this pass is
+to disprove. For each issue ask: what guard, caller, or ordering kills this?
+Anything you can't re-derive from the evidence alone is downgraded to FALSE
+POSITIVE (unproven).
+
 ### Phase 3 — Report
 
-Summarize the findings:
+Summarize the findings. Severity is derived from evidence, not opinion —
+**proven by failing test** > **traced call chain + guard-checked** >
+plausible pattern. Labels: **blocking** (correctness, security, data loss —
+must fix), **important** (should fix), **nit** (polish). Not everything is
+blocking.
 
 ```
 ## Review: <branch>
 
+Intent: [Step 1b intent model, 2-3 sentences]
+
 ### Confirmed Issues (N)
-1. **[Title]** — file:line. Proof: [trace]. Fix: [suggestion].
+1. **[Title]** — [blocking|important|nit] (evidence: failing-test|traced)
+   — file:line. Proof: [trace]. Repro: [command/scenario, for blocking].
+   Fix: [suggestion].
 
 ### False Positives (N)
 1. **[Title]** — thought X, but traced Y → safe because Z.
@@ -312,11 +416,40 @@ Skipped: [test → reason → covered elsewhere? y/n]
 Mutants: N injected / K caught / S survived → [survivors: test X passes without Y]
 LOC: production +A/−B, tests +C/−D (git diff --numstat)
 
+### Coverage
+One row per Step 3 category: ✅ reviewed / ⚠️ shallow / ❌ not covered.
+Declined to judge: [each item considered and set aside, with reason —
+"none" is a valid answer]
+
+Done well: [1-3 things worth keeping]
+
+### Verdict: APPROVE | COMMENT | REQUEST CHANGES
+
 ### Grade: X/100
 ```
 
-A surviving mutant on changed code, or a changed line guarded only by a
-skipped test, caps the grade at 85.
+APPROVE = no confirmed blocking/important issues. COMMENT = nits only.
+REQUEST CHANGES otherwise.
+
+**Grading rubric** (applied identically to every branch): grade = 100, then
+deduct per confirmed issue — blocking −20, important −10, nit −3; each
+confirmed bloat/verbose-comment/junk-test finding −2 (total bloat deduction
+capped at −15). Caps applied after deductions:
+
+- surviving mutant on changed code, or a changed line guarded only by a
+  skipped test → **85**
+- confirmed security issue → **75**
+- a diff that could be ≥40% smaller → **85**
+- tests never ran at all (`test_blocked`) → **80**, stated in the report
+
+Score from executable evidence first (suite result, mutants), traced
+findings second, everything else last.
+
+**Dismissal memory:** before Step 1, read project memory for previously
+refuted hypotheses and dismissed finding types — don't re-report what an
+earlier pass disproved unless the diff changed the facts. After the report,
+persist new refuted hypotheses (memory tool) so the next pass starts from
+them.
 
 Be honest about false positives. Credibility matters more than finding issues.
 
@@ -381,6 +514,6 @@ Verdict: CONFIRMED — lexical-only query is untested; the live test must seed
   with 0 confirmed issues is a valid result. Bloat, verbose-comment, and
   junk-test findings don't count toward this limit; group the same pattern into one
   finding (e.g. "9 restating comments in handler.go").
-- **Bloat lowers the grade.** Bloat is never a correctness bug, but every
-  confirmed bloat finding costs points. A diff that works but could be 40%
-  smaller should not score above 85.
+- **Bloat lowers the grade.** Bloat is never a correctness bug — the Phase 3
+  rubric deducts for every confirmed bloat finding and caps a diff that could
+  be ≥40% smaller at 85.
