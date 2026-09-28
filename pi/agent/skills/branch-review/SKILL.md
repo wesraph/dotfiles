@@ -337,6 +337,23 @@ Run the mutants in two directions:
   failed" in pass A never vouches for the other tests that claim the same
   guard. No cap on pass B: one run per in-scope test/case.
 
+  The named mutant must pass two checks, or the row has no mutant:
+  - **Credible**: it is a mistake a developer could plausibly write in that
+    exact code — the pre-fix code, a reordered return, a dropped guard, a
+    flipped condition. A degenerate mutant does not count: one that wraps a
+    nil error (`%!w(<nil>)`), returns a value no code path could produce,
+    or breaks the function in a way any test would catch. For a guard the
+    branch adds, the credible mutant is removing or reordering that guard.
+  - **Unique kill**: run the row's mutant against its SIBLING rows and the
+    owner test too. If any of them also fails on it, and the row kills no
+    other credible mutant they miss, the row is redundant → CONFIRMED
+    "duplicate invocations"; fix = delete the row (name the sibling that
+    keeps the guard). A row survives only by killing at least one credible
+    mutant that nothing else in scope kills.
+
+  Record both in the Test gate table: the mutant, why it is credible, and
+  which rows/tests also kill it.
+
 **Classify every non-killed mutant** — they are not the same finding:
 
 - **survived** — code covered, assertion missing → "untested: <line>".
@@ -408,8 +425,8 @@ Comment density: X added comment lines / Y added lines.
 Test gate (one row per in-scope test AND subtest/table case — an empty or
 hand-waved cell is itself a finding):
 
-| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | own mutant (pass B): killed? |
-|---|---|---|---|---|---|
+| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | own mutant (pass B): killed? | credible? why | also killed by (must be none) |
+|---|---|---|---|---|---|---|---|
 
 Overlap matrix: [Step 3b rows; duplicates marked]
 Skipped: [test → reason → covered elsewhere? y/n]
