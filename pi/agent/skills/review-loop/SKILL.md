@@ -33,7 +33,8 @@ report, apply fixes to confirmed issues, run validation, and loop.
 
 - One fresh `reviewer` per pass. Never resume or reuse a previous pass's
   reviewer: each pass must judge the current diff without inherited bias.
-- The reviewer never edits code. Fixes are applied in the main session (or a
+- The reviewer never edits the reviewed tree (throwaway mutants in
+  `branch-review`'s Phase 2b worktree are allowed). Fixes are applied in the main session (or a
   single `worker`), then a NEW fresh reviewer grades the updated diff.
 - The main session may read code only to apply a fix to an issue the
   reviewer CONFIRMED — never to generate or verify hypotheses.
@@ -105,8 +106,8 @@ fixes depend on its result). Its prompt contains only:
 - the change surface from Step 0 (base commit / exact diff command),
 - any user scope constraints (e.g. "only this PR's diff"),
 - the current `notes.md` (refuted hypotheses, so it does not re-report them),
-- the instruction to load and run `branch-review` verbatim, stay read-only,
-  and return the Phase 3 report (confirmed issues with proof, false
+- the instruction to load and run `branch-review` verbatim (including the
+  Phase 2b mutation check), never edit the reviewed tree, and return the Phase 3 report (confirmed issues with proof, false
   positives, grade).
 
 No conversation context beyond that. The subagent runs the **full
@@ -115,7 +116,8 @@ No conversation context beyond that. The subagent runs the **full
 1. Phase 1 — capture diff + hypothesize issues.
 2. Phase 2 — verify each claim by tracing the call chain. Only **CONFIRMED**
    issues with proof count.
-3. Phase 3 — report: confirmed issues, false positives, grade.
+3. Phase 2b — mutation check: surviving mutants are CONFIRMED issues.
+4. Phase 3 — report: confirmed issues, false positives, grade.
 
 Use `branch-review`'s tracing rules verbatim. Do not weaken them — a fix
 targeting a false positive is wasted work (and often introduces a real bug).
@@ -126,7 +128,12 @@ For each **CONFIRMED** issue from the pass:
 
 1. Re-read the live code around the issue (not just the diff).
 2. Write the minimal fix that resolves the proven scenario.
-3. Add or update a test that would have caught it, when feasible.
+3. Add or update a test that would have caught it, when feasible. The test
+   must pass `branch-review`'s test gate and junk-test checks, and must fail
+   on the pre-fix code for the intended reason: revert the fix, run the test,
+   read the failure, restore the fix. A test that passes without the fix
+   doesn't count. One test at the owner boundary, not one per layer. Live
+   tests seed their own data. Never assert tuning constants.
 4. Verify the fix locally — `make build`, `make verify`, `go test ./...`, or the
    project's equivalent.
 
