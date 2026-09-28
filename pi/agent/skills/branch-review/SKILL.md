@@ -47,6 +47,16 @@ go test ./...  # or project's test command
 
 If these fail, note the failures — they're real issues, no verification needed.
 
+**Step 2b — Bloat signal.** Measure added comment density:
+
+```bash
+git diff $BASE..HEAD | grep '^+[^+]' | grep -cE '^\+\s*(//|#|/\*|\*|--)'  # added comment lines
+git diff $BASE..HEAD | grep -c '^+[^+]'                                       # added lines total
+```
+
+If more than ~15% of added lines are comments, or any comment block has more
+than 3 lines, check every added comment one by one in Step 3.
+
 **Step 3 — Hypothesize issues.**
 
 Read the diff and list potential issues. For each, note:
@@ -68,6 +78,38 @@ Issue categories to check:
   for…") and any comment that contradicts the code it sits on. These are
   CONFIRMED by quoting the comment (and the code, for contradictions) — no
   call-chain trace needed. Fix: rewrite to describe current behavior, or delete.
+- **Verbose comments**: flag any added comment that:
+  - restates the code (`// increment counter` above `i++`, a docstring that
+    repeats the signature)
+  - narrates obvious steps (`// Step 1: ...`, `// Now we ...`)
+  - is a multi-line essay where one line (or nothing) would do
+  - is a section banner, or explains language basics
+  Keep comments that give a non-obvious *why*: a business rule, a gotcha, or
+  a constraint. CONFIRMED by quoting the comment and the line it describes.
+  Fix: delete it or shrink it to one line (write the shortened version).
+- **Useless code (bloat)**: every added line must be needed. Flag:
+  - **Single-use abstractions**: a new helper, interface, class, factory, or
+    wrapper with exactly one caller that adds nothing. Prove with a
+    references/grep count.
+  - **Impossible-case handling**: nil/empty/error checks that an upstream
+    guard already makes unreachable. Prove by tracing the guard, like any
+    other claim.
+  - **Reinvented stdlib/deps**: hand-written code that duplicates a stdlib
+    function or an already-installed dependency. Prove by naming the exact
+    function and showing it is available (import or go.mod/package.json).
+  - **Speculative flexibility**: config knobs, options, params, or generics
+    that no caller uses. Prove that every call site passes the same value or
+    the default.
+  - **Dead code**: new functions, vars, branches, or exports with zero
+    readers. Prove with a zero-reference grep/LSP result.
+  - **Redundant intermediates**: variables assigned and returned right away,
+    duplicated logic, defensive copies that nothing mutates.
+  - **Unrequested scope**: features, logging, or refactors of untouched code
+    that don't serve the branch's stated goal (check commit messages / PR
+    title).
+  CONFIRMED only when you write the smaller replacement (or say "delete
+  lines X–Y") **and** prove it keeps the same behavior. Taste alone ("I'd
+  write it differently") is not a finding.
 
 Write the issue list.
 
@@ -139,6 +181,12 @@ Summarize the findings:
 ### N/A (N)
 1. **[Title]** — dead code / unreachable.
 
+### Bloat (N lines removable)
+1. **[Title]** — file:lines. Proof: [ref count / guard trace / stdlib fn].
+   Replacement: [shorter code or "delete"].
+
+Comment density: X added comment lines / Y added lines.
+
 ### Grade: X/100
 ```
 
@@ -166,6 +214,18 @@ Trace: Old code skipped deposits for missing/paused destinations. New code
        Deposits for chains that never connect: dropped silently at Debug.
 Verdict: CONFIRMED (minor) — deposits for permanently-failed chains are silently
          dropped. Acceptable during startup, could mask failed chains.
+
+Claim: "newRetryPolicy() + RetryOptions struct is a single-use abstraction"
+Trace: grep newRetryPolicy → 1 caller (client.go:42), passes defaults only.
+       RetryOptions fields MaxJitter/OnRetry are never set by any caller.
+Verdict: CONFIRMED (bloat) — inline as `for i := 0; i < maxRetries; i++`
+         at client.go:42; delete retry.go (38 lines).
+
+Claim: "12-line doc comment on parseID restates the signature"
+Trace: comment says "parseID takes a string and returns an int and an error";
+       nothing in it is non-obvious.
+Verdict: CONFIRMED (verbose comment) — delete, or keep a single line:
+         `// parseID accepts legacy "u-" prefixed IDs.`
 ```
 
 ## Constraints
@@ -182,4 +242,9 @@ Verdict: CONFIRMED (minor) — deposits for permanently-failed chains are silent
 - **One task at a time.** Don't batch verification. Trace one claim fully before
   moving to the next.
 - **Keep the issue list short.** 3-8 issues. Quality over quantity. A review
-  with 0 confirmed issues is a valid result.
+  with 0 confirmed issues is a valid result. Bloat and verbose-comment
+  findings don't count toward this limit; group the same pattern into one
+  finding (e.g. "9 restating comments in handler.go").
+- **Bloat lowers the grade.** Bloat is never a correctness bug, but every
+  confirmed bloat finding costs points. A diff that works but could be 40%
+  smaller should not score above 85.
