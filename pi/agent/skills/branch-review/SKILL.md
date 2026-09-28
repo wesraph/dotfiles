@@ -123,10 +123,16 @@ Issue categories to check:
   "slow", or "looks like implementation" is not proof of redundancy. A kept
   seam or duplicate is fine when its reason is stated (e.g. "fake can't reach
   the unexported option without it").
-  A test finding is CONFIRMED only with: test name + location, what it can
+  A test finding is CONFIRMED with: test name + location, what it can
   actually detect, the mutant it caught or missed (Phase 2b), the stronger
   owner test that remains, and what removing it unlocks. Missing field →
-  "needs verification".
+  "needs verification" — EXCEPT these, which are CONFIRMED on their own:
+  a test (or subtest) that survives its own mutant (Phase 2b step B), and a
+  duplicate row pair in the overlap matrix (Step 3b).
+- **Scope of the test audit**: every test function AND every subtest/table
+  case the diff adds or changes, plus every other test in a test file the
+  diff touches whose subject overlaps them. A table case is a test: audit it
+  like one.
 - **Comments**: every added/changed comment must describe what the code does
   (or why) — nothing else. Flag any comment that references the session,
   the change, or history ("byte-identical to what it was before", "the old
@@ -168,6 +174,26 @@ Issue categories to check:
   write it differently") is not a finding.
 
 Write the issue list.
+
+**Step 3b — Test overlap matrix.** Junk tests are judged against each
+other, not one at a time. For each package, list every in-scope test and
+subtest as a row:
+
+```
+test/subtest | entry point called | inputs (fixture, stub, ctx, options) | fields asserted
+```
+
+- Two rows with the same entry point and equivalent inputs that assert
+  different fields → CONFIRMED "duplicate invocations". Write the merged
+  table (cases × every asserted field).
+- A row whose inputs differ only by a value the package cannot distinguish
+  (e.g. two budgets both above the cap, a "voice"/"chat" split in a package
+  that has no channels) → CONFIRMED "wrong-layer / same case twice".
+- A row whose name claims an outcome no assertion in the row checks (name
+  says "RunsLexicalOnly", fields asserted say only "reached the query
+  stage") → CONFIRMED "name promises more than it asserts".
+
+The matrix goes in the Phase 3 report.
 
 ### Phase 2 — Verify Each Claim
 
@@ -237,7 +263,20 @@ branch adds, and the test(s) claimed to cover it:
 5. When done: `git worktree remove --force ./worktrees/review-mutants`.
 
 A surviving mutant is CONFIRMED: "test X passes without Y". Cap at ~20
-mutants, focused on new branches, conditions, and queries.
+mutants per pass A, focused on new branches, conditions, and queries.
+
+Run the mutants in two directions:
+
+- **A — per guard**: every new branch, condition, query, and constant has at
+  least one test that fails.
+- **B — per test**: every in-scope test AND subtest/table case names the
+  mutant it exists to kill (its gate answer 2). Run ONLY that test with the
+  mutant: `go test -run '^TestX$/^case_name$'` (or the project's
+  equivalent). A test that stays green is CONFIRMED junk, even when another
+  test catches the same mutant — it is a negative control passing for an
+  unrelated reason, or its name promises more than it asserts. "Some test
+  failed" in pass A never vouches for the other tests that claim the same
+  guard. No cap on pass B: one run per in-scope test/case.
 
 ### Phase 3 — Report
 
@@ -262,6 +301,13 @@ Summarize the findings:
 Comment density: X added comment lines / Y added lines.
 
 ### Test audit
+Test gate (one row per in-scope test AND subtest/table case — an empty or
+hand-waved cell is itself a finding):
+
+| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | own mutant (pass B): killed? |
+|---|---|---|---|---|---|
+
+Overlap matrix: [Step 3b rows; duplicates marked]
 Skipped: [test → reason → covered elsewhere? y/n]
 Mutants: N injected / K caught / S survived → [survivors: test X passes without Y]
 LOC: production +A/−B, tests +C/−D (git diff --numstat)

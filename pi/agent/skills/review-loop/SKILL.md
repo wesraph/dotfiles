@@ -105,7 +105,10 @@ fixes depend on its result). Its prompt contains only:
 - the repo path (and worktree path, if working in one),
 - the change surface from Step 0 (base commit / exact diff command),
 - any user scope constraints (e.g. "only this PR's diff"),
-- the current `notes.md` (refuted hypotheses, so it does not re-report them),
+- the current `notes.md` (refuted hypotheses, so it does not re-report them).
+  Refuted hypotheses only — never pass "tests X/Y are fine" or a prior
+  grade: a test verdict is re-earned every pass by the Phase 2b per-test
+  mutants,
 - the instruction to load and run `branch-review` verbatim (including the
   Phase 2b mutation check), never edit the reviewed tree, and return the Phase 3 report (confirmed issues with proof, false
   positives, grade).
@@ -136,6 +139,10 @@ For each **CONFIRMED** issue from the pass:
    tests seed their own data. Never assert tuning constants.
 4. Verify the fix locally — `make build`, `make verify`, `go test ./...`, or the
    project's equivalent.
+5. A reported junk test is a symptom of its file. Record every test file a
+   fix touched in `notes.md`: the next pass's reviewer audits EVERY test in
+   those files (overlap matrix, per-test mutants), not only the changed
+   hunks, so siblings with the same defect are not waved through.
 
 **Fix order matters:** resolve issues that other fixes depend on first (e.g.,
 fix a nil-returning helper before fixing the caller that dereferences it).
@@ -162,6 +169,10 @@ reviewed. A fix can:
   symptoms disappear).
 
 Only a fresh review pass, on the current diff, can detect these.
+
+In every pass after the first, tell the reviewer which test files the fixes
+touched; the whole file is in scope for its test audit, not only the
+changed hunks.
 
 ### Step 5 — Termination
 
