@@ -26,6 +26,7 @@
 	wl = !bash \"$HOME/.config/git/wl.sh\"
     wa = worktree add
     wd = worktree remove
+	waa = "!f() { n=\"$1\"; shift; git worktree add \"./worktrees/$n\" \"$@\"; }; f"
 
 [push]
     default = tracking
