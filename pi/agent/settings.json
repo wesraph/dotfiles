@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.87.1",
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-sonnet-5-5",
+  "defaultProvider": "zai-renaud",
+  "defaultModel": "glm-5.3",
   "packages": [
     "git:github.com/nicobailon/pi-subagents@f7732d6b6e21009cd719749cdfdc68361904a486",
     "git:github.com/nicobailon/pi-powerline-footer@bdf069fcf33211d9037919e539aa129d4efd263e",
