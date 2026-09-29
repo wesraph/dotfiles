@@ -6,12 +6,12 @@
     "git:github.com/nicobailon/pi-subagents@f7732d6b6e21009cd719749cdfdc68361904a486",
     "git:github.com/nicobailon/pi-powerline-footer@bdf069fcf33211d9037919e539aa129d4efd263e",
     "git:github.com/nicobailon/pi-mcp-adapter@a4b3e90779687c1dea113f5d6c1be76c5c6d24bc",
-    "git:github.com/juicesharp/rpiv-mono@d74b1c99830a565f3df3f37e0a36616d17ffc574",
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
     "npm:@narumitw/pi-goal",
-    "npm:pi-anthropic-oauth@0.2.4"
+    "npm:pi-anthropic-oauth@0.2.4",
+    "npm:@juicesharp/rpiv-ask-user-question@2.11.0"
   ],
   "editorPaddingX": 0,
   "terminal": {
