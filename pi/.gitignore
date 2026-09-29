@@ -17,3 +17,5 @@ agent/pi-blackhole/
 /memories/
 agent/extensions/*/node_modules/
 agent/extensions/node_modules/
+/agent/missions/
+/agent/pi-subagents/
