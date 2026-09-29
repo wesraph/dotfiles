@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "49958993-0da4-44f2-8459-3f32aabd3d55",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "failed",
+  "createdAt": "2026-09-29T08:14:12.967Z",
+  "updatedAt": "2026-09-29T08:14:13.784Z",
+  "runs": [
+    {
+      "runId": "49c2b410-1285-4233-b4a1-4ba9c0d98513",
+      "mode": "single",
+      "agent": "scout",
+      "status": "failed",
+      "startedAt": "2026-09-29T08:14:13.784Z",
+      "completedAt": "2026-09-29T08:14:13.784Z"
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-.dotfiles--/subagent-artifacts/49c2b410-1285-4233-b4a1-4ba9c0d98513_scout_0_output.md"
+    },
+    {
+      "kind": "other",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-.dotfiles--/subagent-artifacts/49c2b410-1285-4233-b4a1-4ba9c0d98513_scout_0_transcript.jsonl",
+      "description": "Child transcript"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/.dotfiles",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-.dotfiles--/2026-09-29T08-11-49-714Z_01a0ec38-5451-7217-8dfa-84a869d44591.jsonl",
+  "summary": "Run fan-out: 1/64 used, 63 remaining\nAgent 'scout' ran as a foreground child, which never loads the parent's ambient extensions, and these child tools were unavailable: playwright_browser_close, playwright_browser_resize, playwright_browser_console_messages, playwright_browser_handle_dialog, playwright_browser_evaluate, playwright_browser_file_upload, playwright_browser_drop, playwright_browser_find, playwright_browser_fill_form, playwright_browser_press_key, playwright_browser_type, playwright_browser_navigate, playwright_browser_navigate_back, playwright_browser_network_requests, playwright_browser_network_request, playwright_browser_run_code_unsafe, playwright_browser_take_screenshot, playwright_browser_snapshot, playwright_browser_click, playwright_browser_drag, playwright_browser_hover, playwright_browser_select_option, playwright_browser_tabs, playwright_browser_wait_for.\nThe `tools` field is a strict allowlist; it does not load extension code.\nMCP direct tools missing from the child registry: playwright_browser_close, playwright_browser_resize, playwright_browser_console_messages, playwright_browser_handle_dialog, playwright_browser_evaluate, playwright_browser_file_upload, playwright_browser_drop, playwright_browser_find, playwright_browser_fill_form, playwright_browser_press_key, playwright_browser_type, playwright_browser_navigate, playwright_browser_navigate_back, playwright_browser_network_requests, playwright_browser_network_request, playwright_browser_run_code_unsafe, playwright_browser_take_screenshot, playwright_browser_snapshot, playwright_browser_click, playwright_browser_drag, playwright_browser_hover, playwright_browser_select_option, playwright_browser_tabs, playwright_browser_wait_for.\nMCP tools require background children (`async: true`) because only they load ambient extensions.\nFor extension tools a foreground child can load, add the provider path to `subagentOnlyExtensions` (child-only), `extensions`, or as a path-like entry in `tools`, ...",
+  "acceptance": {
+    "status": "rejected",
+    "evidenceStatus": "rejected",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": [
+        "default lightweight attestation"
+      ],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return a concise result and residual risks when applicable",
+          "evidence": [
+            "manual-notes",
+            "residual-risks"
+          ],
+          "severity": "required"
+        }
+      ],
+      "evidence": [
+        "manual-notes",
+        "residual-risks"
+      ],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": [
+      "default lightweight attestation"
+    ],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return a concise result and residual risks when applicable",
+        "evidence": [
+          "manual-notes",
+          "residual-risks"
+        ],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [
+      {
+        "id": "attestation",
+        "status": "failed",
+        "message": "Structured acceptance report not found."
+      }
+    ],
+    "verifyRuns": [],
+    "childReportParseError": "Structured acceptance report not found."
+  }
+}

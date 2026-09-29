@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "e5311651-136e-46a6-80fe-534446dab746",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "completed",
+  "createdAt": "2026-09-29T08:14:17.553Z",
+  "updatedAt": "2026-09-29T08:14:22.771Z",
+  "runs": [
+    {
+      "runId": "a45322b7-de83-4c8d-a483-f24cf4f5caa5",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/a45322b7-de83-4c8d-a483-f24cf4f5caa5",
+      "status": "complete",
+      "startedAt": "2026-09-29T08:14:17.572Z",
+      "completedAt": "2026-09-29T08:14:22.771Z",
+      "usage": {
+        "tokens": 244
+      }
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/a45322b7-de83-4c8d-a483-f24cf4f5caa5/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/a45322b7-de83-4c8d-a483-f24cf4f5caa5/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-.dotfiles--/subagent-artifacts/a45322b7-de83-4c8d-a483-f24cf4f5caa5_scout_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/.dotfiles",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-.dotfiles--/2026-09-29T08-11-49-714Z_01a0ec38-5451-7217-8dfa-84a869d44591.jsonl",
+  "summary": "scout:\n`.git/ .gitignore .pi/ config/ fzf/ gitconfig gnupg/ mpdconf oh-my-zsh/ pi/ scripts/ shell_functions tag-laptop/ tmate.conf tmux/ tmux.conf Xdefaults xinitrc Xresources z.sh zshrc`"
+}

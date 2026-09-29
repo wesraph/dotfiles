@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "f7379ea4-a58e-4723-8f8f-6ba60bf0b812",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "cancelled",
+  "createdAt": "2026-09-29T08:16:21.623Z",
+  "updatedAt": "2026-09-29T08:19:37.026Z",
+  "runs": [
+    {
+      "runId": "29a4248a-7c9e-478f-96dc-05cabf78c0c6",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/29a4248a-7c9e-478f-96dc-05cabf78c0c6",
+      "status": "stopped",
+      "startedAt": "2026-09-29T08:16:21.647Z",
+      "completedAt": "2026-09-29T08:19:37.026Z"
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/29a4248a-7c9e-478f-96dc-05cabf78c0c6/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/29a4248a-7c9e-478f-96dc-05cabf78c0c6/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/29a4248a-7c9e-478f-96dc-05cabf78c0c6_reviewer_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "Subagent stopped by user."
+}

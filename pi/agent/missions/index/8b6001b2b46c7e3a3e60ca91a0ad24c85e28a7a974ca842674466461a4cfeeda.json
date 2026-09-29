@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "missionId": "49958993-0da4-44f2-8459-3f32aabd3d55",
+  "projectRoot": "/home/raph/.dotfiles",
+  "recordPath": "/home/raph/.pi/agent/missions/projects/07765467cf129e43af6af274ec78fd9778f79765ca4e87a942a185f8926d7c2c/49958993-0da4-44f2-8459-3f32aabd3d55.json",
+  "title": "[prompt redacted]",
+  "status": "failed",
+  "updatedAt": "2026-09-29T08:14:13.784Z",
+  "lastRunId": "49c2b410-1285-4233-b4a1-4ba9c0d98513"
+}

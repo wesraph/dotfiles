@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "0ddf3bcb-0045-49d1-8d29-27dec5602125",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "completed",
+  "createdAt": "2026-09-29T08:28:18.730Z",
+  "updatedAt": "2026-09-29T08:31:03.065Z",
+  "runs": [
+    {
+      "runId": "2be01895-fbf6-46ab-b508-b73abb8b1d0e",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/2be01895-fbf6-46ab-b508-b73abb8b1d0e",
+      "status": "complete",
+      "startedAt": "2026-09-29T08:28:18.750Z",
+      "completedAt": "2026-09-29T08:31:03.065Z",
+      "usage": {
+        "tokens": 15070
+      }
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/2be01895-fbf6-46ab-b508-b73abb8b1d0e/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/2be01895-fbf6-46ab-b508-b73abb8b1d0e/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/2be01895-fbf6-46ab-b508-b73abb8b1d0e_reviewer_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "reviewer:\n## Review: knowledge-base (docs only: `specs/knowledge-base/design.md`, `implementation-plan.md`, 464 lines added)\n\n**What the branch sets out to do:** it adds `rag.sources` and `rag.source_versions` for uploaded files. Triggers maintain them, and SECURITY DEFINER functions promote, fail and roll back versions. Retrieval changes by one filter: its exclusion CTE also drops versions that are not `completed`. The migration goes to production before the merge, because merging is what deploys.\n\n### Last pass's fix holds\n- The Exit gate (plan:201-207) no longer asks for zero skips. The three skips it lists as expected match the code: `retrieve_live_test.go:55`, `documentai_live_test.go:39` and `session_settings_live_test.go:17`. The `rag schema not ready` message it forbids is the one `openLiveDB` skips with at `retrieve_live_test.go:28`.\n- The test stack is seeded by `localseed` (`scripts/mail-test-stack.sh:60-66`), so the siblings that look for \"no provisioning item without chunks\" have a tenant to use.\n- The rag migration creates `pgmq` and the `rag_ingest` queue (`rag.sql:649-654`), so the queue live tests don't skip either.\n- The SchemaReady-false test (plan:194-195) works as described. Dropping `source_version` inside a transaction that is rolled back also drops the table's own composite FK, since a constraint on the same table is dropped with the column. Plpgsql bodies are not tracked as dependencies, so the triggers don't block the drop. `information_schema` reads inside the same transaction see the change.\n- Anchors I rechecked:\n  - `pgvector.go:172` (`candK = 40`) and `:224` (`WITH failed AS`)\n  - `tenant.go:66` (SchemaReady)\n  - `engine/main.go:522` (the probe) and `:544` (names the migration)\n  - `misc/server.go:180-181` (probes until it latches)\n  - mailengine has no probe: `main.go:497` calls `NewStore` with no SchemaReady\n\n### Confirmed issues (2)\n1. **Untested claim: the insert trigger overwrites a `source_id` the caller passes.** Nit; found by t"
+}

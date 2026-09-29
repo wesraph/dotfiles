@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "missionId": "f7379ea4-a58e-4723-8f8f-6ba60bf0b812",
+  "projectRoot": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "recordPath": "/home/raph/.pi/agent/missions/projects/3f9ce56187c461d07dde3ed0dfc8c8eb4a2169e85275988d1d4ee57825498a80/f7379ea4-a58e-4723-8f8f-6ba60bf0b812.json",
+  "title": "[prompt redacted]",
+  "status": "cancelled",
+  "updatedAt": "2026-09-29T08:19:37.026Z",
+  "lastRunId": "29a4248a-7c9e-478f-96dc-05cabf78c0c6"
+}

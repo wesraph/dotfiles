@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "383ce711-24dc-4c43-a458-0120742370b9",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "completed",
+  "createdAt": "2026-09-29T08:25:01.505Z",
+  "updatedAt": "2026-09-29T08:27:53.968Z",
+  "runs": [
+    {
+      "runId": "30237b85-0803-4888-89c3-747c6542042e",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/30237b85-0803-4888-89c3-747c6542042e",
+      "status": "complete",
+      "startedAt": "2026-09-29T08:25:01.535Z",
+      "completedAt": "2026-09-29T08:27:53.968Z",
+      "usage": {
+        "tokens": 15411
+      }
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/30237b85-0803-4888-89c3-747c6542042e/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/30237b85-0803-4888-89c3-747c6542042e/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/30237b85-0803-4888-89c3-747c6542042e_reviewer_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "reviewer:\n## Review: knowledge-base (pass 2)\n\n**What the branch does:** it adds two docs only, `specs/knowledge-base/design.md` (+206 lines) and `implementation-plan.md` (+251 lines). They plan a new migration that gives every uploaded file a source (`rag.sources`) with versions (`rag.source_versions`), kept up to date by triggers and changed only through `SECURITY DEFINER` version functions. Retrieval changes by one filter: it only reads `completed` versions, and `SchemaReady` gets a fourth column to probe. Each promised behaviour has a planned test in `supabase/rlstest/rag_test.go` or `internal/rag/retrieve_live_test.go`.\n\n**Fixes from the previous pass:**\n- **`SchemaReady` count 3→4 and the `Fatalf` test: holds.** `tenant.go:66-75` probes three `documents` columns with `= 3`. `openLiveDB` skips when the probe is false (`retrieve_live_test.go:26-28`), so the planned `Fatalf`-unless-ready test is the right guard.\n- **Companion `(source_id, source_version)` assertions: hold.** Plan lines 137-139 and 192-193 kill the \"companion gets version 1 or the serving version\" mutant and the \"source_version not copied\" mutant (the second fails on `NOT NULL`).\n- **Test stack gets the migration via `db reset`: holds.** `scripts/mail-test-stack.sh:60` runs `$SUPABASE --workdir supabase-test db reset`, and `supabase-test/supabase/migrations -> ../../supabase/migrations` is a symlink.\n- **`search_path = pg_catalog` on the triggers: holds.** It matches the helper at `rag.sql:491`.\n- **Anchors:** `cmd/engine/main.go:544` names `20260728000000_rag.sql`, and `cmd/misc/server.go:180` re-probes until it latches ready.\n\n### Confirmed Issues (1)\n1. **The Phase 2 exit check \"zero `--- SKIP` in the live tests\" can't be met on the test stack.** Important (evidence: I ran the test and got the skip). `implementation-plan.md:200-201`.\n   - **Why it fails:**\n     - `TestRetrieveWithVector_Live` (`retrieve_live_test.go:50-56`) picks any existing chunk and calls `t.Skip(\"no chunks in the database to"
+}

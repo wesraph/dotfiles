@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "280ca74b-adf1-4280-a4b7-ed553eca481d",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "failed",
+  "createdAt": "2026-09-29T08:16:14.893Z",
+  "updatedAt": "2026-09-29T08:16:15.385Z",
+  "runs": [
+    {
+      "runId": "ab30613c-d721-444e-be97-44a235fd9be1",
+      "mode": "single",
+      "agent": "reviewer",
+      "status": "failed",
+      "startedAt": "2026-09-29T08:16:15.385Z",
+      "completedAt": "2026-09-29T08:16:15.385Z"
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/ab30613c-d721-444e-be97-44a235fd9be1_reviewer_0_output.md"
+    },
+    {
+      "kind": "other",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/ab30613c-d721-444e-be97-44a235fd9be1_reviewer_0_transcript.jsonl",
+      "description": "Child transcript"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "Run fan-out: 1/64 used, 63 remaining\nAgent 'reviewer' ran as a foreground child, which never loads the parent's ambient extensions, and these child tools were unavailable: playwright_browser_close, playwright_browser_resize, playwright_browser_console_messages, playwright_browser_handle_dialog, playwright_browser_emulate_media, playwright_browser_evaluate, playwright_browser_file_upload, playwright_browser_drop, playwright_browser_find, playwright_browser_fill_form, playwright_browser_press_key, playwright_browser_type, playwright_browser_navigate, playwright_browser_navigate_back, playwright_browser_network_requests, playwright_browser_network_request, playwright_browser_run_code_unsafe, playwright_browser_take_screenshot, playwright_browser_snapshot, playwright_browser_click, playwright_browser_drag, playwright_browser_hover, playwright_browser_select_option, playwright_browser_tabs, playwright_browser_wait_for.\nThe `tools` field is a strict allowlist; it does not load extension code.\nMCP direct tools missing from the child registry: playwright_browser_close, playwright_browser_resize, playwright_browser_console_messages, playwright_browser_handle_dialog, playwright_browser_emulate_media, playwright_browser_evaluate, playwright_browser_file_upload, playwright_browser_drop, playwright_browser_find, playwright_browser_fill_form, playwright_browser_press_key, playwright_browser_type, playwright_browser_navigate, playwright_browser_navigate_back, playwright_browser_network_requests, playwright_browser_network_request, playwright_browser_run_code_unsafe, playwright_browser_take_screenshot, playwright_browser_snapshot, playwright_browser_click, playwright_browser_drag, playwright_browser_hover, playwright_browser_select_option, playwright_browser_tabs, playwright_browser_wait_for.\nMCP tools require background children (`async: true`) because only they load ambient extensions.\nFor extension tools a foreground child can load, add the provider path to `subagentOnlyExten...",
+  "acceptance": {
+    "status": "rejected",
+    "evidenceStatus": "rejected",
+    "explicit": false,
+    "effectiveAcceptance": {
+      "level": "attested",
+      "explicit": false,
+      "inferredReason": [
+        "default lightweight attestation"
+      ],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Return a concise result and residual risks when applicable",
+          "evidence": [
+            "manual-notes",
+            "residual-risks"
+          ],
+          "severity": "required"
+        }
+      ],
+      "evidence": [
+        "manual-notes",
+        "residual-risks"
+      ],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": [
+      "default lightweight attestation"
+    ],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Return a concise result and residual risks when applicable",
+        "evidence": [
+          "manual-notes",
+          "residual-risks"
+        ],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [
+      {
+        "id": "attestation",
+        "status": "failed",
+        "message": "Structured acceptance report not found."
+      }
+    ],
+    "verifyRuns": [],
+    "childReportParseError": "Structured acceptance report not found."
+  }
+}

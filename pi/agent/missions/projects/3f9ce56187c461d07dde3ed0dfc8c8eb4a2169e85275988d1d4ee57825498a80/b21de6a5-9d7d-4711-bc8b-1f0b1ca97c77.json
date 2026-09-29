@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "b21de6a5-9d7d-4711-bc8b-1f0b1ca97c77",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "completed",
+  "createdAt": "2026-09-29T08:31:23.010Z",
+  "updatedAt": "2026-09-29T08:33:19.101Z",
+  "runs": [
+    {
+      "runId": "35351299-1a83-47ff-aa38-aed567307dda",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/35351299-1a83-47ff-aa38-aed567307dda",
+      "status": "complete",
+      "startedAt": "2026-09-29T08:31:23.032Z",
+      "completedAt": "2026-09-29T08:33:19.101Z",
+      "usage": {
+        "tokens": 11169
+      }
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/35351299-1a83-47ff-aa38-aed567307dda/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/35351299-1a83-47ff-aa38-aed567307dda/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/35351299-1a83-47ff-aa38-aed567307dda_reviewer_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "reviewer:\n## Review: knowledge-base (pass 4). Docs only: `specs/knowledge-base/design.md` +206 lines, `implementation-plan.md` +262 lines.\n\n**What the branch sets out to do:** add `rag.sources` and `rag.source_versions` for uploaded files. Triggers create and remove sources, `SECURITY DEFINER` functions promote, fail and roll back versions, and retrieval drops documents whose version is not `completed`. No webapp, ingest or clipp change. The migration goes to production before the merge, because the merge is what deploys.\n\n### Confirmed Issues (0)\nNone. The rubric counts 0.\n\n### Last pass's fix holds (plan lines 122–137)\n- **(a)** A parentless file insert as `postgres` that names another document's `source_id`/`source_version` still gets a fresh source. The mutant it kills is a trigger that only creates a source when `NEW.source_id IS NULL`. Under that mutant, a same-tenant target shares the other document's source and the assertion fails. A cross-tenant target fails on the composite FK `documents_version_tenant_fkey`. No sibling test names a source on insert: the version test's insert takes the fresh one. So (a) is the only test that kills this mutant.\n- **(b)** The owner reads its own source and its version 1 `completed`. It kills two mutants:\n  - a missing SELECT grant or policy on `rag.source_versions`;\n  - a trigger that writes a status other than `completed`.\n\n  The \"another tenant invisible\" row alone could not catch either, because an empty read passes it.\n\n### False Positives (checked this pass)\n1. **Plan anchors drifted.** They hold:\n   - `rag.sql:491` is `SET search_path = pg_catalog`.\n   - `pgvector.go:172` is `const candK = 40`.\n   - The `failed` CTE is at `pgvector.go:224`.\n   - `cmd/engine/main.go:544` names `20260728000000_rag.sql`.\n   - `cmd/misc/server.go:180` re-probes when `!s.ragSchemaReady.Load()`.\n   - `engine.go:194-196` has the push trigger on `^main$` with `internal/**`.\n   - `mail-test-stack.sh:60` runs `db reset`.\n   - `purge_rag.go:86` r"
+}

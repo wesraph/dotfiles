@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "1c49e2cb-430f-46eb-8257-264c177dc735",
+  "title": "[prompt redacted]",
+  "objective": "[prompt redacted]",
+  "status": "completed",
+  "createdAt": "2026-09-29T08:19:43.504Z",
+  "updatedAt": "2026-09-29T08:24:09.133Z",
+  "runs": [
+    {
+      "runId": "5b04af45-f3ae-42bd-8a0a-bb600da7b1ad",
+      "mode": "single",
+      "asyncDir": "/tmp/pi-subagents-uid-1000/async-subagent-runs/5b04af45-f3ae-42bd-8a0a-bb600da7b1ad",
+      "status": "complete",
+      "startedAt": "2026-09-29T08:19:43.525Z",
+      "completedAt": "2026-09-29T08:24:09.133Z",
+      "usage": {
+        "tokens": 25588
+      }
+    }
+  ],
+  "workflowChildren": [],
+  "decisions": [],
+  "artifacts": [
+    {
+      "kind": "status",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/5b04af45-f3ae-42bd-8a0a-bb600da7b1ad/status.json"
+    },
+    {
+      "kind": "other",
+      "path": "/tmp/pi-subagents-uid-1000/async-subagent-runs/5b04af45-f3ae-42bd-8a0a-bb600da7b1ad/events.jsonl",
+      "description": "Lifecycle events"
+    },
+    {
+      "kind": "output",
+      "path": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/subagent-artifacts/5b04af45-f3ae-42bd-8a0a-bb600da7b1ad_reviewer_output.md"
+    }
+  ],
+  "receipts": [],
+  "cwd": "/home/raph/sources/voiceable/ionflux/worktrees/knowledge-base",
+  "ownerSessionId": "/home/raph/.pi/agent/sessions/--home-raph-sources-voiceable-ionflux-worktrees-knowledge-base--/2026-09-29T08-15-35-442Z_01a0ec3b-c611-70fc-aca0-7d0d383de4ba.jsonl",
+  "summary": "reviewer:\n## Review: knowledge-base (docs only: design.md + implementation-plan.md)\n\n**Intent:** The branch adds `rag.sources` and `rag.source_versions` as groundwork. Insert and delete triggers keep them in step for file uploads, SECURITY DEFINER functions handle promote, fail, rollback and prune, and retrieval only serves `completed` versions. It also covers rlstests, live retrieval tests and a migrate-before-merge rollout.\n\nBuild and tests were not run: the diff only changes docs. For the mutation check I traced mutants of the planned code against the planned tests and the existing test harness.\n\n### Confirmed Issues (3)\n\n1. **The planned tests cannot catch a broken `SchemaReady`, and every live test would then skip and look green.** Important (evidence: traced). Plan Phase 2.2 and its Tests paragraph.\n   - **How the probe is written:** `internal/rag/tenant.go:66-80` counts columns with a hard-coded total: `column_name IN ('parent_document_id','storage_path','ingest_attempts')) = 3`.\n   - **The mutant:** a developer adds `'source_version'` to the list but leaves `= 3`. It is a very plausible edit, and on a migrated database the probe then always answers false.\n   - **Why no planned test fails:**\n     - The only planned `SchemaReady` test checks for false on a database without the column, and still passes.\n     - `openLiveDB` (`retrieve_live_test.go:26-29`) calls `t.Skipf(\"rag schema not ready …\")` when the probe is false, so every `internal/rag` live test skips, the new version tests included.\n     - Phase 2 Exit asks for `go test ./internal/rag` to be \"green\", which a run of skips satisfies.\n     - `x/cmd/rag`, used for the latency check, never calls `SchemaReady`. It is only called from `cmd/engine/main.go:522` and `cmd/misc/server.go:181`.\n   - **Production impact:** the engine logs \"rag schema is not migrated\" and turns retrieval off (`main.go:542-545`). misc returns `errRAGSchemaMissing` on every ingest (`server.go:186-188`), so every upload stays queued.\n  "
+}
