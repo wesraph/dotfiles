@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "approvals": [
+    {
+      "projectRoot": "/home/raph/sources/voiceable/ionflux",
+      "serverName": "excalidraw",
+      "definitionHash": "905e327523cf282f3cb4af3df2fd278ede71e8e817e6c79d34b3d31956ac8def",
+      "approvedAt": "2026-09-29T08:15:37.586Z"
+    },
+    {
+      "projectRoot": "/home/raph/sources/voiceable/ionflux",
+      "serverName": "jiramcp",
+      "definitionHash": "f6316624d9e19089e49d773067b15c0e508a78c0e735af8757fa5ecf8bbf9b19",
+      "approvedAt": "2026-09-29T08:15:38.269Z"
+    },
+    {
+      "projectRoot": "/home/raph/sources/voiceable/ionflux",
+      "serverName": "playwright",
+      "definitionHash": "cc54fc250d2977afcbeeeb78e1bb9b47dea6fdf78054355f8bbe3c5fe892a852",
+      "approvedAt": "2026-09-29T08:15:38.673Z"
+    },
+    {
+      "projectRoot": "/home/raph/sources/voiceable/ionflux",
+      "serverName": "supabase",
+      "definitionHash": "925264af58aa52c771f5bec99baf1f2825c1b8f4d0746b6df240964782ee6303",
+      "approvedAt": "2026-09-29T08:15:38.932Z"
+    }
+  ]
+}
