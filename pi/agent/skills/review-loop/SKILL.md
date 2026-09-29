@@ -20,7 +20,7 @@ careful engineer does manually.
 - Polishing `master`/`main` itself (latest commit or working tree)
 
 **Do not use** for: open-ended feature work, greenfield implementation, or
-debugging a known runtime failure (use `debug` instead). This skill consumes a
+debugging a known runtime failure. This skill consumes a
 diff and drives it toward zero review findings.
 
 ## Hard rule — review passes run in a subagent
