@@ -3,6 +3,12 @@
 - **Always use a task list** for multi-step work.
 - **When you detect a subject change** (the user switches to a new, unrelated topic), **check the task list first**. If there are any tasks still present (especially completed ones from the previous topic), **clear the task list** before creating new tasks for the new subject. This keeps the task list relevant and uncluttered.
 
+## Bash Timeout & Filesystem Scans
+
+- The `bash` tool has a **default timeout of 60 seconds** (injected automatically when you omit `timeout`), despite the tool description saying "no default timeout". A command exceeding it is killed.
+- Need more time? Pass `timeout` (seconds) explicitly on the `bash` call, or use `bg_run` for builds, test suites, servers and watchers.
+- **NEVER run `find /`, `find ~`, `grep -r /`, `du /`, `ls -R /`, or any recursive scan rooted at `/` or the home directory.** They crawl the whole disk (including `/proc`, `/sys`, mounts, `node_modules`) and effectively never finish. Scope searches to the project directory or a known subdirectory, and prefer `fffind`/`ffgrep`/`symbol_search`. If you truly must locate a file outside the project, use `locate`/`fd` on a narrow directory, with `-maxdepth` and an explicit `timeout`.
+
 ## Waiting — Event-Driven, Never Sleep-Polling
 
 NEVER use `sleep`, `sleep N && ...`, or timed re-check loops to wait for something. Sleeping wastes turns/time and never knows the real moment. Instead, block on the event itself — the command returns exactly when the thing happened (like `tail -f`):
