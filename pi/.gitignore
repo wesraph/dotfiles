@@ -19,3 +19,4 @@ agent/extensions/*/node_modules/
 agent/extensions/node_modules/
 /agent/missions/
 /agent/pi-subagents/
+agent/fff/

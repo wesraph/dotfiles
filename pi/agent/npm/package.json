@@ -2,7 +2,11 @@
   "name": "pi-extensions",
   "private": true,
   "dependencies": {
+    "@ff-labs/pi-fff": "^0.11.0",
+    "@ifi/oh-pi-themes": "^0.5.1",
     "@juicesharp/rpiv-ask-user-question": "^2.11.0",
-    "pi-anthropic-oauth": "^0.3.0"
+    "@narumitw/pi-goal": "^0.54.8",
+    "pi-anthropic-oauth": "^0.3.0",
+    "pi-lens": "^4.3.0"
   }
 }
