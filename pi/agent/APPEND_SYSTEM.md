@@ -382,13 +382,13 @@ Resume caveman after the clear part is done.
 
 Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persists until changed or session end.
 
-## Scout Model Selection
+## Model Family Rules for Spawned Agents and Pi
 
-Scout has no pinned model — it inherits the parent model by default. Before calling the `scout` agent, check `PI_MODEL`:
+Before spawning ANY subagent (`subagent`) or pi session (`spawn_pi`), check `PI_MODEL`. The child's model MUST be from the same family as the parent — no exceptions:
 
-- `claude-opus-*` or `claude-fable-*` → pass `model: "anthropic/claude-haiku-4-5"` in the subagent call (code search/recon does not need a frontier model).
-- `glm-5.3` (exact, not already `glm-5.3-flash`) → pass `model: "zai-renaud/glm-5.3-flash"` in the subagent call.
-- `qwen*` → NEVER substitute another model — not even for `scout`. Use Qwen for the parent AND every subagent, scout included (explicitly pass the same Qwen model via `model:` in each subagent call, or omit `model` so they inherit).
-- Anything else (other glm, sonnet, local) → omit `model` and inherit the parent.
+- Anthropic parent (`claude-*`, `anthropic/*`) → child must be an Anthropic model. For scout/recon under `claude-opus-*` or `claude-fable-*`, pass `model: "anthropic/claude-haiku-4-5"` (code search/recon does not need a frontier model).
+- GLM parent (`glm-*`) → child must be a GLM model. For scout/recon under `glm-5.3` (exact, not already `glm-5.3-flash`), pass `model: "zai-renaud/glm-5.3-flash"`.
+- Qwen parent (`qwen*`) → child must be the same Qwen model, for every agent including `scout` (explicitly pass the same Qwen model via `model:`, or omit `model` so children inherit). ONLY a Qwen parent may spawn a Qwen child — never give a Qwen model to the child of an Anthropic or GLM parent.
+- Anything else → omit `model` and inherit the parent.
 
-The claude and glm rules apply only to `scout`. When running Qwen, ALL subagents must use Qwen — no exceptions.
+Cross-family spawns are forbidden in every direction (no Anthropic→Qwen, no GLM→Qwen, no Qwen→Anthropic/GLM, no Anthropic↔GLM). This applies to every agent (`scout`, `planner`, `worker`, `reviewer`, `oracle`, `researcher`, `doc-searcher`) and to the `model` parameter of `spawn_pi`.
