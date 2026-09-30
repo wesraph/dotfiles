@@ -1,6 +1,7 @@
 /**
  * Subscription quota in the status bar for the active model's provider.
  * Supports Anthropic (Claude Pro/Max OAuth) and Z.AI / BigModel coding plans.
+ * The 5h window also shows the time left until its reset.
  * /quota forces a refresh and prints per-window usage and reset times.
  */
 import type {
@@ -62,7 +63,7 @@ export default function (pi: ExtensionAPI) {
 	function render(ctx: ExtensionContext, entry: CacheEntry): void {
 		const theme = ctx.ui.theme;
 		const body = entry.windows
-			? formatStatus(entry.windows, (sev, text) =>
+			? formatStatus(entry.windows, new Date(), (sev, text) =>
 					theme.fg(SEVERITY_COLOR[sev], text),
 				)
 			: theme.fg("dim", "?");

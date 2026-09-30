@@ -145,17 +145,34 @@ test("formatStatus rounds and colours percentages", () => {
 			{ label: "5h", percent: 9.4 },
 			{ label: "7d", percent: 95 },
 		],
+		new Date(),
 		(sev, text) => `<${sev}>${text}`,
 	);
 	assert.equal(out, "5h <ok>9% · 7d <high>95%");
 });
 
+test("formatStatus shows time to reset for the 5h window only", () => {
+	const now = new Date("2026-09-24T10:00:00Z");
+	const resetsAt = new Date("2026-09-24T12:20:00Z");
+	const out = formatStatus(
+		[
+			{ label: "5h", percent: 42, resetsAt },
+			{ label: "7d", percent: 10, resetsAt },
+		],
+		now,
+		(sev, text) => `<${sev}>${text}`,
+	);
+	assert.equal(out, "5h <ok>42% (2h20m) · 7d <ok>10%");
+});
+
 test("formatDuration", () => {
-	assert.equal(formatDuration(-5000), "0m");
-	assert.equal(formatDuration(59 * 60_000), "59m");
-	assert.equal(formatDuration(60 * 60_000), "1h0m");
-	assert.equal(formatDuration((2 * 60 + 13) * 60_000), "2h13m");
-	assert.equal(formatDuration((24 * 60 + 60) * 60_000), "1d1h");
+	const after = (ms: number): string =>
+		formatDuration(new Date(ms), new Date(0));
+	assert.equal(after(-5000), "0m");
+	assert.equal(after(59 * 60_000), "59m");
+	assert.equal(after(60 * 60_000), "1h0m");
+	assert.equal(after((2 * 60 + 13) * 60_000), "2h13m");
+	assert.equal(after((24 * 60 + 60) * 60_000), "1d1h");
 });
 
 test("formatDetails", () => {

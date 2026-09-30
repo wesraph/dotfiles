@@ -20,8 +20,9 @@ const OPENAI_MODEL = {
 	provider: "openai",
 	baseUrl: "https://api.openai.com/v1",
 };
+const NOW = new Date("2026-09-24T10:00:00Z");
 const ANTHROPIC_BODY = {
-	five_hour: { utilization: 9 },
+	five_hour: { utilization: 9, resets_at: "2026-09-24T12:20:00Z" },
 	seven_day: { utilization: 95 },
 };
 
@@ -65,6 +66,7 @@ function mockFetch(body: unknown, ok = true, status = 200) {
 }
 
 test("renders anthropic quota with severity colours", async (t) => {
+	t.mock.timers.enable({ apis: ["Date"], now: NOW });
 	const fetch = mockFetch(ANTHROPIC_BODY);
 	t.after(() => fetch.mock.restore());
 	const { ctx, fire } = setup(ANTHROPIC_MODEL);
@@ -77,11 +79,12 @@ test("renders anthropic quota with severity colours", async (t) => {
 	assert.equal(init.headers.Authorization, "Bearer key");
 	assert.deepEqual(ctx.ui.setStatus.mock.calls.at(-1)?.arguments, [
 		"quota",
-		"<dim>quota 5h <success>9% · 7d <error>95%",
+		"<dim>quota 5h <success>9% (2h20m) · 7d <error>95%",
 	]);
 });
 
 test("throttles refreshes, /quota forces one and notifies details", async (t) => {
+	t.mock.timers.enable({ apis: ["Date"], now: NOW });
 	const fetch = mockFetch(ANTHROPIC_BODY);
 	t.after(() => fetch.mock.restore());
 	const { ctx, fire, runCommand } = setup(ANTHROPIC_MODEL);
@@ -92,7 +95,7 @@ test("throttles refreshes, /quota forces one and notifies details", async (t) =>
 	assert.equal(fetch.mock.callCount(), 2);
 	assert.match(
 		String(ctx.ui.notify.mock.calls[0].arguments[0]),
-		/^5h: 9% used\n7d: 95% used$/,
+		/^5h: 9% used \(resets in 2h20m\)\n7d: 95% used$/,
 	);
 });
 

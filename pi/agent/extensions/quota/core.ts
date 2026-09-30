@@ -22,6 +22,7 @@ const HIGH_PERCENT: number = 90;
 const MS_PER_MINUTE: number = 60_000;
 const MINUTES_PER_HOUR: number = 60;
 const HOURS_PER_DAY: number = 24;
+const STATUS_RESET_LABEL: string = "5h";
 
 const ANTHROPIC_WINDOWS: Readonly<Record<string, string>> = {
 	five_hour: "5h",
@@ -129,18 +130,25 @@ export function severity(percent: number): Severity {
 
 export function formatStatus(
 	windows: QuotaWindow[],
+	now: Date,
 	color: (sev: Severity, text: string) => string,
 ): string {
 	return windows
-		.map(
-			(w) =>
-				`${w.label} ${color(severity(w.percent), `${Math.round(w.percent)}%`)}`,
-		)
+		.map((w) => {
+			const reset =
+				w.label === STATUS_RESET_LABEL && w.resetsAt
+					? ` (${formatDuration(w.resetsAt, now)})`
+					: "";
+			return `${w.label} ${color(severity(w.percent), `${Math.round(w.percent)}%`)}${reset}`;
+		})
 		.join(" · ");
 }
 
-export function formatDuration(ms: number): string {
-	const totalMinutes = Math.max(0, Math.round(ms / MS_PER_MINUTE));
+export function formatDuration(until: Date, now: Date): string {
+	const totalMinutes = Math.max(
+		0,
+		Math.round((until.getTime() - now.getTime()) / MS_PER_MINUTE),
+	);
 	const minutes = totalMinutes % MINUTES_PER_HOUR;
 	const totalHours = Math.floor(totalMinutes / MINUTES_PER_HOUR);
 	const hours = totalHours % HOURS_PER_DAY;
@@ -154,7 +162,7 @@ export function formatDetails(windows: QuotaWindow[], now: Date): string {
 	return windows
 		.map((w) => {
 			const reset = w.resetsAt
-				? ` (resets in ${formatDuration(w.resetsAt.getTime() - now.getTime())})`
+				? ` (resets in ${formatDuration(w.resetsAt, now)})`
 				: "";
 			return `${w.label}: ${Math.round(w.percent)}% used${reset}`;
 		})
