@@ -1,7 +1,6 @@
 ---
 name: doc-finder
 description: Finds relevant documentation URLs for a given topic or product using Playwright MCP web search
-tools: mcp:playwright
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: false

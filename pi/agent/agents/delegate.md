@@ -1,7 +1,7 @@
 ---
 name: delegate
 description: Lightweight subagent that inherits the parent model with no default reads
-tools: read, grep, find, ls, bash, edit, write, contact_supervisor, mcp:playwright
+tools: read, grep, find, ls, bash, edit, write, contact_supervisor
 systemPromptMode: append
 inheritProjectContext: true
 inheritSkills: false

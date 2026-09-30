@@ -1,7 +1,7 @@
 ---
 name: oracle
 description: High-context decision-consistency oracle that protects inherited state and prevents drift
-tools: read, grep, find, ls, bash, intercom, mcp:playwright
+tools: read, grep, find, ls, bash, intercom
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

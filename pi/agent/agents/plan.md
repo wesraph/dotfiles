@@ -1,7 +1,6 @@
 ---
 name: plan
 description: Plans work with structured thinking process. First drafts inner monologue, then provides a self-contained response. Spawns subagents for file edits/reviews/analysis.
-tools: mcp:playwright
 systemPromptMode: append
 ---
 

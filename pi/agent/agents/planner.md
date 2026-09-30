@@ -1,7 +1,7 @@
 ---
 name: planner
 description: Creates implementation plans from context and requirements as inline output
-tools: read, grep, find, ls, write, intercom, mcp:playwright
+tools: read, grep, find, ls, write, intercom
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

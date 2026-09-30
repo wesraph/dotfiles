@@ -1,7 +1,7 @@
 ---
 name: doc-extractor
 description: Extracts and synthesizes documentation from web URLs using Playwright MCP — finds docs via search, navigates with MCP, extracts markdown, and produces a clean summary
-tools: read, write, web_search, mcp:playwright
+tools: read, write
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: false

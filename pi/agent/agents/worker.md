@@ -1,7 +1,7 @@
 ---
 name: worker
 description: Implementation agent for normal tasks and approved oracle handoffs
-tools: read, grep, find, ls, bash, edit, write, contact_supervisor, mcp:playwright
+tools: read, grep, find, ls, bash, edit, write, contact_supervisor
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: true

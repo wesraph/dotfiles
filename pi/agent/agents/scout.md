@@ -1,7 +1,7 @@
 ---
 name: scout
 description: Fast codebase recon that returns compressed context as inline output
-tools: read, grep, find, ls, bash, write, intercom, mcp:playwright
+tools: read, grep, find, ls, bash, write, intercom
 thinking: low
 systemPromptMode: replace
 inheritProjectContext: true

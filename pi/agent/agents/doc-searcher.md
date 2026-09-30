@@ -1,7 +1,6 @@
 ---
 name: doc-searcher
 description: Finds documentation automatically using Playwright MCP, extracts content, and returns a comprehensive implementation-ready summary as inline context for downstream agents.
-tools: mcp:playwright
 thinking: high
 systemPromptMode: replace
 inheritProjectContext: false

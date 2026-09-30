@@ -1,7 +1,6 @@
 ---
 name: researcher
 description: Autonomous web researcher using Playwright MCP — navigates, extracts, and synthesizes a focused research brief
-tools: mcp:playwright
 thinking: medium
 systemPromptMode: replace
 inheritProjectContext: true
