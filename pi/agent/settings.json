@@ -10,7 +10,7 @@
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
     "npm:@narumitw/pi-goal",
-    "npm:pi-anthropic-oauth@0.2.4",
+    "npm:pi-anthropic-oauth@0.3.0",
     "npm:@juicesharp/rpiv-ask-user-question@2.11.0"
   ],
   "editorPaddingX": 0,
