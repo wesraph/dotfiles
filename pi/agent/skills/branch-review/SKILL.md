@@ -52,14 +52,29 @@ linked issue. Write 2–3 sentences: what this branch claims to do. Then:
 - The intent model goes in the report, so a reader can check code against
   intent, not just code against tests.
 
-**Step 2 — Run build/lint.**
+**Step 2 — Run build/lint, then tests scoped to the changed code.**
 
 ```bash
 make build     # if Makefile exists
 make verify    # if Makefile exists
-go test ./...  # or project's test command
-go test -race ./...  # Go: race detector — races don't show in plain runs
 ```
+
+Never run the whole suite. Derive the affected packages from the diff and
+run only those:
+
+```bash
+PKGS=$(git diff --name-only $BASE..HEAD | grep -E '\.go$' | xargs -n1 dirname | sort -u | sed 's|^|./|')
+go test $PKGS   # or the project's equivalent, scoped to the changed dirs/files
+```
+
+If an exported function/interface changed, also include its direct
+dependents: find them with `lsp_navigation("references")` or `ffgrep` on the
+changed symbols and add those packages to `$PKGS`.
+
+`-race` is off by default — it is slow. Add it ONLY when the diff touches
+concurrency primitives in the changed packages: `go` statements, channels,
+`sync.*`/`atomic.*`, `select`, worker pools, shared caches. Then run
+`go test -race $PKGS` on exactly those packages, not the whole module.
 
 If these fail, note the failures — they're real issues, no verification needed.
 If the tests cannot run at all (no env, no runner), record it: `test_blocked`
@@ -76,11 +91,11 @@ git diff $BASE..HEAD | grep -c '^+[^+]'                                       # 
 If more than ~15% of added lines are comments, or any comment block has more
 than 3 lines, check every added comment one by one in Step 3.
 
-**Step 2c — Skipped tests count as not run.** Run the tests verbosely and list
-skips:
+**Step 2c — Skipped tests count as not run.** Run the scoped tests verbosely
+and list skips:
 
 ```bash
-go test -v ./... 2>&1 | grep -E -- '--- (SKIP|FAIL)'   # or the project's equivalent
+go test -v $PKGS 2>&1 | grep -E -- '--- (SKIP|FAIL)'   # or the project's equivalent
 ```
 
 - If the env a skipped test needs exists (local DB, DSN var, local stack), rerun

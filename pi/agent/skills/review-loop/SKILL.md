@@ -137,8 +137,8 @@ For each **CONFIRMED** issue from the pass:
    read the failure, restore the fix. A test that passes without the fix
    doesn't count. One test at the owner boundary, not one per layer. Live
    tests seed their own data. Never assert tuning constants.
-4. Verify the fix locally — `make build`, `make verify`, `go test ./...`, or the
-   project's equivalent.
+4. Verify the fix locally — `make build`, `make verify`, then tests scoped to
+   the changed packages (branch-review Step 2), never the whole suite.
 5. A reported junk test is a symptom of its file. Record every test file a
    fix touched in `notes.md`: the next pass's reviewer audits EVERY test in
    those files (overlap matrix, per-test mutants), not only the changed
@@ -180,7 +180,8 @@ Stop the loop when **any** of these is true:
 
 - **Clean pass is not done.** Zero confirmed issues is a *candidate* exit, not
   an exit. Before stopping, run the project's validation commands yourself
-  (`make test`, `make verify`, `go test ./...` — whatever applies) and paste the
+  (`make verify` and the scoped `go test $PKGS` from branch-review Step 2 —
+  whatever applies) and paste the
   decisive output lines into the final report. A red suite **invalidates** the
   clean pass: the loop continues with the failures as confirmed issues,
   regardless of what the review found. Reviewers miss things in both
