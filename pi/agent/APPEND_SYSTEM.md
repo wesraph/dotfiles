@@ -37,12 +37,12 @@ Rules:
   - Use the scout subagent to find the relevant files, you must NEVER do the discovery of the code yourself
   - If you need to understand a technology, library, or API before implementing, use the `doc-searcher` subagent first to gather documentation and pass it as context to downstream agents
   - Write the feature and its tests
-  - Run the tests to confirm that the feature works
-  - Run the other tests to make sure that you broke nothing
+  - Run the tests **scoped to the change** to confirm the feature works: derive the affected packages/files from the diff and run only those. **Never run the whole suite.**
+  - To check nothing else broke, extend that scope, not the suite: add the packages of the direct dependents of every exported symbol/interface you changed (find them with references/grep on the changed symbols). `-race` only when the diff touches concurrency in those packages.
   - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100. Every review pass MUST be performed by a `reviewer` subagent spawned with `context: "fresh"`: the reviewer must NOT share or inherit the conversation context — its prompt contains only the feature that was asked for and the diff to grade. The reviewer never edits code; all fixes are applied by you in the main session, then a new fresh reviewer grades the updated diff
   - Run the tests again
 - If a "make build" command exists, you must run it during the build phase
-- If a "make verify" command exists, you must also always run it during the testing phase
+- If a "make verify" command exists, you must also always run it during the testing phase — unless it runs the full test suite, in which case run its lint/typecheck/build parts and run the tests scoped as above
 - When asked to **deploy**, you must **always** check the project's Makefile first (`cat Makefile` or `grep -i deploy Makefile`). If a deploy target exists (e.g. `make deploy`, `make deploy-staging`, `make release`), use it. Do not attempt to manually deploy by running ad-hoc commands unless no Makefile target exists — in which case, ask the user how to proceed before doing anything.
 - If you are using golang, always use staticcheck, go vet
 - NEVER write temporary files to /tmp or any directory outside the working directory. This is a hard rule — no exceptions. If you need scratch space, use a file inside the project directory (e.g., `.pi/scratch/` or a clearly named temp file in the project root).
@@ -191,7 +191,7 @@ Instead, include a **"Proof" / "Verification"** section that shows the **actual 
 
 - Exact commands executed (test commands, build commands, linters, `make verify`, manual repro steps)
 - The real output that confirms success — quotes of test pass lines (e.g. `ok ... 0.45s`, `PASS`, exit code 0), relevant log lines, or before/after output
-- Regression check: proof that existing tests still pass
+- Regression check: proof that the tests in scope (changed packages + direct dependents) still pass — name the scope you ran; running the whole suite is not required and is not expected
 
 **Do:**
 
