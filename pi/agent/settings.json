@@ -10,7 +10,8 @@
     "npm:@ff-labs/pi-fff",
     "npm:@narumitw/pi-goal",
     "npm:pi-anthropic-oauth@0.3.0",
-    "npm:@juicesharp/rpiv-ask-user-question@2.11.0"
+    "npm:@juicesharp/rpiv-ask-user-question@2.11.0",
+    "npm:@tintinweb/pi-tasks@0.9.0"
   ],
   "editorPaddingX": 0,
   "terminal": {

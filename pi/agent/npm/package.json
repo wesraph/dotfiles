@@ -6,6 +6,7 @@
     "@ifi/oh-pi-themes": "^0.5.1",
     "@juicesharp/rpiv-ask-user-question": "^2.11.0",
     "@narumitw/pi-goal": "^0.54.8",
+    "@tintinweb/pi-tasks": "^0.9.0",
     "pi-anthropic-oauth": "^0.3.0",
     "pi-lens": "^4.3.0"
   }
