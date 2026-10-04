@@ -20,3 +20,4 @@ agent/extensions/node_modules/
 /agent/missions/
 /agent/pi-subagents/
 agent/fff/
+agent/mcp-auth.json

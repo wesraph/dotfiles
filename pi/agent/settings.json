@@ -1,11 +1,10 @@
 {
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.0.2",
   "defaultProvider": "zai-renaud",
   "defaultModel": "glm-5.3",
   "packages": [
     "git:github.com/nicobailon/pi-subagents@f7732d6b6e21009cd719749cdfdc68361904a486",
     "git:github.com/nicobailon/pi-powerline-footer@bdf069fcf33211d9037919e539aa129d4efd263e",
-    "git:github.com/nicobailon/pi-mcp-adapter@a4b3e90779687c1dea113f5d6c1be76c5c6d24bc",
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
@@ -38,7 +37,7 @@
     "anthropic/claude-opus-5-5",
     "anthropic/claude-haiku-4-5",
     "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-fable-5"
+    "anthropic/claude-fable-5-1"
   ],
   "hideThinkingBlock": false,
   "retry": {

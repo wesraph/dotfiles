@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "notion": {
+      "url": "https://mcp.notion.com/mcp",
+      "description": "Notion workspace: search, read, and edit pages and databases"
+    },
+    "cloakbrowser": {
+      "command": "cloakbrowser-mcp",
+      "args": [],
+      "description": "CloakBrowser: stealth browser automation, navigation, and scraping"
+    },
+    "blender": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/home/raph/.local/share/blender-mcp/mcp",
+        "blender-mcp"
+      ],
+      "env": {
+        "BLENDER_MCP_HOST": "127.0.0.1",
+        "BLENDER_MCP_PORT": "9876"
+      },
+      "description": "Blender 3D: scene manipulation, objects, rendering"
+    },
+    "gsheets": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "gsheets-mcp"
+      ],
+      "env": {
+        "SERVICE_ACCOUNT_PATH": "/home/raph/.config/mcp/pi-drive-sa.json"
+      },
+      "description": "Google Sheets: read, write, and format spreadsheets via service account"
+    }
+  }
+}
