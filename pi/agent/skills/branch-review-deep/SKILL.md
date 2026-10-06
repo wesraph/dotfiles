@@ -1,9 +1,15 @@
 ---
-name: branch-review
-description: Review a git branch against main/master. Generates a diff, hypothesizes issues, then verifies each claim by tracing the full call chain before reporting. Use before merging PRs or branches. For mutation-proven test coverage use branch-review-deep.
+name: branch-review-deep
+description: The thorough branch-review variant - same hypothesize-then-verify workflow, plus mutation testing that proves every test kills the regression it claims. Slow. Use when merging critical branches or auditing test quality; use branch-review for everyday reviews.
 ---
 
-# Branch Review
+# Branch Review (Deep)
+
+Same workflow as `branch-review`, plus **Phase 2b — Mutation Check**: every
+fix, guard, and test is proven by injecting mutants in a throwaway worktree.
+Use this variant when test quality matters as much as code correctness
+(critical branches, test-suite audits, pre-release). For everyday reviews,
+use `branch-review` — mutation testing roughly doubles the review time.
 
 A two-phase review workflow: **hypothesize** issues from the diff, then **verify**
 each by tracing the actual code paths. Never reports a claim it hasn't proven.
@@ -15,10 +21,8 @@ each by tracing the actual code paths. Never reports a claim it hasn't proven.
 - Checking whether a refactor broke callers
 
 **Do not use** for: implementing features, writing tests, or debugging runtime
-behavior. The reviewed tree is never edited. When a review needs
-mutation-proven test coverage (every test kills its claimed regression), use
-`branch-review-deep` instead — it adds a mutation pass that roughly doubles
-the review time.
+behavior. The reviewed tree is never edited; the only code changes allowed are
+throwaway mutants in a scratch worktree (Phase 2b).
 
 ## Workflow
 
@@ -191,9 +195,11 @@ Issue categories to check:
   seam or duplicate is fine when its reason is stated (e.g. "fake can't reach
   the unexported option without it").
   A test finding is CONFIRMED with: test name + location, what it can
-  actually detect, the stronger owner test that remains, and what removing it
-  unlocks. Missing field → "needs verification" — EXCEPT a duplicate row
-  pair in the overlap matrix (Step 3b), which is CONFIRMED on its own.
+  actually detect, the mutant it caught or missed (Phase 2b), the stronger
+  owner test that remains, and what removing it unlocks. Missing field →
+  "needs verification" — EXCEPT these, which are CONFIRMED on their own:
+  a test (or subtest) that survives its own mutant (Phase 2b step B), and a
+  duplicate row pair in the overlap matrix (Step 3b).
 - **Scope of the test audit**: every test function AND every subtest/table
   case the diff adds or changes, plus every other test in a test file the
   diff touches whose subject overlaps them. A table case is a test: audit it
@@ -319,7 +325,85 @@ Process tasks one at a time. Mark `in_progress`, trace the code, mark
 - `ffgrep(pattern: "executor.Close")` — text search for method invocations
 - `read(path: "...", offset: N, limit: N)` — read the live code at key points
 
-### Phase 2b — Re-derivation pass
+### Phase 2b — Mutation Check
+
+Prove each test catches the regression it claims. For every fix or guard the
+branch adds, and the test(s) claimed to cover it:
+
+1. `git worktree add ./worktrees/review-mutants HEAD` — never mutate the
+   reviewed tree.
+2. Inject ONE mutant from the operator set (PIT/Stryker defaults): negate a
+   conditional (`==`↔`!=`), boundary flip (`<`↔`<=`), logical swap (`&&`↔`||`),
+   boolean literal flip, empty string literal, return-value tampering
+   (zero-value/`nil`/`false`), block-body removal, side-effect call deletion,
+   constant tweak — or revert the whole fix.
+3. Run only the claimed test(s). It must fail **for the intended reason** —
+   read the failure message, not just the exit code.
+4. `git -C ./worktrees/review-mutants checkout -- .`, next mutant.
+5. When done: `git worktree remove --force ./worktrees/review-mutants`.
+
+A surviving mutant is CONFIRMED: "test X passes without Y". Cap at ~20
+mutants per pass A, focused on new branches, conditions, and queries.
+
+Run the mutants in two directions:
+
+- **A — per guard**: every new branch, condition, query, and constant has at
+  least one test that fails.
+- **B — per test**: every in-scope test AND subtest/table case names the
+  mutant it exists to kill (its gate answer 2). Run ONLY that test with the
+  mutant: `go test -run '^TestX$/^case_name$'` (or the project's
+  equivalent). A test that stays green is CONFIRMED junk, even when another
+  test catches the same mutant — it is a negative control passing for an
+  unrelated reason, or its name promises more than it asserts. "Some test
+  failed" in pass A never vouches for the other tests that claim the same
+  guard. No cap on pass B: one run per in-scope test/case.
+
+  The named mutant must pass two checks, or the row has no mutant:
+  - **Credible**: it is a mistake a developer could plausibly write in that
+    exact code — the pre-fix code, a reordered return, a dropped guard, a
+    flipped condition. A degenerate mutant does not count: one that wraps a
+    nil error (`%!w(<nil>)`), returns a value no code path could produce,
+    or breaks the function in a way any test would catch. For a guard the
+    branch adds, the credible mutant is removing or reordering that guard.
+  - **Unique kill**: run the row's mutant against its SIBLING rows and the
+    owner test too. If any of them also fails on it, and the row kills no
+    other credible mutant they miss, the row is redundant → CONFIRMED
+    "duplicate invocations"; fix = delete the row (name the sibling that
+    keeps the guard). A row survives only by killing at least one credible
+    mutant that nothing else in scope kills.
+
+  Record both in the Test gate table: the mutant, why it is credible, and
+  which rows/tests also kill it.
+
+**Classify every non-killed mutant** — they are not the same finding:
+
+- **survived** — code covered, assertion missing → "untested: <line>".
+- **no coverage** — mutant never executed → the behavior has no test path at
+  all; worse, and a different fix.
+- **timeout** — counts as caught (CI would hang).
+- **suppressed** — logging-only lines and behavior-identical (equivalent)
+  mutants: skip them and say why. Most raw mutants are noise; spend the
+  budget on logic lines.
+
+**Survivor remediation, both options always:** (A) the test that kills it,
+(B) the code simplification that removes the mutation axis. Equivalent
+mutant (the mutant IS the simpler form) → apply it to the source. Unkillable
+= no test can kill it AND the mutant can't be applied — say so explicitly.
+
+**Before writing the finding, check why it survived:** only one branch value
+tested; collection has one element; test data uses identical values where
+the code distinguishes; default parameter never exercised (every test passes
+it explicitly). The cause is the fix.
+
+**Anti-cheat:** never recommend deleting a mutation axis (syntax rewrite)
+when the expression lacks coverage — hiding the axis is not proving
+correctness.
+
+**Fix suggestions that add a test must be red-green proven**: run the
+suggested test against the mutant worktree (fix reverted) — it must fail for
+the intended reason, or don't suggest it.
+
+### Phase 2c — Re-derivation pass
 
 For every CONFIRMED issue, re-derive it from the diff and the cited lines
 **only** — no access to your Phase 1/2 reasoning trail. Reading your own
@@ -362,11 +446,12 @@ Comment density: X added comment lines / Y added lines.
 Test gate (one row per in-scope test AND subtest/table case — an empty or
 hand-waved cell is itself a finding):
 
-| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? |
-|---|---|---|---|---|
+| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | own mutant (pass B): killed? | credible? why | also killed by (must be none) |
+|---|---|---|---|---|---|---|---|
 
 Overlap matrix: [Step 3b rows; duplicates marked]
 Skipped: [test → reason → covered elsewhere? y/n]
+Mutants: N injected / K caught / S survived → [survivors: test X passes without Y]
 LOC: production +A/−B, tests +C/−D (git diff --numstat)
 
 ### Coverage
@@ -389,12 +474,13 @@ deduct per confirmed issue — blocking −20, important −10, nit −3; each
 confirmed bloat/verbose-comment/junk-test finding −2 (total bloat deduction
 capped at −15). Caps applied after deductions:
 
-- a changed line guarded only by a skipped test → **85**
+- surviving mutant on changed code, or a changed line guarded only by a
+  skipped test → **85**
 - confirmed security issue → **75**
 - a diff that could be ≥40% smaller → **85**
 - tests never ran at all (`test_blocked`) → **80**, stated in the report
 
-Score from executable evidence first (suite result), traced
+Score from executable evidence first (suite result, mutants), traced
 findings second, everything else last.
 
 **Dismissal memory:** before Step 1, read project memory for previously
@@ -442,8 +528,8 @@ Verdict: CONFIRMED (verbose comment) — delete, or keep a single line:
 
 Claim: "TestRetrieveLexicalOnly_Live guards the lexical-only SQL"
 Trace: go test -v with RAG_TEST_DSN → --- SKIP (no chunks in DB). Siblings
-       seed their own tenant; this test relies on data already present
-       instead of seeding its own.
+       seed their own tenant. Mutant "always run vector query" in
+       ./worktrees/review-mutants → every test passes.
 Verdict: CONFIRMED — lexical-only query is untested; the live test must seed
          its own chunk and assert the exact score (1/61 lexical, 2/61 both).
 ```
@@ -456,7 +542,8 @@ Verdict: CONFIRMED — lexical-only query is untested; the live test must seed
   never graded.
 - **Never edit the reviewed tree.** Use `read`, `bash`, `grep`,
   `lsp_navigation`, `ast_grep_search` — never `edit` or `write` on it (except
-  for task list).
+  for task list). Mutants live only in the throwaway `./worktrees/review-mutants`
+  worktree, removed at the end.
 - **Never report speculative bugs.** If you can't prove it by tracing, mark it
   "needs verification" or skip it.
 - **One task at a time.** Don't batch verification. Trace one claim fully before

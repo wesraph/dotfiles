@@ -34,7 +34,8 @@ report, apply fixes to confirmed issues, run validation, and loop.
 - One fresh `reviewer` per pass. Never resume or reuse a previous pass's
   reviewer: each pass must judge the current diff without inherited bias.
 - The reviewer never edits the reviewed tree (throwaway mutants in
-  `branch-review`'s Phase 2b worktree are allowed). Fixes are applied in the main session (or a
+  `branch-review-deep`'s mutation worktree are allowed, when that variant is
+  used). Fixes are applied in the main session (or a
   single `worker`), then a NEW fresh reviewer grades the updated diff.
 - The main session may read code only to apply a fix to an issue the
   reviewer CONFIRMED — never to generate or verify hypotheses.
@@ -42,7 +43,10 @@ report, apply fixes to confirmed issues, run validation, and loop.
 ## Prerequisites
 
 This skill **requires** the `branch-review` skill. The reviewer subagent runs
-it — the main session does not. Tell the reviewer to load it:
+it — the main session does not. By default the loop uses `branch-review`;
+for branches that also need mutation-proven test coverage, tell the reviewer
+to load the `branch-review-deep` variant instead (same workflow plus a
+mutation check, roughly double the time per pass):
 
 ```
 read(/home/raph/.pi/agent/skills/branch-review/SKILL.md)
@@ -107,11 +111,11 @@ fixes depend on its result). Its prompt contains only:
 - any user scope constraints (e.g. "only this PR's diff"),
 - the current `notes.md` (refuted hypotheses, so it does not re-report them).
   Refuted hypotheses only — never pass "tests X/Y are fine" or a prior
-  grade: a test verdict is re-earned every pass by the Phase 2b per-test
-  mutants,
-- the instruction to load and run `branch-review` verbatim (including the
-  Phase 2b mutation check), never edit the reviewed tree, and return the Phase 3 report (confirmed issues with proof, false
-  positives, grade).
+  grade: a test verdict is re-earned every pass (by the per-test mutants,
+  when running the `branch-review-deep` variant),
+- the instruction to load and run `branch-review` verbatim, never edit the
+  reviewed tree, and return the Phase 3 report (confirmed issues with proof,
+  false positives, grade).
 
 No conversation context beyond that. The subagent runs the **full
 `branch-review` workflow**:
@@ -119,7 +123,8 @@ No conversation context beyond that. The subagent runs the **full
 1. Phase 1 — capture diff + hypothesize issues.
 2. Phase 2 — verify each claim by tracing the call chain. Only **CONFIRMED**
    issues with proof count.
-3. Phase 2b — mutation check: surviving mutants are CONFIRMED issues.
+3. Phase 2b — re-derivation pass. (With `branch-review-deep`: a mutation
+   check first — surviving mutants are CONFIRMED issues.)
 4. Phase 3 — report: confirmed issues, false positives, grade.
 
 Use `branch-review`'s tracing rules verbatim. Do not weaken them — a fix
@@ -141,8 +146,9 @@ For each **CONFIRMED** issue from the pass:
    the changed packages (branch-review Step 2), never the whole suite.
 5. A reported junk test is a symptom of its file. Record every test file a
    fix touched in `notes.md`: the next pass's reviewer audits EVERY test in
-   those files (overlap matrix, per-test mutants), not only the changed
-   hunks, so siblings with the same defect are not waved through.
+   those files (overlap matrix; per-test mutants with `branch-review-deep`),
+   not only the changed hunks, so siblings with the same defect are not
+   waved through.
 
 **Fix order matters:** resolve issues that other fixes depend on first (e.g.,
 fix a nil-returning helper before fixing the caller that dereferences it).
