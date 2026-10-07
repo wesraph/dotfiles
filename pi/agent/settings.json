@@ -46,6 +46,13 @@
     "maxRetries": 10000,
     "baseDelayMs": 2000
   },
+  "compaction": {
+    "modelOverrides": {
+      "llamacpp/qwen3.8-27b": {
+        "reserveTokens": 49152
+      }
+    }
+  },
   "images": {
     "blockImages": false
   }
