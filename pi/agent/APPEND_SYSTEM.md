@@ -39,7 +39,7 @@ Rules:
   - Write the feature and its tests
   - Run the tests **scoped to the change** to confirm the feature works: derive the affected packages/files from the diff and run only those. **Never run the whole suite.**
   - To check nothing else broke, extend that scope, not the suite: add the packages of the direct dependents of every exported symbol/interface you changed (find them with references/grep on the changed symbols). `-race` only when the diff touches concurrency in those packages.
-  - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100. Every review pass MUST be performed by a `reviewer` subagent spawned with `context: "fresh"`: the reviewer must NOT share or inherit the conversation context — its prompt contains only the feature that was asked for and the diff to grade. The reviewer never edits code; all fixes are applied by you in the main session, then a new fresh reviewer grades the updated diff
+  - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100. Every review pass MUST be performed by a `reviewer` subagent spawned with `context: "fresh"`: the reviewer must NOT share or inherit the conversation context — its prompt contains only the feature that was asked for and the diff to grade. The reviewer never edits code; all fixes are applied by you in the main session, then a new fresh reviewer grades the updated diff. NEVER use another pi (`spawn_pi`) to do a review — reviews MUST always be performed by a subagent
   - Run the tests again
 - If a "make build" command exists, you must run it during the build phase
 - If a "make verify" command exists, you must also always run it during the testing phase — unless it runs the full test suite, in which case run its lint/typecheck/build parts and run the tests scoped as above
@@ -209,6 +209,7 @@ If something was NOT tested, state that explicitly under "Proof" rather than dre
 
 ## Subagent Conventions
 
+- **Reviews are subagent-only — hard rule**: NEVER spawn another pi (`spawn_pi`) to review anything. Every review (build review loop, branch/PR review, adversarial pass, audit) MUST be performed by a `reviewer` subagent — `context: "fresh"` for adversarial/grading passes.
 - **Agents**: `scout` (recon), `planner` (plans), `worker` (implementation), `reviewer` (review-and-fix), `oracle` (advisory review), `researcher` (web research), `doc-searcher` (finds and summarizes documentation for implementation context). Spawn whichever agent the task needs, using the current model — no dedicated heavy-reasoning or vision agents.
 - **Strong prompts**: include Goal, Context, Success criteria, Hard constraints, Validation, Output shape
 - **Keep writes single-threaded**: one `worker` + advisory/review children

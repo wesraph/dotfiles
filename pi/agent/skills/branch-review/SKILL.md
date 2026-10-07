@@ -53,6 +53,15 @@ linked issue. Write 2–3 sentences: what this branch claims to do. Then:
   lead (see bloat below).
 - The intent model goes in the report, so a reader can check code against
   intent, not just code against tests.
+- **The branch's own claims are leads, not exemptions.** "Accepted
+  tradeoff", "follow-up", "known limitation" in a README, comment or PR
+  description is graded like any other finding. For each declared side
+  effect, check whether it undoes an earlier deliberate decision: read the
+  comments around the affected code and run `git log -S'<symbol>'`. Bringing
+  back a failure someone fixed on purpose is a behaviour regression.
+- **Completeness.** For a fix, list every way the original problem shows up
+  (each trigger, path, idle or edge case) and name the code that covers each.
+  An uncovered case is CONFIRMED "fix incomplete: <case>".
 
 **Step 2 — Run build/lint, then tests scoped to the changed code.**
 
@@ -128,7 +137,22 @@ Issue categories to check:
 
 - **Concurrency**: data races, missing locks, lock ordering, TOCTOU,
   goroutine lifecycle (leaks, premature exit), context cancellation,
-  shutdown/initialization ordering
+  shutdown/initialization ordering. For background/async work, play out each
+  state change: what if the side effect fails, times out, runs out of order,
+  or is dropped at shutdown? Is local state advanced **before** the side
+  effect is confirmed? Can a panic in it crash the process (no recover, no
+  errgroup)?
+- **Writes and their readers**: for every new or more frequent write (DB
+  row, cache, queue, file, external API), list everything that reads or reacts
+  to it: triggers, audit/history tables, other services, dashboards and SQL
+  panels, version/CAS checks, sync jobs, permission grants on the target. Each
+  reader is a hypothesis to trace.
+  - **Shared resources**: name the limited resources each new operation uses
+    (connection pool, row locks, rate limits, quotas) and find their limits in
+    the code (`MaxOpenConns`, etc.).
+  - **Frequency × fan-out**: how often does it run (per request / call / turn
+    / item)? Multiply by any per-element repetition. "Correct but runs N
+    times" is a finding when N grows with input.
 - **Resource leaks**: unclosed connections, goroutines, files, temp state
 - **Nil/missing guards**: removed nil checks, ignored bool returns
 - **Behavior changes**: removed filters, changed error handling, altered semantics
@@ -145,11 +169,22 @@ Issue categories to check:
   (injection sinks), authn/authz, crypto, or logging → check for new attack
   vectors, weakened existing controls, trust boundaries crossed by new data
   flows, hardcoded secrets (scan the diff), sensitive data in logs/errors.
+  When the diff stores or moves a secret, list every place a copy lands
+  (logs, traces, audit tables, backups, replicas, analytics) and who can read
+  each (`GRANT`, IAM). Keeping a secret out of one place while copying it
+  into another is a finding.
   Security regressions are traced like any behavior change — never assumed.
 - **Dependency changes**: go.mod/package.json/lockfiles in the diff → for each
   new dep: license, known CVEs, version pinning, whether it's needed at all
 - **Docs consistency**: changes to how users build/test/run/release → README
   and docs updated? Deleted/deprecated code → its docs deleted?
+- **Fix at source**: when the diff works around a shared defect for one case
+  only (bypassing a tracing plugin, a private client to get a timeout), check
+  whether fixing it at the source is small. If so, CONFIRMED "fix at source:
+  <file:line>".
+- **Project rules**: read the coding rules in the repo's `CLAUDE.md` /
+  `AGENTS.md` (DB access, concurrency, error handling, logging) and check
+  every added line against them. CONFIRMED by quoting the rule and the line.
 - **Naming**: names must not lie (`Get*` that mutates, plural naming a single
   thing).
 - **CL hygiene**: reformat-only hunks mixed into behavior changes;
@@ -158,7 +193,7 @@ Issue categories to check:
 - **Test coverage**: for each changed production branch/query/condition, name
   the test that fails if it breaks. None, or only skipped ones → finding.
   Tests that no longer match behavior → finding.
-- **Test gate**: every added or changed test must answer all four; a missing
+- **Test gate**: every added or changed test must answer all five; a missing
   answer is a finding (quote the test):
   1. What observable behavior or contract does it protect?
   2. What credible regression makes it fail?
@@ -167,6 +202,8 @@ Issue categories to check:
      can't reach.
   4. Does it need a production seam (export, flag, hook) no production caller
      uses?
+  5. Is the expected value right according to the **intent**, not just the
+     code? A test that locks in a bad behaviour turns a bug into a contract.
 - **Junk tests**: flag any added/changed test that matches:
   - constant echo: asserts a tuning value (`timeout == 300ms`,
     `interval == 6s`) — catches no behavior change, forces a second edit on
@@ -224,6 +261,10 @@ Issue categories to check:
   - **Reinvented stdlib/deps**: hand-written code that duplicates a stdlib
     function or an already-installed dependency. Prove by naming the exact
     function and showing it is available (import or go.mod/package.json).
+  - **Reinvented in-repo subsystem**: new infrastructure (token storage,
+    retry, outbox, cache, credential store) when the repo or an open branch
+    already has one. Search the concept (`ffgrep`, `git branch -a`) before
+    accepting it. Not using the existing one is a design finding.
   - **Speculative flexibility**: config knobs, options, params, or generics
     that no caller uses. Prove that every call site passes the same value or
     the default.
@@ -328,6 +369,14 @@ to disprove. For each issue ask: what guard, caller, or ordering kills this?
 Anything you can't re-derive from the evidence alone is downgraded to FALSE
 POSITIVE (unproven).
 
+### Phase 2c — Root cause
+
+Group the surviving CONFIRMED issues by the design decision they stem from
+(where data lives, who owns a resource, sync vs async). Two or more sharing
+one decision → one **design** finding (important), with those issues as
+evidence and the alternative that removes them. The proof is the confirmed
+issues themselves, not taste.
+
 ### Phase 3 — Report
 
 Summarize the findings. Severity is derived from evidence, not opinion —
@@ -340,6 +389,10 @@ blocking.
 ## Review: <branch>
 
 Intent: [Step 1b intent model, 2-3 sentences]
+
+### Design findings (N)
+1. **[Decision]** — important. Causes: [confirmed issue numbers].
+   Alternative: [design that removes them, existing in-repo example if any].
 
 ### Confirmed Issues (N)
 1. **[Title]** — [blocking|important|nit] (evidence: failing-test|traced)
@@ -362,8 +415,8 @@ Comment density: X added comment lines / Y added lines.
 Test gate (one row per in-scope test AND subtest/table case — an empty or
 hand-waved cell is itself a finding):
 
-| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? |
-|---|---|---|---|---|
+| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | 5. expected value matches intent? |
+|---|---|---|---|---|---|
 
 Overlap matrix: [Step 3b rows; duplicates marked]
 Skipped: [test → reason → covered elsewhere? y/n]
@@ -372,7 +425,8 @@ LOC: production +A/−B, tests +C/−D (git diff --numstat)
 ### Coverage
 One row per Step 3 category: ✅ reviewed / ⚠️ shallow / ❌ not covered.
 Declined to judge: [each item considered and set aside, with reason —
-"none" is a valid answer]
+"none" is a valid answer. An item with a concrete cost (failure, load, data
+exposure, metric skew) cannot sit here: confirm it or refute it with proof]
 
 Done well: [1-3 things worth keeping]
 
@@ -393,6 +447,7 @@ capped at −15). Caps applied after deductions:
 - confirmed security issue → **75**
 - a diff that could be ≥40% smaller → **85**
 - tests never ran at all (`test_blocked`) → **80**, stated in the report
+- unresolved design finding → **85**
 
 Score from executable evidence first (suite result), traced
 findings second, everything else last.
@@ -450,10 +505,12 @@ Verdict: CONFIRMED — lexical-only query is untested; the live test must seed
 
 ## Constraints
 
-- **Diff is the only review surface.** Every issue must originate from a changed
-  line. Pre-existing bugs in untouched code found while tracing are listed at
-  most as "pre-existing, out of scope" notes — never as confirmed issues,
-  never graded.
+- **Issues start in the diff; effects do not stop there.** Every issue must
+  originate from a changed line, but its consequences in untouched code
+  (triggers, readers, dashboards, pools, other services) are in scope and
+  graded. Bugs that predate the branch in untouched code are listed at most
+  as "pre-existing, out of scope" notes — never as confirmed issues, never
+  graded.
 - **Never edit the reviewed tree.** Use `read`, `bash`, `grep`,
   `lsp_navigation`, `ast_grep_search` — never `edit` or `write` on it (except
   for task list).

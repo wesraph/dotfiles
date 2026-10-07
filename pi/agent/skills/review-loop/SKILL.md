@@ -108,7 +108,10 @@ fixes depend on its result). Its prompt contains only:
 
 - the repo path (and worktree path, if working in one),
 - the change surface from Step 0 (base commit / exact diff command),
-- any user scope constraints (e.g. "only this PR's diff"),
+- any user scope constraints (e.g. "only this PR's diff"). These narrow
+  which **changes** are reviewed, never their **effects**: never write
+  "review only this diff" or anything that keeps the reviewer from tracing
+  into untouched code (triggers, readers, dashboards, pools, other services),
 - the current `notes.md` (refuted hypotheses, so it does not re-report them).
   Refuted hypotheses only — never pass "tests X/Y are fine" or a prior
   grade: a test verdict is re-earned every pass (by the per-test mutants,
@@ -123,9 +126,12 @@ No conversation context beyond that. The subagent runs the **full
 1. Phase 1 — capture diff + hypothesize issues.
 2. Phase 2 — verify each claim by tracing the call chain. Only **CONFIRMED**
    issues with proof count.
-3. Phase 2b — re-derivation pass. (With `branch-review-deep`: a mutation
-   check first — surviving mutants are CONFIRMED issues.)
-4. Phase 3 — report: confirmed issues, false positives, grade.
+3. Phase 2b — re-derivation pass. (With `branch-review-deep`: Phase 2m,
+   the mutation check, runs first — surviving mutants are CONFIRMED issues.)
+4. Phase 2c — root cause: confirmed issues sharing one design decision
+   become a **design** finding.
+5. Phase 3 — report: design findings, confirmed issues, false positives,
+   grade.
 
 Use `branch-review`'s tracing rules verbatim. Do not weaken them — a fix
 targeting a false positive is wasted work (and often introduces a real bug).
@@ -155,6 +161,19 @@ fix a nil-returning helper before fixing the caller that dereferences it).
 Otherwise order by severity.
 
 Do not fix false positives or N/A items. Note them and move on.
+
+**Design findings go to the user, not straight into code.** A design finding
+(Phase 2c) usually changes the branch's scope (move data, reuse another
+subsystem, split the PR). Present it with the confirmed issues it explains
+and the alternatives (`ask_user_question`), then apply the chosen direction.
+Record the decision in `notes.md`.
+
+**Never relay the reviewer's ungraded notes as "accepted tradeoffs".** A
+note, "declined to judge" item or side effect with a concrete cost (failure,
+load, data exposure, metric skew) is an open question: send it back to the
+next reviewer as a lead, or put it to the user. Never write "accepted",
+"tradeoff" or "follow-up" into code, README or PR text on the reviewer's
+word alone — only after the user accepted it.
 
 ### Step 4 — Re-review (the loop)
 
@@ -192,6 +211,8 @@ Stop the loop when **any** of these is true:
   clean pass: the loop continues with the failures as confirmed issues,
   regardless of what the review found. Reviewers miss things in both
   directions; the test run is ground truth and overrides any review verdict.
+  An unresolved design finding also blocks the clean exit, unless the user
+  explicitly accepted it (recorded in `notes.md`).
 - **Safety cap.** The loop hits a maximum number of passes (default **5**). If
   you reach the cap without a clean pass, stop, report what remains, and flag
   that the cap was hit — the branch likely needs human judgement, not more
