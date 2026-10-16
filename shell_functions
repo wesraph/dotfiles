@@ -76,4 +76,16 @@ man() {
 		man "$@"
 }
 
+# cd into the worktree created by `git waa` (the gitconfig alias runs in a
+# subprocess and cannot cd the calling shell)
+git() {
+    if [ "$1" = "waa" ] && [ -n "$2" ]; then
+        local name="$2"
+        shift 2
+        command git worktree add "./worktrees/$name" "$@" && cd "./worktrees/$name"
+        return
+    fi
+    command git "$@"
+}
+
 alias unreal="export GDK_SCALE=1; export GDK_DPI_SCALE=1; export QT_AUTO_SCREEN_SCALE_FACTOR=2;"

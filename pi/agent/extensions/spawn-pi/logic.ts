@@ -253,6 +253,97 @@ export function tokenize(input: string): string[] {
 	return out;
 }
 
+/** Minimal model shape for pattern resolution (provider+id+display name). */
+export interface ModelRef {
+	provider: string;
+	id: string;
+	name?: string;
+}
+
+/** Valid `--model pattern:level` suffixes; mirrors pi's THINKING_LEVEL_OPTIONS. */
+const THINKING_LEVELS: readonly string[] = [
+	"off",
+	"minimal",
+	"low",
+	"medium",
+	"high",
+	"xhigh",
+	"max",
+];
+
+export type ModelResolution =
+	| { status: "ok"; canonical: string }
+	| { status: "ambiguous"; matches: string[] }
+	| { status: "no-match" };
+
+/**
+ * Resolve a model pattern against the authenticated models only, so a spawn
+ * never lands on an unauthenticated catalog entry (pi's own `--model` fuzzy
+ * matching searches every provider's catalog, including OpenRouter's slashed
+ * vendor ids). Resolution order, all case-insensitive:
+ *   1. exact "provider/id"
+ *   2. exact bare id (must be unique)
+ *   3. substring over "provider/id" when the pattern contains a slash
+ *   4. substring over id or name (must be unique)
+ * Ambiguity is reported, never guessed.
+ */
+export function resolveModelPattern(
+	pattern: string,
+	models: readonly ModelRef[],
+): ModelResolution {
+	const trimmed = pattern.trim();
+	if (!trimmed) return { status: "no-match" };
+	// A trailing ":level" (pi's --model shorthand) resolves the prefix and is
+	// folded back, so "provider/id:high" round-trips through pi's own parser.
+	const lastColon = trimmed.lastIndexOf(":");
+	if (lastColon > 0) {
+		const suffix = trimmed.slice(lastColon + 1).toLowerCase();
+		if (THINKING_LEVELS.includes(suffix)) {
+			const inner = resolveModelPattern(trimmed.slice(0, lastColon), models);
+			return inner.status === "ok"
+				? { status: "ok", canonical: `${inner.canonical}:${suffix}` }
+				: inner;
+		}
+	}
+	const lower = trimmed.toLowerCase();
+	const canonicalOf = (m: ModelRef) => `${m.provider}/${m.id}`;
+
+	const exactCanonical = models.filter(
+		(m) => canonicalOf(m).toLowerCase() === lower,
+	);
+	if (exactCanonical.length === 1)
+		return { status: "ok", canonical: canonicalOf(exactCanonical[0]) };
+	if (exactCanonical.length > 1)
+		return { status: "ambiguous", matches: exactCanonical.map(canonicalOf) };
+
+	const exactId = models.filter((m) => m.id.toLowerCase() === lower);
+	if (exactId.length === 1)
+		return { status: "ok", canonical: canonicalOf(exactId[0]) };
+	if (exactId.length > 1)
+		return { status: "ambiguous", matches: exactId.map(canonicalOf) };
+
+	if (trimmed.includes("/")) {
+		const slashMatches = models.filter((m) =>
+			canonicalOf(m).toLowerCase().includes(lower),
+		);
+		if (slashMatches.length === 1)
+			return { status: "ok", canonical: canonicalOf(slashMatches[0]) };
+		if (slashMatches.length > 1)
+			return { status: "ambiguous", matches: slashMatches.map(canonicalOf) };
+	}
+
+	const substringMatches = models.filter(
+		(m) =>
+			m.id.toLowerCase().includes(lower) ||
+			m.name?.toLowerCase().includes(lower),
+	);
+	if (substringMatches.length === 1)
+		return { status: "ok", canonical: canonicalOf(substringMatches[0]) };
+	if (substringMatches.length > 1)
+		return { status: "ambiguous", matches: substringMatches.map(canonicalOf) };
+	return { status: "no-match" };
+}
+
 export interface ParsedSpawnArgs {
 	prompt: string;
 	cwd?: string;

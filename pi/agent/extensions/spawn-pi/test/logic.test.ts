@@ -16,7 +16,9 @@ import {
 	parseMeshEnv,
 	tokenize,
 	parseSpawnArgs,
+	resolveModelPattern,
 	type TerminalSpec,
+	type ModelRef,
 } from "../logic.ts";
 
 const ENV_NODE_ID = "PI_SPAWN_NODE_ID";
@@ -340,4 +342,167 @@ test("buildChildEnv: omits parent when not provided", () => {
 	const child = buildChildEnv({}, "kid");
 	assert.equal(child[ENV_NODE_ID], "kid");
 	assert.equal(child[ENV_PARENT_ID], undefined);
+});
+
+const MODEL_CATALOG: readonly ModelRef[] = [
+	{ provider: "zai-renaud", id: "glm-5.3", name: "GLM-5.3 (Renaud)" },
+	{
+		provider: "zai-renaud",
+		id: "glm-5.3-flash",
+		name: "GLM-5.3 Flash (Renaud)",
+	},
+	{ provider: "zai", id: "glm-5.3-flash", name: "GLM-5.3 Flash" },
+	{ provider: "anthropic", id: "claude-haiku-4-5", name: "Claude Haiku 4.5" },
+	{ provider: "llamacpp", id: "qwen3.8-27b", name: "Qwen3.8-27B (Q6_K_XL)" },
+];
+
+test("resolveModelPattern: trims surrounding whitespace", () => {
+	assert.deepEqual(
+		resolveModelPattern("  zai-renaud/glm-5.3 \t", MODEL_CATALOG),
+		{ status: "ok", canonical: "zai-renaud/glm-5.3" },
+	);
+});
+
+test("resolveModelPattern: duplicate registry entries are reported as ambiguous", () => {
+	const catalog: readonly ModelRef[] = [
+		{ provider: "zai", id: "glm-5.3" },
+		{ provider: "zai", id: "glm-5.3" },
+	];
+	assert.deepEqual(resolveModelPattern("zai/glm-5.3", catalog), {
+		status: "ambiguous",
+		matches: ["zai/glm-5.3", "zai/glm-5.3"],
+	});
+});
+
+test("resolveModelPattern: slashed vendor ids resolve like OpenRouter's", () => {
+	const catalog: readonly ModelRef[] = [
+		{ provider: "openrouter", id: "moonshotai/kimi-k2.6", name: "Kimi K2.6" },
+		{
+			provider: "bedrock",
+			id: "us.anthropic.claude-opus-4-6-v1:0",
+			name: "Opus",
+		},
+	];
+	// Bare vendor-style id resolves to the canonical provider/id.
+	assert.deepEqual(resolveModelPattern("moonshotai/kimi-k2.6", catalog), {
+		status: "ok",
+		canonical: "openrouter/moonshotai/kimi-k2.6",
+	});
+	// Full canonical reference with a slashed id.
+	assert.deepEqual(
+		resolveModelPattern("openrouter/moonshotai/kimi-k2.6", catalog),
+		{ status: "ok", canonical: "openrouter/moonshotai/kimi-k2.6" },
+	);
+	// Non-thinking colon suffix stays part of the id and still matches exactly.
+	assert.deepEqual(
+		resolveModelPattern("bedrock/us.anthropic.claude-opus-4-6-v1:0", catalog),
+		{ status: "ok", canonical: "bedrock/us.anthropic.claude-opus-4-6-v1:0" },
+	);
+});
+
+test("resolveModelPattern: exact provider/id wins and is canonicalized", () => {
+	assert.deepEqual(resolveModelPattern("zai-renaud/glm-5.3", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "zai-renaud/glm-5.3",
+	});
+	assert.deepEqual(resolveModelPattern("ZAI-RENAUD/GLM-5.3", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "zai-renaud/glm-5.3",
+	});
+});
+
+test("resolveModelPattern: unique bare id resolves", () => {
+	assert.deepEqual(resolveModelPattern("qwen3.8-27b", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "llamacpp/qwen3.8-27b",
+	});
+	// Case-insensitive on every stage.
+	assert.deepEqual(resolveModelPattern("QWEN3.8-27B", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "llamacpp/qwen3.8-27b",
+	});
+});
+
+test("resolveModelPattern: thinking-level suffix folds back onto the canonical id", () => {
+	assert.deepEqual(
+		resolveModelPattern("zai-renaud/glm-5.3:high", MODEL_CATALOG),
+		{
+			status: "ok",
+			canonical: "zai-renaud/glm-5.3:high",
+		},
+	);
+	assert.deepEqual(resolveModelPattern("QWEN3.8-27B:MAX", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "llamacpp/qwen3.8-27b:max",
+	});
+	// Ambiguity inside the prefix is still reported.
+	const res = resolveModelPattern("glm-5.3-f:high", MODEL_CATALOG);
+	assert.equal(res.status, "ambiguous");
+	// An unknown suffix stays part of the id (pi strict-mode behavior).
+	assert.deepEqual(resolveModelPattern("qwen3.8-27b:exacto", MODEL_CATALOG), {
+		status: "no-match",
+	});
+});
+
+test("resolveModelPattern: ambiguous bare id is reported, never guessed", () => {
+	assert.deepEqual(resolveModelPattern("glm-5.3-flash", MODEL_CATALOG), {
+		status: "ambiguous",
+		matches: ["zai-renaud/glm-5.3-flash", "zai/glm-5.3-flash"],
+	});
+});
+
+test("resolveModelPattern: provider-slash substring resolves uniquely", () => {
+	assert.deepEqual(
+		resolveModelPattern("anthropic/claude-haiku", MODEL_CATALOG),
+		{
+			status: "ok",
+			canonical: "anthropic/claude-haiku-4-5",
+		},
+	);
+	// Non-contiguous provider/slash fragments do not match.
+	assert.deepEqual(resolveModelPattern("anthropic/haiku", MODEL_CATALOG), {
+		status: "no-match",
+	});
+});
+
+test("resolveModelPattern: provider-slash substring ambiguity within one provider", () => {
+	const catalog: readonly ModelRef[] = [
+		{ provider: "zai", id: "glm-5.3-flash", name: "GLM 5.3 Flash" },
+		{ provider: "zai", id: "glm-5.3-flashx", name: "GLM 5.3 FlashX" },
+	];
+	assert.deepEqual(resolveModelPattern("zai/glm-5.3-fla", catalog), {
+		status: "ambiguous",
+		matches: ["zai/glm-5.3-flash", "zai/glm-5.3-flashx"],
+	});
+});
+
+test("resolveModelPattern: unique substring over id or name resolves", () => {
+	assert.deepEqual(resolveModelPattern("haiku-4-5", MODEL_CATALOG), {
+		status: "ok",
+		canonical: "anthropic/claude-haiku-4-5",
+	});
+	assert.deepEqual(
+		resolveModelPattern("Qwen3.8-27B (Q6_K_XL)", MODEL_CATALOG),
+		{
+			status: "ok",
+			canonical: "llamacpp/qwen3.8-27b",
+		},
+	);
+});
+
+test("resolveModelPattern: ambiguous substring is reported", () => {
+	const res = resolveModelPattern("glm-5.3-f", MODEL_CATALOG);
+	assert.deepEqual(res, {
+		status: "ambiguous",
+		matches: ["zai-renaud/glm-5.3-flash", "zai/glm-5.3-flash"],
+	});
+});
+
+test("resolveModelPattern: no match", () => {
+	assert.deepEqual(resolveModelPattern("gpt-9", MODEL_CATALOG), {
+		status: "no-match",
+	});
+	assert.deepEqual(resolveModelPattern("   ", MODEL_CATALOG), {
+		status: "no-match",
+	});
 });

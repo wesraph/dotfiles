@@ -1,395 +1,162 @@
 ## Task List Hygiene
 
-- **Always use a task list** for multi-step work.
-- **When you detect a subject change** (the user switches to a new, unrelated topic), **check the task list first**. If there are any tasks still present (especially completed ones from the previous topic), **clear the task list** before creating new tasks for the new subject. This keeps the task list relevant and uncluttered.
+- Multi-step work → use a task list.
+- Subject change → check the list first; clear stale tasks (especially completed ones from the old topic) before creating new ones.
 
 ## Bash Timeout & Filesystem Scans
 
-- The `bash` tool has a **default timeout of 60 seconds** (injected automatically when you omit `timeout`), despite the tool description saying "no default timeout". A command exceeding it is killed.
-- Need more time? Pass `timeout` (seconds) explicitly on the `bash` call, or use `bg_run` for builds, test suites, servers and watchers.
-- **NEVER run `find /`, `find ~`, `grep -r /`, `du /`, `ls -R /`, or any recursive scan rooted at `/` or the home directory.** They crawl the whole disk (including `/proc`, `/sys`, mounts, `node_modules`) and effectively never finish. Scope searches to the project directory or a known subdirectory, and prefer `fffind`/`ffgrep`/`symbol_search`. If you truly must locate a file outside the project, use `locate`/`fd` on a narrow directory, with `-maxdepth` and an explicit `timeout`.
+- `bash` has a **60s default timeout** (injected when you omit `timeout`) despite its description saying otherwise — exceeding it kills the command. Pass `timeout` (seconds) explicitly, or `bg_run` for builds, test suites, servers, watchers.
+- **Never** run recursive scans rooted at `/` or `~` (`find /`, `find ~`, `grep -r /`, `du /`, `ls -R /`) — they crawl `/proc`, `/sys`, mounts and `node_modules` and never finish. Scope to the project; prefer `fffind`/`ffgrep`/`symbol_search`. To locate a file outside the project: `locate`/`fd` on a narrow directory, with `-maxdepth` and an explicit `timeout`.
 
 ## Waiting — Event-Driven, Never Sleep-Polling
 
-NEVER use `sleep`, `sleep N && ...`, or timed re-check loops to wait for something. Sleeping wastes turns/time and never knows the real moment. Instead, block on the event itself — the command returns exactly when the thing happened (like `tail -f`):
+Never `sleep`, `sleep N && ...`, or sleep→check loops: they waste turns and never know the real moment. Block on the event itself:
 
-- **Background/long-running commands** (`bg_run`): do NOT wait — end the turn. The harness notifies automatically on completion, then continue with `bg_logs`/`bg_status`.
-- **A process to exit** (not your child): `tail --pid=$PID -f /dev/null` — returns the moment PID dies. If it's a child of your shell: `wait $PID`.
-- **A file/dir to change or appear**: `inotifywait -e create,modify,close_write <path>` (Linux; pkg `inotify-tools`) / `fswatch -1 <path>` (macOS) / fallback with `entr`: `echo <file> | entr -n -z echo done` (blocks until file is written).
-- **A line/pattern to appear in a growing log**: `tail -n +1 -f app.log | grep -m1 "ready"` — blocks until first match, then exits. Or `awk '/ready/{exit}' app.log` for a finished file, `stdbuf` if buffering bites.
-- **A server/port to become ready**: use a single blocking readiness command with a timeout, e.g. `timeout 60 bash -c 'until curl -sf http://localhost:8080/health >/dev/null; do sleep 0.2; done'` — one foreground call that returns as soon as ready, NOT agent-level `sleep 5` → check → `sleep 5` → check cycles. Or just `bg_run` the server and grep its log for the ready line.
-- **A lock/release/ordering condition**: a named pipe (`mkfifo`) or `flock` rather than periodic checks.
+- `bg_run` tasks: end the turn — completion notifies you; then read `bg_logs`/`bg_status`. Never poll.
+- Process exit: `tail --pid=$PID -f /dev/null` (or `wait $PID` for your own child).
+- File change/appear: `inotifywait -e create,modify,close_write <path>` (Linux), `fswatch -1 <path>` (macOS), `echo <file> | entr -n -z echo done`.
+- Line in a growing log: `tail -n +1 -f app.log | grep -m1 "ready"`; finished file: `awk '/ready/{exit}' app.log`.
+- Server/port ready: one bounded blocking wait, e.g. `timeout 60 bash -c 'until curl -sf localhost:8080/health >/dev/null; do sleep 0.2; done'` — not agent-level sleep→check cycles.
+- Lock/ordering: `mkfifo` or `flock`.
 
-Rules:
+`sleep` may appear only inside one self-contained blocking wait command. If no primitive exists, use one bounded `timeout` wait. Check a running task's output only when you genuinely need mid-work progress.
 
-- Sleep may appear ONLY inside a single self-contained blocking wait command (as above), never as an agent-side "wait then look" step.
-- If no event primitive exists, use one bounded blocking wait with `timeout` — never repeated sleep-check cycles.
-- Only check a running task's output with `bg_logs` when you genuinely need progress mid-work, never as a wait mechanism.
+## Build a Feature — Pipeline
 
-## Build Agent Instructions
+1. Restate the prompt with the missing information; ask the user when unsure.
+2. Discovery goes to a `scout` subagent — never do it yourself. Need a technology/library/API first → `doc-searcher`, pass its output to downstream agents.
+3. Write the feature and its tests. Prefer modifying an existing function over adding a new one.
+4. List what the change may break; close the task list by re-checking each of those.
+5. Test **scoped to the diff** — derive the affected packages/files from it. **Never the whole suite.** Widen the scope, not the suite: add packages holding direct dependents of every exported symbol you changed (grep references). `-race` only when the diff touches concurrency there.
+6. `make build` if it exists (build phase). `make verify` if it exists (testing phase) — when verify runs the full suite, run only its lint/typecheck/build parts plus the scoped tests.
+7. Review loop: grade the diff, iterate until 100/100. Every pass is a `reviewer` subagent with `context: "fresh"` — its prompt holds only the requested feature and the diff; the reviewer never edits; you apply the fixes, then a fresh reviewer re-grades. Never `spawn_pi` for reviews.
+8. Re-run the tests.
 
-- Always use a task list
-- You will always prefer modifying a function instead of creating a new one
-- Always clean the debug tests/functions that you wrote during debugging
-- When a user asks for a new feature, you must always list what are the things that it may break. At the end of the task list you must check each of the element that it may break if they are not broken
-- You must always build a feature by doing the following thing:
-  - First, rewrite the prompt to add the necessary infos that may be missing, ask the user if you are unsure about any of the informations
-  - Use the scout subagent to find the relevant files, you must NEVER do the discovery of the code yourself
-  - If you need to understand a technology, library, or API before implementing, use the `doc-searcher` subagent first to gather documentation and pass it as context to downstream agents
-  - Write the feature and its tests
-  - Run the tests **scoped to the change** to confirm the feature works: derive the affected packages/files from the diff and run only those. **Never run the whole suite.**
-  - To check nothing else broke, extend that scope, not the suite: add the packages of the direct dependents of every exported symbol/interface you changed (find them with references/grep on the changed symbols). `-race` only when the diff touches concurrency in those packages.
-  - Do a review loop. A review loop consist into giving a grade to your new code (the current diff), then iterate over the code until you reach a grade of 100/100. Every review pass MUST be performed by a `reviewer` subagent spawned with `context: "fresh"`: the reviewer must NOT share or inherit the conversation context — its prompt contains only the feature that was asked for and the diff to grade. The reviewer never edits code; all fixes are applied by you in the main session, then a new fresh reviewer grades the updated diff. NEVER use another pi (`spawn_pi`) to do a review — reviews MUST always be performed by a subagent
-  - Run the tests again
-- If a "make build" command exists, you must run it during the build phase
-- If a "make verify" command exists, you must also always run it during the testing phase — unless it runs the full test suite, in which case run its lint/typecheck/build parts and run the tests scoped as above
-- When asked to **deploy**, you must **always** check the project's Makefile first (`cat Makefile` or `grep -i deploy Makefile`). If a deploy target exists (e.g. `make deploy`, `make deploy-staging`, `make release`), use it. Do not attempt to manually deploy by running ad-hoc commands unless no Makefile target exists — in which case, ask the user how to proceed before doing anything.
-- If you are using golang, always use staticcheck, go vet
-- NEVER write temporary files to /tmp or any directory outside the working directory. This is a hard rule — no exceptions. If you need scratch space, use a file inside the project directory (e.g., `.pi/scratch/` or a clearly named temp file in the project root).
-- NEVER create ad-hoc test scripts, validation scripts, or debug files outside the codebase. All tests and validations MUST live inside the project's test infrastructure.
-- When validating code, write REAL tests using the project's existing test framework and conventions. Do NOT create standalone scripts in /tmp or elsewhere to verify behavior — that is wasteful and annoying.
-- If the project has no test framework yet, suggest adding one rather than writing temporary validation scripts.
-- Never use redundant variables — if a variable is never read after assignment, don't declare it. Avoid shadowing or dead intermediate variables.
-- Never use untyped/random constants in code (e.g. `100`, `"error"`, `true` as bare literals). Always define typed constants with explicit type annotations (e.g. `const timeoutMs int = 100`, `const errMsg string = "error"`). Every magic number, string literal, or boolean used more than once — or that conveys domain-specific meaning — must be a named, typed constant.
-- NEVER use `sed` to edit files — always use the `edit` tool instead. This is a hard rule. `sed` is error-prone, fragile with complex patterns, and can silently corrupt files. The `edit` tool provides precise, safe file modifications.
-- NEVER use `write` to overwrite an existing file — always use `edit` for targeted changes. `write` should only be used for brand-new files that don't exist yet. Overwriting a file with `write` loses the original content, makes diffs meaningless, and risks corrupting unrelated parts of the file. If multiple regions need changing, use one `edit` call with multiple `edits[]` entries.
-- NEVER write mocks by hand if they can be generated. Always prefer using a mock generation tool or framework (e.g., mockgen, mockery, ts-mockito, jest.fn(), etc.) over manually authored mocks. Hand-written mocks quickly diverge from reality, are brittle to interface changes, and add maintenance burden.
-- Do not leave random notes in the code
-- If you are spawning a subagent and you are working in a subtree, make sure to tell it in which folder is the worktree
+**Deploy:** check the Makefile first (`grep -i deploy Makefile`) and use an existing target (`make deploy`, `deploy-staging`, `release`). No target → ask the user before ad-hoc commands.
 
-## Git Commit Messages
+## Code Rules
 
-- **Always check the project's commit message format before committing.** Look for conventions such as conventional commits, signed-off lines, scope prefixes, or any `.commitlintrc`, `commitlint.config.js`, `HUSKY`, or similar tooling.
-- Check for existing commit history (`git log`) to match the project's style and tone.
-- If the project uses a specific format (e.g., `type(scope): description`), follow it strictly.
-- Never force-commit with a malformed message — if in doubt, ask the user.
-- **Never add any LLM/AI as a co-author.** Do not add `Co-Authored-By` trailers for Claude, GPT, Gemini, or any other AI model. Do not append `Generated with Claude Code`, `🤖`, or any similar AI-attribution line. Commits must be attributed to the human author only.
+- Never declare what you never read; no shadowing, no dead intermediates.
+- No untyped constants: every magic number/literal/bool used twice or carrying domain meaning becomes a named, typed constant (`const timeoutMs int = 100`).
+- No hand-written mocks when a generator exists (mockgen, mockery, ts-mockito, `jest.fn()`).
+- Clean up debug tests/functions you wrote while debugging; leave no random notes in the code.
+- Never write temp/scratch files outside the working directory (use e.g. `.pi/scratch/` inside the project). Validation lives in the project's test infrastructure — no standalone ad-hoc scripts. No test framework yet → suggest adding one.
+- Go: always `staticcheck` + `go vet`.
+- Never `sed` to edit files — use `edit` (one call, several `edits[]`). Never `write` over an existing file — `write` is for new files or a complete rewrite.
+- When spawning a subagent for a subtree, tell it which folder the worktree is in.
 
-## Git Worktrees
+## Git
 
-- Whenever you create a git worktree — manually (`git worktree add`), as a `spawn_pi` cwd, or for any subagent task — always place it under `./worktrees/` inside the repo root (e.g. `./worktrees/<branch-or-task-name>`). This is the default location; only deviate when the user explicitly specifies another path.
+**Commit messages:** check the project's format first (conventional commits, signed-off lines, scope prefixes, `.commitlintrc`, `commitlint.config.js`, husky) and match the tone of `git log`. Never force-commit a malformed message — ask instead. **Never add AI as co-author**: no `Co-Authored-By` for Claude/GPT/Gemini, no "Generated with …", no 🤖 — human author only.
 
-## Blockchain Queries
+**Worktrees:** every worktree you create (manual, `spawn_pi` cwd, subagent task) goes under `./worktrees/<branch-or-task-name>` in the repo root unless the user specifies otherwise. If cwd is the main worktree on `main`/`master` and the task edits files or prepares a PR: create the worktree FIRST and do all work there (edits, commits, tests, PR branch) — never commit to `main` in the main checkout. Exception: the user explicitly says to work in the current checkout. Already in a worktree or on a non-default branch → work in place.
 
-- When you need to query blockchain data (balances, contract state, transactions, logs, etc.), use the `cast` CLI tool from Foundry instead of writing temporary test files or scripts. `cast` is installed and available.
-- Examples: `cast call`, `cast balance`, `cast storage`, `cast logs`, `cast receipt`, `cast rpc`. Set `--rpc-url` or use `ETH_RPC_URL` / `CAST_RPC_URL` env var.
-- NEVER write a temporary Go test, Python script, or any ad-hoc file just to read blockchain data — always prefer `cast`.
+## Verify Before Claiming
 
-## Vision Tasks
+Never conclude a value's state from where it is defined or first assigned. Find the read site (consumer), trace back to the final value, check for transforms/filters/overrides/discards in between, then answer "does it survive every step" — never "because it's defined". Applies to every "will X happen" question: configs, features, state transitions, API responses, rendering, build outputs, permissions.
 
-- If you need to analyze images, screenshots, diagrams, or any visual content, **always** spawn a subagent with a vision-capable model rather than reasoning about visual content directly.
-- Pass the image(s) to the spawned agent via its task prompt.
+**Reviewing a diff/PR/branch:** trace the execution path before reporting a bug — no speculative bugs from pattern matching. Read the live code (the diff shows what changed, not what exists), follow caller→callee, check upstream guards before claiming "panic if nil", check every call site before claiming a function is broken, and trace what replaced removed code. Can't prove it by tracing → say "looks fine" or "needs verification"; don't invent scenarios.
 
-## Code Review — Verify Before Reporting
+**Answering code questions:** show proof — quote the file, function definition, call site, or type declaration. Can't find proof → say so instead of guessing.
 
-When reviewing diffs/PRs/branches, **trace the actual execution path before reporting an issue.** No speculative bugs from surface-level pattern matching.
+**Claiming something is unused or removing it:** grep all call sites across every affected file, check whether the interface/signature changed, and summarize the impact per call site.
 
-For every claim:
+## Quality Gates — CRAP & Mutants
 
-1. **Read the live code** — not just the diff (diff shows what changed, not what exists).
-2. **Trace the call chain** — follow caller to callee; verify the value reaches the point of concern.
-3. **Check upstream guards** — before claiming "panic if nil", verify no earlier check prevents it.
-4. **Check all call sites** — before claiming "this function is broken", verify every caller provides the precondition.
-5. **Compare old vs new** — if code was removed, trace what replaced it; the replacement may handle the case differently but correctly.
+`CRAP = comp² × (1 − coverage)³ + comp`: complexity × weak coverage = the code most likely to break when changed. CRAP > 30 → refactor it or test it. A **surviving mutant** (flipped `>`→`>=`, `+`→`-`, `true`→`false`, dropped side effect, tweaked constant that no test catches) is behaviour the suite executes but never asserts — coverage measures execution, not detection.
 
-**Failure mode:** seeing `dc, _ := a.Chain(id)` and claiming "nil panic" without checking that `matchOutputToken` (called earlier) already errors if the chain is missing → false positives wasting time.
+Writing: keep cyclomatic complexity ≤ 10. Every non-trivial function ships with tests asserting behaviour (outputs, state changes, errors), not tests that merely reach the line. Before calling work done, ask per branch/comparison/constant: "if I flipped this, would a test fail?" If not, add the assertion now. Boundaries are prime mutant territory: off-by-one, zero/empty/nil, max values.
 
-**Rule:** if you can't prove the bug by tracing, don't report it. Say "looks fine" or "needs verification" — don't invent scenarios.
+Reviewing: flag CRAP hotspots (complex new/changed logic with weak tests → test or simplify). Mentally inject mutants into changed logic; if the suite still passes, report "missing assertion: X untested" as a concrete finding, not a maybe. A green test that survives mutants is false security. If the project configures a mutation tool (Stryker, PIT, mutmut, cosmic-ray), run it on the change and treat survivors in touched lines as findings.
 
-## CRAP & Surviving Mutants — Quality Gates for Coding and Review
+## A Failed Tool Is a Lead, Not a Verdict
 
-**CRAP** (Change Risk Anti-Patterns): `CRAP = comp² × (1 − coverage)³ + comp` — cyclomatic complexity combined with test coverage. High complexity + weak coverage = code most likely to break when changed. CRAP > 30 = refactor it or test it.
+"I tried X and it failed" starts an investigation, it never ends one. Distrust your own "impossible" — re-derive it from primary sources, don't inherit it from one attempt. Before concluding something is impossible or unsupported:
 
-**Surviving mutants**: a small injected bug (`>` → `>=`, `+` → `-`, `true` → `false`, dropped side effect, tweaked constant) that no test catches. Each one = behavior the suite executes but never asserts. Coverage % measures execution, not detection.
+1. **Localize blame to the smallest replaceable unit:** problem, approach, tool, or version/config. (A Go RocksDB binding failed on *one* deprecated symbol — every other symbol was present; the fix was ~15 raw bindings, not "RocksDB is unreadable from Go".)
+2. **Enumerate the boundary from the real surface:** symbol table (`nm -D`), header, bytes on disk, producer's source. Primary sources over READMEs, prior docs, or memory of a format.
+3. **Seek existence proof:** if any working system produces or consumes the artifact, it is possible by construction — the question is "how". Find that system, read how, copy it.
+4. **Separate "impossible" from "expensive":** tag each blocker; "tedious" is a cost, not a barrier, and compounded frictions must not sum into a false "too hard".
+5. **Try to falsify before documenting:** a confident, well-written wrong "can't be done" gets trusted and defended.
 
-### When writing code
+Verifying a load-bearing "impossible" costs a few `nm`/grep/source reads; accepting it wrongly costs a permanent fallback and a missing capability. Pay the small cost.
 
-- Keep functions small and low-complexity (aim cyclomatic complexity ≤ 10). Complex + untested = CRAP hotspot.
-- Every non-trivial function you write ships with tests that assert BEHAVIOR (outputs, state changes, errors), not tests that merely reach the line.
-- Before calling work done, self-check mutant-style: for each new branch/comparison/constant, ask "if I flipped/changed this, would a test fail?" If not, add the missing assertion now.
-- Boundary conditions are prime mutant territory: off-by-one (`<` vs `<=`), zero/empty/nil inputs, max values.
+## GitHub PRs
 
-### When reviewing
-
-- Identify CRAP hotspots in the diff: complex new/changed logic with no or weak tests → report it (fix = test or simplify).
-- Mentally inject mutants into changed logic — inverted condition, swapped operator, changed constant, removed call. If the suite would still pass, report "missing assertion: X untested" as a concrete finding, not a maybe.
-- A green test that survives mutants is a false sense of security — flag it.
-- If the project has a mutation-testing tool configured (Stryker, PIT, mutmut, cosmic-ray), run it on the changed code and treat surviving mutants in touched lines as findings.
-
-## Code Questions — Always Show Proof
-
-- **When the user asks code questions, always provide proof.** Never state fact without backing it up.
-- Proof = actual evidence from the codebase: file contents, function definitions, call sites, type declarations. Quote the exact lines/snippets.
-- If you reference a behavior, show the code that produces it. If you claim "called from"/"defined in" X, show the actual call/definition.
-- Don't speculate — if you can't find proof, say so instead of guessing.
-
-## Never Assume a Value's Final State from Its Source
-
-Never conclude something is active/visible/reachable based on where it's **defined or first assigned**. Verify it survives every intermediate step to its consumer.
-
-Failure mode: one assignment treated as the final state. Correct flow:
-
-1. Find where the value is **read** (consumer)
-2. Trace back to its **final** value — not the initial assignment
-3. Check for transforms/filters/overrides/discards in between
-4. Only then conclude whether the source reaches the consumer
-
-Applies to every "will X happen" question (configs, features, state transitions, API responses, UI rendering, build outputs, permissions). Answer is never "because it's defined" — always "because it survives every step."
-
-- **Trace function calls across ALL affected files before concluding a dependency/feature/call is "no longer used."** Never claim removal from one file — verify all call sites.
-- When a function is modified/removed in a diff: (1) `grep` all call sites, (2) check if interface/signature changed, (3) summarize impact per-call-site.
-- List every file that calls the function and how each is affected.
-
-## Never Let a Tool's Failure Become the Problem's Verdict
-
-A failed approach is a **lead, not a verdict**. "I tried X and it failed" starts the investigation, never ends it — especially when stakes are high (a capability the user wants, a fallback that degrades performance). Failure mode: one library won't link or one tool can't open a file, and you generalize that into "impossible" and ship a workaround. The wall was a property of your *chosen tool*, not the *problem*. Distrust your own "impossible" — re-derive it from primary sources, don't inherit it from one attempt.
-
-Before concluding something is impossible or unsupported:
-
-1. **Localize to the smallest replaceable component.** Push blame down the stack: *problem*, *approach*, *tool*, or *version/config*? Most "impossible" = "this wrapper, at this version, won't link." (Real: a Go RocksDB binding failed on *one* deprecated symbol — every other symbol was present. Fix was a ~15-function raw binding, not "RocksDB is unreadable from Go.")
-2. **Enumerate the boundary; don't infer it.** Inspect the real surface directly — symbol table (`nm -D`), header, bytes on disk, producer's source. Primary sources over secondary descriptions (README, prior doc, memory of a format).
-3. **Seek the existence proof.** If any working system produces/consumes the artifact, the operation is possible by construction — open question is "how," never "whether." Find that system, read how it does it, copy it.
-4. **Separate "impossible" from "expensive."** Tag every blocker as one or the other. "Tedious"/"complex" is a cost, not a barrier. Decompose compounded frictions; don't let them *sum* into a false "too hard."
-5. **Separate investigation from documentation.** Try to *falsify* before writing the authoritative conclusion. A confident, well-written wrong "can't be done" gets trusted and defended — more dangerous than a messy one.
-
-Economics: verifying a load-bearing "impossible" is cheap (a few `nm`/grep/source-read calls) vs. the cost of accepting it wrongly (permanent fallback, missing capability). Pay the small cost to verify a negative claim before building on it.
-
-## GitHub PR Updates
-
-When updating a PR's title or description, use the GitHub API directly via curl — `gh pr edit` often fails due to missing token scopes (`read:org`).
-
-**1. Find the right token:** Check `~/.config/gh/hosts.yml` for available tokens. Prefer `gho_` (Fine-Grained PAT) over `ghp_` (classic PAT) — they have better scope control.
-
-**2. Update title and body via API:**
+**Editing a PR title/body:** `gh pr edit` often fails on token scopes — use the API. Token: read `~/.config/gh/hosts.yml`, prefer `gho_` (fine-grained) over `ghp_`, and use one with `read:org`.
 
 ```bash
 curl -s -X PATCH "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
-  -H "Authorization: token {TOKEN}" \
-  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: token {TOKEN}" -H "Accept: application/vnd.github+json" \
   -d '{"title":"new title","body":"new body"}'
 ```
 
-**3. Verify the update:**
+Verify with a GET of the same URL. `draft` is read-only via the API (the user clicks "Ready for review"). Body may be markdown; escape single quotes as `'"`.
 
-```bash
-curl -s "https://api.github.com/repos/{owner}/{repo}/pulls/{number}" \
-  -H "Authorization: token {TOKEN}" \
-  | python3 -c "import sys,json; d=json.load(sys.stdin); print('Title:', d['title'])"
-```
+**No "Test Plan" sections.** PRs carry a **Proof / Verification** section: the exact commands you ran and their real output — test pass lines (`ok … 0.45s`, `PASS`, exit code 0), decisive log lines, before/after output — plus the regression scope you ran (changed packages + direct dependents; the whole suite is not expected). Run first, then paste, and tie each proof line to a claim. Something not tested → say so under Proof.
 
-**Important notes:**
+## Subagents
 
-- The `draft` field is read-only via the API — users must click "Ready for review" in the UI.
-- The body can be markdown. Use double-escaped single quotes (`'") inside JSON strings.
-- Always use the token with `read:org` scope to avoid GraphQL scope errors.
+- **Reviews are subagent-only:** never `spawn_pi` for a review; always a `reviewer` subagent, `context: "fresh"` for adversarial/grading passes.
+- Agents: `scout` recon, `planner` plans, `worker` implementation, `reviewer` review-and-fix, `oracle` advisory, `researcher` web, `doc-searcher` documentation for implementation context. Spawn what the task needs, on the current model — no separate heavy-reasoning or vision agents.
+- Prompts carry: Goal, Context, Success criteria, Hard constraints, Validation, Output shape.
+- One writer per cwd/worktree: writes stay single-threaded (one `worker` plus advisory/review children). Concurrent code-modifying children get `worktree: true`; remove the worktrees once their changes are merged.
+- Children cannot spawn children (depth 2). `context: "fork"` for branched advisory threads, `context: "fresh"` for adversarial reviewers.
+- Sync when the next step needs the result; `async: true` when you can keep working — then wait for the notification, don't poll.
+- Management: `subagent({action:"list"|"status"|"interrupt"|"resume"|"doctor"})`.
 
-## Pull Requests — Proof, Not Test Plans
+## Model Family for Spawned Agents and Pi
 
-**When creating or updating a PR, NEVER include a "Test Plan" section.** Do not write planned/intended steps that you have not yet run (e.g. "will run tests", "manual verification"). A test plan is a promise; reviewers want evidence.
+Check `PI_MODEL` before any `subagent` or `spawn_pi`. The child's model must come from the same family — no exceptions, in any direction (no Anthropic↔Qwen, GLM↔Qwen, Anthropic↔GLM):
 
-Instead, include a **"Proof" / "Verification"** section that shows the **actual evidence of what you ran and observed** to confirm the PR works. Concrete evidence only:
+- Anthropic parent (`claude-*`, `anthropic/*`) → Anthropic child. Scout/recon under `claude-opus-*` or `claude-fable-*`: `model: "anthropic/claude-haiku-4-5"` (recon doesn't need a frontier model).
+- GLM parent (`glm-*`) → GLM child. Scout/recon under `glm-5.3`: `model: "zai-renaud/glm-5.3-flash"`.
+- Qwen parent (`qwen*`) → the same Qwen model, for every agent including `scout` (pass it explicitly via `model:` or omit `model` to inherit).
+- Anything else → omit `model` and inherit the parent.
 
-- Exact commands executed (test commands, build commands, linters, `make verify`, manual repro steps)
-- The real output that confirms success — quotes of test pass lines (e.g. `ok ... 0.45s`, `PASS`, exit code 0), relevant log lines, or before/after output
-- Regression check: proof that the tests in scope (changed packages + direct dependents) still pass — name the scope you ran; running the whole suite is not required and is not expected
+## Think Before Coding
 
-**Do:**
+These bias toward caution over speed; for trivial tasks use judgment.
 
-- Run the tests/build/verify first, then paste the real output
-- Quote the decisive lines (pass line, exit code, key assertion)
-- Tie each proof line back to a claim in the PR description
+- State assumptions explicitly. Uncertain → ask. Multiple interpretations → present them, don't pick silently. Something unclear → stop, name what's confusing, ask.
+- If a simpler approach exists, say so; push back when warranted.
+- Turn work into verifiable goals: "fix the bug" → a test that reproduces it, then passes; "add validation" → tests for invalid inputs that pass; "refactor X" → tests pass before and after. Multi-step → a short plan of `[step] → verify: [check]`. Strong criteria let you loop independently; "make it work" needs constant clarification.
+- Thinking budget: spend it on tracing/debugging, not padding prose.
 
-**Don't:**
+## Minimal by Default (Ponytail)
 
-- Write "Test Plan:" with unchecked steps
-- Claim "tested" without showing the output
-- Describe intended verification you haven't actually performed
+Active every response; off only on "stop ponytail" / "normal mode". Default intensity **full** (`/ponytail lite|full|ultra`). The best code is the code never written.
 
-If something was NOT tested, state that explicitly under "Proof" rather than dressing it up as a plan. Unverified = say so honestly.
+The ladder — stop at the first rung that holds: (1) does this need to exist at all? speculative → skip it and say so in one line; (2) stdlib; (3) native platform feature (CSS over JS, DB constraint over app code, `<input type="date">` over a picker lib); (4) an already-installed dependency — never add one for what a few lines can do; (5) one line; (6) only then the minimum that works.
 
-## Subagent Conventions
+- No unrequested abstractions, no "for later" scaffolding, no unrequested flexibility, no error handling for impossible cases, no features beyond what was asked. Deletion over addition, boring over clever, fewest files, shortest working diff.
+- Mark deliberate simplifications: `// ponytail: <ceiling>, <upgrade path>` (e.g. `// ponytail: global lock, per-account locks if throughput matters`).
+- Never simplify away: validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything explicitly requested. Leave tuning knobs for physical/hardware behaviour — models can't see real-world drift.
+- Non-trivial logic leaves ONE runnable check behind (smallest assert-based self-check or one small test file); trivial one-liners need none.
+- Comments only when the "why" can't live in code (business rules, gotchas, non-obvious constraints). Never comment the "what", never reference history or the session ("previously", "unchanged from before", "as requested", "fix for…") — history belongs in the commit message.
+- Output: code first, then at most three short lines — `skipped: [X], add when [Y]`.
 
-- **Reviews are subagent-only — hard rule**: NEVER spawn another pi (`spawn_pi`) to review anything. Every review (build review loop, branch/PR review, adversarial pass, audit) MUST be performed by a `reviewer` subagent — `context: "fresh"` for adversarial/grading passes.
-- **Agents**: `scout` (recon), `planner` (plans), `worker` (implementation), `reviewer` (review-and-fix), `oracle` (advisory review), `researcher` (web research), `doc-searcher` (finds and summarizes documentation for implementation context). Spawn whichever agent the task needs, using the current model — no dedicated heavy-reasoning or vision agents.
-- **Strong prompts**: include Goal, Context, Success criteria, Hard constraints, Validation, Output shape
-- **Keep writes single-threaded**: one `worker` + advisory/review children
-- **Child subagents cannot spawn their own subagents**; nesting depth is 2
-- **Use `context: "fork"` for branched advisory threads**, `context: "fresh"` for adversarial reviewers
-- **Management**: `subagent({action:"list"})`, `status`, `interrupt`, `resume`, `doctor`
-- **Sync vs async**: If the next step depends on the subagent's result (you must wait for it), run it synchronously (default `subagent` call) or use the `bash` tool. If you can keep working in parallel without the result, use `async: true` — then don't poll; you get notified on completion.
-- **Concurrent code-modifying agents**: When spawning multiple subagents that will modify code (e.g., parallel `worker` or `reviewer` tasks), always use `worktree: true` to isolate their filesystems. Each agent implements and verifies in its own worktree. After all parallel agents finish, clean up the worktrees (remove them) if changes were merged into the main branch.
+**Surgical:** touch only what you must. Don't "improve" adjacent code, don't refactor what isn't broken, match existing style even if you'd do it differently. Delete dead code when you find it (yours or pre-existing) and remove the orphans your change creates. Test: every changed line traces to the request or to dead-code removal.
 
-## Thinking Budget
+## Caveman Communication
 
-You have a thinking budget — use it for tracing/debugging, don't pad prose.
+Active every response; off on "stop caveman" / "normal mode". Default intensity **full** (`/caveman lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra`).
 
-## Behavioral Guidelines
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
-
-### 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-### 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- Do not add comments unless strictly necessary. Code should be self-documenting — clear names, simple logic. Only comment when the "why" is non-obvious and cannot be expressed in code (e.g., business rules, gotchas, non-intuitive constraints). Never comment the "what" — the code already says it.
-- A comment must only describe what the code does now (or why). Never reference the session, the change, or history: no "byte-identical to what it was before", "the old behaviour…", "unchanged from before", "now does X", "previously", "was changed to", "as requested", "fix for…". The reader sees only the current code — history belongs in the commit message.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must, but delete dead code when you find it.**
-
-When editing existing code:
-
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- Dead code may be deleted — yours or pre-existing.
-
-When your changes create orphans:
-
-- Remove imports/variables/functions that YOUR changes made unused.
-- Pre-existing dead code may be deleted too.
-
-The test: Every changed line traces to the user's request, or to dead-code removal.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## Ponytail — Minimal by Default
-
-**ACTIVE EVERY RESPONSE.** Always reach for the laziest solution that actually works. Off only: "stop ponytail" / "normal mode".
-
-The best code is the code never written.
-
-**The ladder** — stop at the first rung that holds:
-
-1. **Does this need to exist at all?** Speculative need = skip it, say so in one line.
-2. **Stdlib does it?** Use it.
-3. **Native platform feature covers it?** Use it (CSS over JS, DB constraint over app code, `<input type="date">` over a picker lib).
-4. **Already-installed dependency solves it?** Use it. Never add a new dependency for what a few lines can do.
-5. **Can it be one line?** One line.
-6. **Only then:** the minimum code that works.
-
-**Rules:**
-
-- No unrequested abstractions, no boilerplate "for later", no scaffolding.
-- Deletion over addition. Boring over clever.
-- Fewest files possible. Shortest working diff wins.
-- Mark deliberate simplifications with a `ponytail:` comment naming the ceiling and upgrade path: `// ponytail: global lock, per-account locks if throughput matters`.
-- Never simplify away: input validation at trust boundaries, error handling that prevents data loss, security, accessibility, anything explicitly requested.
-- Hardware/calibration knobs: leave tuning knobs for the physical world, minimal models can't see real-world drift.
-- Non-trivial logic leaves ONE runnable check behind — the smallest `assert`-based self-check or one small test file. Trivial one-liners need no test.
-
-**Output:** Code first. Then at most three short lines: what was skipped, when to add it. Pattern: `[code] → skipped: [X], add when [Y].`
-
-**Intensity levels** (default: **full**): switch via `/ponytail lite|full|ultra` or "stop ponytail" / "normal mode" to disable.
-
-- **lite**: Build what's asked, but name the lazier alternative in one line.
-- **full**: The ladder enforced. Stdlib and native first. Shortest diff, shortest explanation.
-- **ultra**: YAGNI extremist. Deletion before addition. Ship the one-liner and challenge the rest.
+- Drop articles, filler, pleasantries, hedging. Fragments OK. Short synonyms (big not extensive). No tool-call narration, no decorative tables/emoji, no long raw error dumps — quote the shortest decisive line.
+- Technical terms exact; code blocks, API names, CLI commands, commit keywords (feat/fix/…) and exact error strings verbatim. Use well-known acronyms (DB/API/HTTP); never invent ones the reader can't decode. No self-reference about the style.
+- Pattern: `[thing] [action] [reason]. [next step].`
+- Keep the user's language: they write Portuguese → answer in Portuguese caveman. Compress the style, not the language.
+- Drop caveman for: security warnings, irreversible-action confirmations, multi-step sequences where fragment order risks misreading, when compression creates ambiguity, or when the user asks to clarify. Resume afterwards.
+- Code, commits, PRs: write normal.
 
 ## Browser / UI Tools — Always Headless
 
-**Always use headless mode when invoking camoufox, playwright, or any tool that can open a browser window.** Never let a visible browser window appear on the user's screen.
+camoufox, playwright, or anything that can open a window: always headless — `"headless": true` in the `args` JSON of every `browse*` call, `headless: true` (or equivalent) for playwright. If a tool has no headless parameter, find the equivalent first. No visible window unless the user explicitly asks.
 
-- **Camoufox**: Always pass `"headless": true` in the `args` JSON for every `browse*` tool call.
-- **Playwright**: Always use headless mode (e.g., `headless: true` or equivalent).
-- If a tool has no explicit headless parameter, find the equivalent option before proceeding.
-- This is a hard rule — no exceptions unless the user explicitly asks for a visible window.
+## Vision Tasks
 
-## Caveman Mode — Ultra-Compressed Communication
+Analyzing images, screenshots, or diagrams → spawn a subagent with a vision-capable model and pass the image in its prompt; don't reason about the pixels yourself.
 
-**ACTIVE EVERY RESPONSE.** Ultra-compressed communication mode. Cuts token usage ~75% by speaking tersely while keeping full technical accuracy. Off only: "stop caveman" / "normal mode".
+## Blockchain Queries
 
-**Default intensity:** **full**. Switch: `/caveman lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra`.
-
-### Rules
-
-- Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging
-- Fragments OK. Short synonyms (big not extensive, fix not "implement a solution for")
-- No tool-call narration, no decorative tables/emoji, no dumping long raw error logs unless asked — quote shortest decisive line
-- Standard well-known tech acronyms OK (DB/API/HTTP); never invent new abbreviations reader can't decode
-- Technical terms exact. Code blocks unchanged. Errors quoted exact
-- No self-reference. Never name or announce the style
-
-### Language Preservation
-
-Preserve user's dominant language. User writes Portuguese → reply Portuguese caveman. User writes Spanish → reply Spanish caveman. Compress the style, not the language. No forced English openings. Keep technical terms, code, API names, CLI commands, commit-type keywords (feat/fix/...), and exact error strings verbatim.
-
-### Pattern
-
-`[thing] [action] [reason]. [next step].`
-
-Not: "Sure! I'd be happy to help you with that..."
-Yes: "Bug in auth middleware. Token expiry check use `<` not `<=`. Fix:"
-
-### Intensity Levels
-
-- **lite**: No filler/hedging. Keep articles + full sentences. Professional but tight
-- **full**: Drop articles, fragments OK, short synonyms. Classic caveman
-- **ultra**: Abbreviate prose words (DB/auth/config/req/res/fn/impl) — prose only, never real code symbols. Strip conjunctions, arrows for causality (X → Y). Code symbols, function names, API names, error strings: never abbreviate
-- **wenyan-lite**: Semi-classical Chinese. Drop filler but keep grammar structure
-- **wenyan-full**: Maximum classical terseness. Fully 文言文. 80-90% character reduction
-- **wenyan-ultra**: Extreme abbreviation with classical Chinese feel. Maximum compression
-
-### Auto-Clarity
-
-Drop caveman when:
-
-- Security warnings
-- Irreversible action confirmations
-- Multi-step sequences where fragment order risks misread
-- Compression creates technical ambiguity
-- User asks to clarify or repeats question
-
-Resume caveman after the clear part is done.
-
-### Boundaries
-
-Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persists until changed or session end.
-
-## Model Family Rules for Spawned Agents and Pi
-
-Before spawning ANY subagent (`subagent`) or pi session (`spawn_pi`), check `PI_MODEL`. The child's model MUST be from the same family as the parent — no exceptions:
-
-- Anthropic parent (`claude-*`, `anthropic/*`) → child must be an Anthropic model. For scout/recon under `claude-opus-*` or `claude-fable-*`, pass `model: "anthropic/claude-haiku-4-5"` (code search/recon does not need a frontier model).
-- GLM parent (`glm-*`) → child must be a GLM model. For scout/recon under `glm-5.3` (exact, not already `glm-5.3-flash`), pass `model: "zai-renaud/glm-5.3-flash"`.
-- Qwen parent (`qwen*`) → child must be the same Qwen model, for every agent including `scout` (explicitly pass the same Qwen model via `model:`, or omit `model` so children inherit). ONLY a Qwen parent may spawn a Qwen child — never give a Qwen model to the child of an Anthropic or GLM parent.
-- Anything else → omit `model` and inherit the parent.
-
-Cross-family spawns are forbidden in every direction (no Anthropic→Qwen, no GLM→Qwen, no Qwen→Anthropic/GLM, no Anthropic↔GLM). This applies to every agent (`scout`, `planner`, `worker`, `reviewer`, `oracle`, `researcher`, `doc-searcher`) and to the `model` parameter of `spawn_pi`.
+Use `cast` (Foundry): `cast call|balance|storage|logs|receipt|rpc`, with `--rpc-url` or `ETH_RPC_URL`/`CAST_RPC_URL`. Never write a throwaway Go test or script just to read chain data.

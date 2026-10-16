@@ -3,15 +3,14 @@
   "defaultProvider": "zai-renaud",
   "defaultModel": "glm-5.3",
   "packages": [
-    "git:github.com/nicobailon/pi-subagents@f7732d6b6e21009cd719749cdfdc68361904a486",
+    "git:github.com/nicobailon/pi-subagents@a4c8ced69a8176cdf4179b127feddc8875e3418f",
     "git:github.com/nicobailon/pi-powerline-footer@bdf069fcf33211d9037919e539aa129d4efd263e",
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
     "npm:@narumitw/pi-goal",
-    "npm:pi-anthropic-oauth@0.3.0",
-    "npm:@juicesharp/rpiv-ask-user-question@2.12.0",
-    "npm:@tintinweb/pi-tasks@0.9.0"
+    "npm:pi-anthropic-oauth@0.3.1",
+    "npm:@juicesharp/rpiv-ask-user-question@2.12.0"
   ],
   "editorPaddingX": 0,
   "terminal": {
@@ -36,7 +35,7 @@
     "zai-renaud/glm-5.3-flash",
     "qwen3.8-27b",
     "anthropic/claude-opus-5-5",
-    "anthropic/claude-haiku-4-5",
+    "anthropic/claude-haiku-5-5",
     "anthropic/claude-sonnet-5-5",
     "anthropic/claude-fable-5-1"
   ],

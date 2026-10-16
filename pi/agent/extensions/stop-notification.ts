@@ -16,6 +16,8 @@ const NOTIFICATION_WAV = "/home/raph/.pi/agent/extensions/notification.wav";
 const LOG_FILE = "/tmp/pi-stop-hook.log";
 const ENV_PLAY_SOUND = "PLAY_PI_NOTIFICATION";
 const ENV_SUBAGENT_CHILD = "PI_SUBAGENT_CHILD";
+/** Set by spawn_pi on child sessions; their parent coordinates them, so they stay silent too. */
+const ENV_SPAWN_PARENT = "PI_SPAWN_PARENT_ID";
 const SOUND_ON_VALUES = new Set(["1", "true", "yes", "on"]);
 
 /** Sound plays only when PLAY_PI_NOTIFICATION is explicitly on (1/true/yes/on). */
@@ -76,6 +78,10 @@ export default function (
 		// return control to the user directly, so don't notify for their completion.
 		if (process.env[ENV_SUBAGENT_CHILD] === "1") {
 			log("skipped (subagent child process)");
+			return;
+		}
+		if (process.env[ENV_SPAWN_PARENT]) {
+			log("skipped (spawned child session; parent coordinates)");
 			return;
 		}
 

@@ -1,6 +1,6 @@
 ---
 name: rev-grill-me
-description: Reverse grilling. Explore a branch (or diff), extract every new or changed behaviour, then put each one to the user with the question tool ("is this the change you intended?") so they can spot what was built wrong. Collect the verdicts into a fix list. Stores asked questions and answers in .pi/scratch so a later session first re-checks the code against past answers, then asks only new questions. Use when the user wants to validate a branch's behaviour against their intent, or says "rev-grill-me" / "reverse grill" / "ask me about each change".
+description: Reverse grilling. Explore a branch (or diff), extract every new or changed behaviour, then put each one to the user with the question tool ("is this the change you intended?") so they can spot what was built wrong. Collect the verdicts into a fix list. Stores asked questions and answers in .pi/scratch so a later session first re-checks the code against past answers, then asks only new questions.
 ---
 
 # Reverse Grill

@@ -46,6 +46,7 @@ import {
 	spawnPi,
 	parseSpawnArgs,
 	parseMeshEnv,
+	resolveModelPattern,
 } from "./logic.ts";
 import {
 	ensureMeshDirs,
@@ -238,12 +239,39 @@ export default function (pi: ExtensionAPI): void {
 		return { results, available: nodes.filter((n) => n.id !== currentNodeId) };
 	};
 
+	/**
+	 * Resolve a model pattern to one authenticated model, canonical "provider/id".
+	 * pi's own --model fuzzy matching searches every provider's catalog (1542
+	 * models, incl. 400 unauthenticated OpenRouter ones with slashed vendor ids),
+	 * so approximate patterns land on random unauthenticated models. Restricting
+	 * to the parent's authenticated models keeps spawns deterministic.
+	 */
+	const resolveSpawnModel = (
+		rawModel: string,
+		registry: ExtensionContext["modelRegistry"],
+	): string => {
+		const result = resolveModelPattern(rawModel, registry.getAvailable());
+		if (result.status === "ok") return result.canonical;
+		if (result.status === "ambiguous") {
+			throw new Error(
+				`model "${rawModel}" is ambiguous between:\n  ${result.matches.join("\n  ")}\nQualify with the full provider/model id.`,
+			);
+		}
+		throw new Error(
+			`model "${rawModel}" matches no authenticated model. Available:\n  ${registry
+				.getAvailable()
+				.map((m) => `${m.provider}/${m.id}`)
+				.join("\n  ")}`,
+		);
+	};
+
 	const runSpawn = async (
 		rawPrompt: string,
 		rawCwd: string | undefined,
 		rawTarget: string,
 		fallbackCwd: string,
 		env: NodeJS.ProcessEnv,
+		registry: ExtensionContext["modelRegistry"],
 		rawName?: string,
 		rawModel?: string,
 	): Promise<{
@@ -258,7 +286,10 @@ export default function (pi: ExtensionAPI): void {
 			);
 		}
 		const name = rawName?.trim() || undefined;
-		const model = rawModel?.trim() || undefined;
+		const trimmedModel = rawModel?.trim();
+		const model = trimmedModel
+			? resolveSpawnModel(trimmedModel, registry)
+			: undefined;
 		const resolved = resolveCwd(rawCwd, fallbackCwd);
 		let cwd = resolved;
 		try {
@@ -352,7 +383,7 @@ export default function (pi: ExtensionAPI): void {
 			model: Type.Optional(
 				Type.String({
 					description:
-						'Model pattern or ID to force the spawned pi to use, passed as `pi --model` (e.g. "anthropic/claude-opus-5", "google/gemini-3-pro"). Omit to use the child\'s default model.',
+						'Model pattern or id to force on the spawned pi (e.g. "anthropic/claude-opus-5", "gemini-3-pro"). Resolved against the authenticated models of this pi and passed as a canonical `--model provider/id`; approximate patterns that match several models are rejected with the candidates listed. Omit to use the child\'s default model.',
 				}),
 			),
 		}),
@@ -365,6 +396,7 @@ export default function (pi: ExtensionAPI): void {
 					params.target ?? "auto",
 					ctx.cwd,
 					process.env,
+					ctx.modelRegistry,
 					params.name,
 					params.model,
 				);
@@ -525,6 +557,7 @@ export default function (pi: ExtensionAPI): void {
 					parsed.target,
 					ctx.cwd,
 					process.env,
+					ctx.modelRegistry,
 					parsed.name,
 					parsed.model,
 				);

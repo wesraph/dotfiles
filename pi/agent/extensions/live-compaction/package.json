@@ -1,0 +1,7 @@
+{
+	"name": "pi-live-compaction-extension",
+	"private": true,
+	"devDependencies": {
+		"@types/node": "^24.0.0"
+	}
+}
