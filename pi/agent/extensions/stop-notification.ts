@@ -5,15 +5,20 @@
  * with the session summary and plays a notification sound when the agent finishes.
  */
 
-import { exec } from "node:child_process";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { execFile } from "node:child_process";
+import { appendFileSync } from "node:fs";
 import { basename } from "node:path";
-import { readFileSync } from "node:fs";
 import { promisify } from "node:util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const NOTIFICATION_WAV = "/home/raph/.pi/agent/extensions/notification.wav";
-const LOG_FILE = "/tmp/pi-stop-hook.log";
+const LOG_FILE_DEFAULT = "/tmp/pi-stop-hook.log";
+/** // ponytail: env override exists only so tests write their own log, not the live one. */
+function logFilePath(): string {
+	return process.env.PI_STOP_HOOK_LOG ?? LOG_FILE_DEFAULT;
+}
 const ENV_PLAY_SOUND = "PLAY_PI_NOTIFICATION";
 const ENV_SUBAGENT_CHILD = "PI_SUBAGENT_CHILD";
 /** Set by spawn_pi on child sessions; their parent coordinates them, so they stay silent too. */
@@ -28,52 +33,59 @@ function isSoundEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
 function log(msg: string): void {
 	const ts = new Date().toISOString();
 	try {
-		exec(`echo "${ts}: ${msg}" >> ${LOG_FILE} 2>&1`);
+		// Direct write: the line carries model-generated text, which a shell would expand.
+		appendFileSync(logFilePath(), `${ts}: ${msg}\n`);
 	} catch {
 		/* ignore */
 	}
 }
 
-async function getLastAssistantSummary(): Promise<string> {
-	const sessionFile = process.env.PI_CODING_AGENT_SESSION_FILE;
-	if (!sessionFile) return "Task completed";
+/** How the last assistant message of a run ended. */
+export type RunOutcome = "success" | "error" | "aborted" | "no-assistant-message";
 
-	try {
-		const lines = readFileSync(sessionFile, "utf-8")
-			.split("\n")
-			.filter(Boolean);
+/**
+ * Stop reasons that mean the model delivered nothing: request/runtime failures
+ * (connection errors included) and user aborts both end the run with a final
+ * assistant message carrying one of these and an errorMessage.
+ */
+const FAILED_STOP_REASONS: Record<string, RunOutcome> = {
+	error: "error",
+	aborted: "aborted",
+};
 
-		// Find the last assistant message (scan backwards for efficiency)
-		for (let i = lines.length - 1; i >= 0; i--) {
-			try {
-				const entry = JSON.parse(lines[i]);
-				if (entry.role === "assistant" && entry.content) {
-					let text = "";
-					if (typeof entry.content === "string") {
-						text = entry.content;
-					} else if (Array.isArray(entry.content)) {
-						for (const part of entry.content) {
-							if (part.type === "text") text += part.text;
-						}
-					}
-					text = text.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
-					return text.slice(0, 150) || "Task completed";
-				}
-			} catch {
-				/* skip malformed lines */
-			}
-		}
-	} catch {
-		// Can't read session file — fall back to default
+const SUMMARY_MAX_LENGTH = 150;
+
+type MessageLike = { role?: unknown; stopReason?: unknown; content?: unknown };
+
+function lastAssistantMessage(messages: readonly unknown[]): MessageLike | undefined {
+	for (let i = messages.length - 1; i >= 0; i--) {
+		const message = messages[i] as MessageLike | undefined;
+		if (message?.role === "assistant") return message;
 	}
-
-	return "Task completed";
+	return undefined;
 }
 
-export default function (
-	pi: import("@mariozechner/pi-coding-agent").ExtensionAPI,
-) {
-	pi.on("agent_end", async (_event, ctx) => {
+export function runOutcome(messages: readonly unknown[]): RunOutcome {
+	const last = lastAssistantMessage(messages);
+	if (!last) return "no-assistant-message";
+	return FAILED_STOP_REASONS[(last.stopReason as string | undefined) ?? ""] ?? "success";
+}
+
+export function summarizeRun(messages: readonly unknown[]): string {
+	const content = lastAssistantMessage(messages)?.content;
+	let text = "";
+	if (typeof content === "string") {
+		text = content;
+	} else if (Array.isArray(content)) {
+		for (const part of content) {
+			if (part?.type === "text") text += part.text;
+		}
+	}
+	return text.replace(/\s+/g, " ").trim().slice(0, SUMMARY_MAX_LENGTH) || "Task completed";
+}
+
+export default function (pi: ExtensionAPI) {
+	pi.on("agent_end", async (event, ctx) => {
 		// Subagent children (async/foreground) run headless pi processes — they never
 		// return control to the user directly, so don't notify for their completion.
 		if (process.env[ENV_SUBAGENT_CHILD] === "1") {
@@ -85,10 +97,16 @@ export default function (
 			return;
 		}
 
+		const outcome = runOutcome(event.messages);
+		if (outcome !== "success") {
+			log(`skipped (${outcome})`);
+			return;
+		}
+
 		const projectName = basename(ctx.cwd);
 
 		try {
-			const summary = await getLastAssistantSummary();
+			const summary = summarizeRun(event.messages);
 			const title = `🤖 ${projectName}`;
 
 			log(`Sending notify-send for '${title}': '${summary}'`);
@@ -96,10 +114,12 @@ export default function (
 				`DISPLAY=${process.env.DISPLAY} DBUS_SESSION_BUS_ADDRESS=${process.env.DBUS_SESSION_BUS_ADDRESS}`,
 			);
 
-			// Send desktop notification via notify-send
+			// notify-send parses its arguments with getopt: options first, then "--", so a
+			// summary that starts with "-" stays data instead of becoming options.
 			try {
-				await execAsync(
-					`notify-send "${title}" "${summary}" --icon=info --expire-time=5000`,
+				await execFileAsync(
+					"notify-send",
+					["--icon=info", "--expire-time=5000", "--", title, summary],
 					{ timeout: 3000 },
 				);
 				log("notify-send exit=0");
@@ -111,14 +131,12 @@ export default function (
 			if (!isSoundEnabled()) {
 				log("sound skipped (PLAY_PI_NOTIFICATION not on)");
 			} else {
-				try {
-					execAsync(`paplay --volume=85000 "${NOTIFICATION_WAV}"`, {
-						timeout: 5000,
-					});
-					log("paplay started");
-				} catch (err: any) {
-					log(`paplay failed: ${err.message}`);
-				}
+				// Fire-and-forget, but the rejection must stay handled: a missing paplay
+				// otherwise surfaces as an unhandledRejection in the host process.
+				execFileAsync("paplay", ["--volume=85000", NOTIFICATION_WAV], { timeout: 5000 }).catch(
+					(err: unknown) => log(`paplay failed: ${err instanceof Error ? err.message : String(err)}`),
+				);
+				log("paplay started");
 			}
 
 			// Send bell character to terminal
