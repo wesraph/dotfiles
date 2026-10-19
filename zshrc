@@ -113,3 +113,4 @@ hfaria () {
 # Pi
 export PATH="/home/raph/.local/share/pi-node/node-v22.22.3-linux-x64/bin:$PATH"
 export PI_OFFLINE=1
+export PATH=$PATH:$HOME/.maestro/bin
