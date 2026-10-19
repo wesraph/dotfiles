@@ -146,6 +146,42 @@
           }
         }
       ]
+    },
+    "opencode-free": {
+      "baseUrl": "http://127.0.0.1:8790/v1",
+      "api": "openai-completions",
+      "apiKey": "local-relay",
+      "models": [
+        {
+          "id": "glm-5.3-flash-free",
+          "name": "GLM-5.3-Flash (opencode free)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsStore": false,
+            "supportsDeveloperRole": false,
+            "supportsStrictMode": true,
+            "maxTokensField": "max_tokens"
+          },
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          }
+        }
+      ]
     }
   }
 }
