@@ -9,8 +9,8 @@
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
     "npm:@narumitw/pi-goal",
-    "npm:pi-anthropic-oauth@0.3.1",
-    "npm:@juicesharp/rpiv-ask-user-question@2.12.0"
+    "npm:pi-anthropic-oauth",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "editorPaddingX": 0,
   "terminal": {
