@@ -98,7 +98,7 @@ Verify with a GET of the same URL. `draft` is read-only via the API (the user cl
 ## Subagents
 
 - **Reviews are subagent-only:** never `spawn_pi` for a review; always a `reviewer` subagent, `context: "fresh"` for adversarial/grading passes.
-- Agents: `scout` recon, `planner` plans, `worker` implementation, `reviewer` review-and-fix, `oracle` advisory, `researcher` web, `doc-searcher` documentation for implementation context. Spawn what the task needs, on the current model — no separate heavy-reasoning or vision agents.
+- Agents: `scout` recon, `planner` plans, `worker` implementation, `reviewer` review-and-fix, `oracle` advisory, `researcher` web, `doc-searcher` documentation for implementation context. Spawn what the task needs, on the current model — no separate heavy-reasoning or vision agents. Under an Anthropic parent, light-duty agents (`scout`, `doc-searcher`, `researcher`) are downgraded to Haiku 5.5 with low thinking — see Model Family below.
 - Prompts carry: Goal, Context, Success criteria, Hard constraints, Validation, Output shape.
 - One writer per cwd/worktree: writes stay single-threaded (one `worker` plus advisory/review children). Concurrent code-modifying children get `worktree: true`; remove the worktrees once their changes are merged.
 - Children cannot spawn children (depth 2). `context: "fork"` for branched advisory threads, `context: "fresh"` for adversarial reviewers.
@@ -109,7 +109,7 @@ Verify with a GET of the same URL. `draft` is read-only via the API (the user cl
 
 Check `PI_MODEL` before any `subagent` or `spawn_pi`. The child's model must come from the same family — no exceptions, in any direction (no Anthropic↔Qwen, GLM↔Qwen, Anthropic↔GLM):
 
-- Anthropic parent (`claude-*`, `anthropic/*`) → Anthropic child. Scout/recon under `claude-opus-*` or `claude-fable-*`: `model: "anthropic/claude-haiku-4-5"` (recon doesn't need a frontier model).
+- Anthropic parent (`claude-*`, `anthropic/*`) → Anthropic child. Light-duty children — `scout`/recon, `doc-searcher`, `researcher`, or any agent that only gathers or summarizes — MUST use `model: "anthropic/claude-haiku-5-5:low"` (Haiku 5.5, low thinking). Recon doesn't need a frontier model, whatever the parent is (`claude-opus-*`, `claude-fable-*`, …). `worker`/`reviewer`/`planner`/`oracle` stay on the parent model.
 - GLM parent (`glm-*`) → GLM child. Scout/recon under `glm-5.3`: `model: "zai-renaud/glm-5.3-flash"`.
 - Qwen parent (`qwen*`) → the same Qwen model, for every agent including `scout` (pass it explicitly via `model:` or omit `model` to inherit).
 - Anything else → omit `model` and inherit the parent.
