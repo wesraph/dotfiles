@@ -5,523 +5,411 @@ description: Review a git branch against main/master. Generates a diff, hypothes
 
 # Branch Review
 
-A two-phase review workflow: **hypothesize** issues from the diff, then **verify**
-each by tracing the actual code paths. Never reports a claim it hasn't proven.
+Two phases: **hypothesize** issues from the diff, then **verify** each by
+tracing the real code paths. Never report a claim you haven't proven.
 
-## When to use
+**Use for:** reviewing a branch before merge, auditing a PR, checking a
+refactor's callers. **Not for:** implementing, writing tests, debugging
+runtime behaviour. The reviewed tree is never edited. For mutation-proven
+test coverage use `branch-review-deep` (adds a mutation pass, ~2× the time).
 
-- Reviewing a branch before merge
-- Auditing a PR for correctness
-- Checking whether a refactor broke callers
+## Phase 1 — Diff + hypothesize
 
-**Do not use** for: implementing features, writing tests, or debugging runtime
-behavior. The reviewed tree is never edited. When a review needs
-mutation-proven test coverage (every test kills its claimed regression), use
-`branch-review-deep` instead — it adds a mutation pass that roughly doubles
-the review time.
+Issues are **leads, not verdicts**: every one is verified in Phase 2.
 
-## Workflow
-
-### Phase 1 — Diff + Hypothesize
-
-Capture the change surface, then list potential issues. Issues are **leads, not
-verdicts** — every one must be verified in Phase 2.
-
-**Step 1 — Capture the diff.**
+### Step 1 — Diff and areas
 
 ```bash
 BRANCH=$(git branch --show-current)
 BASE=$(git merge-base $BRANCH main || git merge-base $BRANCH master)
-git diff $BASE..HEAD --stat    # scope
-git log --oneline $BASE..HEAD  # commit list
-git diff $BASE..HEAD           # full diff
+git diff $BASE..HEAD --stat; git log --oneline $BASE..HEAD; git diff $BASE..HEAD
 ```
 
-If the diff is large (>500 lines), scope it: read only the files listed in
-`--stat`. Test files in the diff get reviewed as carefully as logic files — a
-weak test is a finding, not noise. Past ~400 changed lines, review
-effectiveness drops sharply — note it in the report and recommend a split;
-past ~2000, review in per-file batches with one running findings list.
+- Test files are reviewed as carefully as logic: a weak test is a finding.
+- Past ~400 changed lines effectiveness drops: say so, recommend a split.
+  Past ~2000, review per-file batches with one running findings list.
+- **Areas:** split the change surface into areas (one per service/command,
+  shared package, schema, web app, mobile app, infra) with line counts.
+  Every Step 3 category applies to every area; an area not reached is ❌.
 
-**Step 1b — Intent model.** Read the commit messages, PR description, and any
-linked issue. Write 2–3 sentences: what this branch claims to do. Then:
+### Step 1b — Intent model
 
-- Every promised behavior must have code **and** a test. A promise with no
-  code is a lead — omissions are invisible in the diff, so the intent model
-  is the only place they surface.
-- Anything in the diff not serving that intent is an "unrequested scope"
-  lead (see bloat below).
-- The intent model goes in the report, so a reader can check code against
-  intent, not just code against tests.
-- **The branch's own claims are leads, not exemptions.** "Accepted
-  tradeoff", "follow-up", "known limitation" in a README, comment or PR
-  description is graded like any other finding. For each declared side
-  effect, check whether it undoes an earlier deliberate decision: read the
-  comments around the affected code and run `git log -S'<symbol>'`. Bringing
-  back a failure someone fixed on purpose is a behaviour regression.
-- **Completeness.** For a fix, list every way the original problem shows up
-  (each trigger, path, idle or edge case) and name the code that covers each.
-  An uncovered case is CONFIRMED "fix incomplete: <case>".
+Read commits, PR description, linked issue. Write 2–3 sentences: what the
+branch claims to do. It goes in the report. Then:
 
-**Step 2 — Run build/lint, then tests scoped to the changed code.**
+- A promised behaviour needs code **and** a test; a promise with no code is
+  a lead (omissions only surface here). Diff not serving the intent is an
+  "unrequested scope" lead.
+- **Claims are leads, never exemptions.** Statements in the PR, README,
+  spec, UI copy, tool descriptions and **code comments** ("redirects to
+  another host are dropped", "latched on purpose", "the window is tiny",
+  "accepted tradeoff", "follow-up") are checked on every path that reaches
+  them. True on one path only → CONFIRMED "claim holds only for <path>".
+  For a declared side effect, check it doesn't undo an earlier deliberate
+  fix (`git log -S'<symbol>'`): bringing a fixed failure back is a
+  regression.
+- **Completeness of a fix:** list every way the original problem shows up
+  (trigger, path, idle/edge case) and the code covering each. Uncovered →
+  CONFIRMED "fix incomplete: <case>".
 
-```bash
-make build     # if Makefile exists
-make verify    # if Makefile exists
-```
-
-Never run the whole suite. Derive the affected packages from the diff and
-run only those:
+### Step 2 — Build, lint, scoped tests
 
 ```bash
+make build; make verify          # if the Makefile has them
 PKGS=$(git diff --name-only $BASE..HEAD | grep -E '\.go$' | xargs -n1 dirname | sort -u | sed 's|^|./|')
-go test $PKGS   # or the project's equivalent, scoped to the changed dirs/files
-```
-
-If an exported function/interface changed, also include its direct
-dependents: find them with `lsp_navigation("references")` or `ffgrep` on the
-changed symbols and add those packages to `$PKGS`.
-
-`-race` is off by default — it is slow. Add it ONLY when the diff touches
-concurrency primitives in the changed packages: `go` statements, channels,
-`sync.*`/`atomic.*`, `select`, worker pools, shared caches. Then run
-`go test -race $PKGS` on exactly those packages, not the whole module.
-
-If these fail, note the failures — they're real issues, no verification needed.
-If the tests cannot run at all (no env, no runner), record it: `test_blocked`
-plus the blocking reason — the grade is capped and the residual risk stated.
-Never present an unrun suite as a green one.
-
-**Step 2b — Bloat signal.** Measure added comment density:
-
-```bash
-git diff $BASE..HEAD | grep '^+[^+]' | grep -cE '^\+\s*(//|#|/\*|\*|--)'  # added comment lines
-git diff $BASE..HEAD | grep -c '^+[^+]'                                       # added lines total
-```
-
-If more than ~15% of added lines are comments, or any comment block has more
-than 3 lines, check every added comment one by one in Step 3.
-
-**Step 2c — Skipped tests count as not run.** Run the scoped tests verbosely
-and list skips:
-
-```bash
 go test -v $PKGS 2>&1 | grep -E -- '--- (SKIP|FAIL)'   # or the project's equivalent
 ```
 
-- If the env a skipped test needs exists (local DB, DSN var, local stack), rerun
-  with it and report the real result.
-- A test that skips because it relies on data already present in the DB or
-  fixtures, instead of seeding its own like its siblings, is CONFIRMED.
-- If a changed production line's only guard is a skipped test, that is
-  CONFIRMED "untested: <line>".
+- Never the whole suite. Add packages of direct dependents of changed
+  exported symbols (`lsp_navigation references` / `ffgrep`). `-race` only
+  when the diff touches concurrency in those packages.
+- An orchestrator-provided suite result (split pass) replaces this run: run
+  only your own repro and mutant tests.
+- Live/repro tests seed their own rows (own tenant, or a rolled-back tx).
+  Never change, delete or "restore" rows you did not create; polluted
+  shared data is reported, not fixed.
+- Failures are real issues, no verification needed. Can't run at all →
+  `test_blocked` + reason (grade capped). Never present an unrun suite as
+  green.
+- **Skips count as not run.** If the needed env exists (local DB, DSN,
+  stack), rerun with it. A test skipping because it relies on pre-existing
+  data instead of seeding its own → CONFIRMED. A changed line guarded only
+  by a skipped test → CONFIRMED "untested: <line>".
+- **Debris:** `git diff $BASE..HEAD | grep -nE '^\+.*(fmt\.Print|console\.log|println\(|debugger|dbg\.|TODO|FIXME|XXX)'`
+  — debug prints, markers, commented-out code are CONFIRMED by quoting.
+- **Comment density:** added comment lines / added lines. Over ~15%, or
+  any block over 3 lines → check every added comment in Step 3.
 
-**Step 2d — Debug leftovers.** Grep added lines for debug debris:
+### Step 3 — Hypothesize
 
-```bash
-git diff $BASE..HEAD | grep -nE '^\+.*(fmt\.Print|console\.log|println\(|debugger|dbg\.|TODO|FIXME|XXX)'
-```
+For each lead note **what** changed (file:line, old → new), **why** it may
+break (the scenario), **what to trace**. Work through every category below.
 
-Debug prints, leftover markers, and commented-out code in added lines are
-CONFIRMED by quoting the line — no trace needed.
+**Required written artifacts.** These categories are not ✅ without their
+table or case written in the report — they are the checks most often
+ticked without being done:
 
-**Step 3 — Hypothesize issues.**
+| category | artifact |
+|---|---|
+| Parity with replaced code | *old behaviour → new code → verdict*, every item, "n/a" included |
+| Every path of a guard | *guard → each implementation/path → bound line or measurement* |
+| Partial results | *outcome × position → (result, err) → what the caller does* |
+| Writers of a shared row | every writer (by grep) + the **longest** staleness window of each blind one |
+| Keys | *key → each caller or grouping step → where its key comes from → verdict* |
+| Batches | the two-item case: A and B both edited; A replaced by C |
+| Tests | test gate table + overlap matrix (Step 3b) |
 
-Read the diff and list potential issues. For each, note:
+#### A. Runtime and lifecycle
 
-- **What** changed (file:line, old → new)
-- **Why** it might be wrong (the scenario that breaks)
-- **What to trace** (the call chain to verify)
+- **Concurrency:** races, locks and ordering, TOCTOU, goroutine leaks or
+  premature exit, cancellation, shutdown/init order. For async work, play
+  out each state change: the side effect fails, times out, runs out of
+  order, is dropped at shutdown. Is local state advanced before the side
+  effect is confirmed? Can a panic crash the process?
+- **New deployable or worker vs its siblings — per capability.** For each
+  thing it does (retrieval, crawling, queue draining, JWT routes), find the
+  existing service that already does it and compare that capability's
+  setup item by item (a service moved out of another is compared with its
+  origin for what moved, and with the services that already do the rest):
+  - shutdown: signals, drain, in-flight work on kill (message handed back?
+    attempt counted before or after the work?);
+  - boot-time dependency failure: retried, or latched until the next deploy
+    (`sync.Once` keeping an error). A latch is CONFIRMED unless you name
+    the code that retries it; check what keeps the broken instance alive
+    (probe not touching the dependency, min-instances ≥ 1);
+  - pool options and session settings; body-size and memory caps per unit
+    of work.
+- **Shared resources and new callers.** Name each limited resource a new
+  operation uses (pool, row locks, rate limits, quotas) and its limit in
+  code. For each new pool/handle, list the queries that run on it and
+  compare its setup with the pools that already run them. When changed
+  code uses an existing function/store/client in a new place, read the
+  callee's doc for preconditions ("call Close", "needs setting Y") —
+  including what it needs from its connection (session settings,
+  `search_path`, timeouts, extensions) — and compare with other callers.
+- **Frequency × fan-out:** how often it runs (per request/call/turn/item)
+  × per-element repetition. "Correct but runs N times" is a finding when N
+  grows with input.
+- **Production configuration:** derive which branches run in production
+  from the infra env; flag defaults and missing keys (a fallback without
+  its key configured does not exist). Judge every lead under that config.
 
-Issue categories to check:
+#### B. Data and state
 
-- **Concurrency**: data races, missing locks, lock ordering, TOCTOU,
-  goroutine lifecycle (leaks, premature exit), context cancellation,
-  shutdown/initialization ordering. For background/async work, play out each
-  state change: what if the side effect fails, times out, runs out of order,
-  or is dropped at shutdown? Is local state advanced **before** the side
-  effect is confirmed? Can a panic in it crash the process (no recover, no
-  errgroup)?
-- **Writes and their readers**: for every new or more frequent write (DB
-  row, cache, queue, file, external API), list everything that reads or reacts
-  to it: triggers, audit/history tables, other services, dashboards and SQL
-  panels, version/CAS checks, sync jobs, permission grants on the target. Each
-  reader is a hypothesis to trace.
-  - **Shared resources**: name the limited resources each new operation uses
-    (connection pool, row locks, rate limits, quotas) and find their limits in
-    the code (`MaxOpenConns`, etc.).
-  - **Frequency × fan-out**: how often does it run (per request / call / turn
-    / item)? Multiply by any per-element repetition. "Correct but runs N
-    times" is a finding when N grows with input.
-- **Resource leaks**: unclosed connections, goroutines, files, temp state
-- **Nil/missing guards**: removed nil checks, ignored bool returns
-- **Behavior changes**: removed filters, changed error handling, altered semantics
-- **Call site breakage**: signature changes without updating callers
-- **Boundary conditions**: off-by-one (`<` vs `<=`), zero/empty/nil inputs,
-  max values, first/last element
-- **Error paths**: swallowed errors, wrong wrap/annotation, partial-failure
-  states, panics on paths that used to return errors
-- **Performance**: hot-path regressions, accidental O(n²), N+1 queries,
-  unbounded growth
-- **API/contract compatibility**: exported signature changes, breaking
-  serialization/schema/config formats for existing consumers
-- **Security**: diff touches input validation, query/HTML/shell construction
-  (injection sinks), authn/authz, crypto, or logging → check for new attack
-  vectors, weakened existing controls, trust boundaries crossed by new data
-  flows, hardcoded secrets (scan the diff), sensitive data in logs/errors.
-  When the diff stores or moves a secret, list every place a copy lands
-  (logs, traces, audit tables, backups, replicas, analytics) and who can read
-  each (`GRANT`, IAM). Keeping a secret out of one place while copying it
-  into another is a finding.
-  Security regressions are traced like any behavior change — never assumed.
-- **Dependency changes**: go.mod/package.json/lockfiles in the diff → for each
-  new dep: license, known CVEs, version pinning, whether it's needed at all
-- **Docs consistency**: changes to how users build/test/run/release → README
-  and docs updated? Deleted/deprecated code → its docs deleted?
-- **Fix at source**: when the diff works around a shared defect for one case
-  only (bypassing a tracing plugin, a private client to get a timeout), check
-  whether fixing it at the source is small. If so, CONFIRMED "fix at source:
-  <file:line>".
-- **Project rules**: read the coding rules in the repo's `CLAUDE.md` /
-  `AGENTS.md` (DB access, concurrency, error handling, logging) and check
-  every added line against them. CONFIRMED by quoting the rule and the line.
-- **Naming**: names must not lie (`Get*` that mutates, plural naming a single
-  thing).
-- **CL hygiene**: reformat-only hunks mixed into behavior changes;
-  intermediate commits that don't build (spot-check with
-  `git rebase --exec 'make build' $BASE` only when cheap).
-- **Test coverage**: for each changed production branch/query/condition, name
-  the test that fails if it breaks. None, or only skipped ones → finding.
-  Tests that no longer match behavior → finding.
-- **Test gate**: every added or changed test must answer all five; a missing
-  answer is a finding (quote the test):
-  1. What observable behavior or contract does it protect?
-  2. What credible regression makes it fail?
-  3. Why doesn't existing coverage catch it? Each contract has ONE owner test
-     at the strongest boundary; another layer needs a distinct risk the owner
-     can't reach.
-  4. Does it need a production seam (export, flag, hook) no production caller
-     uses?
-  5. Is the expected value right according to the **intent**, not just the
-     code? A test that locks in a bad behaviour turns a bug into a contract.
-- **Junk tests**: flag any added/changed test that matches:
-  - constant echo: asserts a tuning value (`timeout == 300ms`,
-    `interval == 6s`) — catches no behavior change, forces a second edit on
-    retune
-  - name or fixture promises more than it asserts ("RunsLexicalOnly" that
-    only proves a width guard passes)
-  - negative control that passes for an unrelated reason (an offline DB
-    returns `context.Canceled` by itself, so the cancel check never runs)
-  - weak assertion (`> 0`, `!= nil`) where the exact value is computable
-  - duplicate invocations of one contract: N tests, same inputs, each checks
-    one field — fix is one table checking every field per case
-  - wrong-layer test: exercises a concern the package doesn't know about,
-    already covered at the owning layer — delete it
-  - expected value produced by the helper under test; mock that implements
-    the asserted behavior
-  - test-only export or seam with no production caller
-  - assertion-free probes, self-comparisons, copied fixtures, source greps
-- **Retention bar**: don't over-delete. Keep a test that independently guards
-  a public API, protocol, config, storage, security, or user-facing default
-  (a documented default is a contract; a tuning constant is not). "Static",
-  "slow", or "looks like implementation" is not proof of redundancy. A kept
-  seam or duplicate is fine when its reason is stated (e.g. "fake can't reach
-  the unexported option without it").
-  A test finding is CONFIRMED with: test name + location, what it can
-  actually detect, the stronger owner test that remains, and what removing it
-  unlocks. Missing field → "needs verification" — EXCEPT a duplicate row
-  pair in the overlap matrix (Step 3b), which is CONFIRMED on its own.
-- **Scope of the test audit**: every test function AND every subtest/table
-  case the diff adds or changes, plus every other test in a test file the
-  diff touches whose subject overlaps them. A table case is a test: audit it
-  like one.
-- **Comments**: every added/changed comment must describe what the code does
-  (or why) — nothing else. Flag any comment that references the session,
-  the change, or history ("byte-identical to what it was before", "the old
-  behaviour…", "previously", "now does X", "unchanged from before", "fix
-  for…") and any comment that contradicts the code it sits on. These are
-  CONFIRMED by quoting the comment (and the code, for contradictions) — no
-  call-chain trace needed. Fix: rewrite to describe current behavior, or delete.
-- **Verbose comments**: flag any added comment that:
-  - restates the code (`// increment counter` above `i++`, a docstring that
-    repeats the signature)
-  - narrates obvious steps (`// Step 1: ...`, `// Now we ...`)
-  - is a multi-line essay where one line (or nothing) would do
-  - is a section banner, or explains language basics
-  Keep comments that give a non-obvious *why*: a business rule, a gotcha, or
-  a constraint. CONFIRMED by quoting the comment and the line it describes.
-  Fix: delete it or shrink it to one line (write the shortened version).
-- **Useless code (bloat)**: every added line must be needed. Flag:
-  - **Single-use abstractions**: a new helper, interface, class, factory, or
-    wrapper with exactly one caller that adds nothing. Prove with a
-    references/grep count.
-  - **Impossible-case handling**: nil/empty/error checks that an upstream
-    guard already makes unreachable. Prove by tracing the guard, like any
-    other claim.
-  - **Reinvented stdlib/deps**: hand-written code that duplicates a stdlib
-    function or an already-installed dependency. Prove by naming the exact
-    function and showing it is available (import or go.mod/package.json).
-  - **Reinvented in-repo subsystem**: new infrastructure (token storage,
-    retry, outbox, cache, credential store) when the repo or an open branch
-    already has one. Search the concept (`ffgrep`, `git branch -a`) before
-    accepting it. Not using the existing one is a design finding.
-  - **Speculative flexibility**: config knobs, options, params, or generics
-    that no caller uses. Prove that every call site passes the same value or
-    the default.
-  - **Dead code**: new functions, vars, branches, or exports with zero
-    readers. Prove with a zero-reference grep/LSP result.
-  - **Redundant intermediates**: variables assigned and returned right away,
-    duplicated logic, defensive copies that nothing mutates.
-  - **Semantic duplication**: two blocks with different syntax but equal
-    intent (a second, working hand-rolled sort next to the existing one).
-    Grep won't find it — compare each new logic block against neighbors with
-    the same responsibility.
-  - **Semantic dead code**: code that executes but affects no output —
-    computed, correct, and pointless.
-  - **Unrequested scope**: features, logging, or refactors of untouched code
-    that don't serve the branch's stated goal (check commit messages / PR
-    title).
-  CONFIRMED only when you write the smaller replacement (or say "delete
-  lines X–Y") **and** prove it keeps the same behavior. Taste alone ("I'd
-  write it differently") is not a finding.
+- **Writes and their readers:** for each new or more frequent write (row,
+  cache, queue, file, external API), list what reads or reacts to it:
+  triggers, history tables, other services, dashboards/SQL panels, CAS
+  checks, sync jobs, grants. Each reader is a lead.
+- **Schema rules reach every writer:** for each new FK, NOT NULL, CHECK,
+  unique index or trigger, grep the whole repo for every write on the
+  table and trace each against the rule (classic failure: an `UPDATE ...
+  SET <tenant key>` moving rows a new FK ties to rows it does not move).
+  For each new tenant/user/item-scoped table, check every lifecycle
+  operation of that scope: create, move/merge/re-scope, delete, export,
+  copy.
+- **Writers of a shared row or document:** list every writer by grepping
+  the write call and the table — other services, UI saves (a form saving
+  the whole document is a writer even if it doesn't edit the new field),
+  other tabs/devices. A blind whole-value writer next to another writer
+  loses updates. "A narrow window" is decided by the longest staleness
+  bound (poll caps, navigation, idle tab, other devices, other services),
+  never asserted.
+- **Keys (upsert, natural, dedup):** across every entry point (API, UI,
+  LLM tools, accept paths, batch jobs): can two things land on one key
+  (overwrite)? Can one thing get two keys (duplicate)? A caller holding the
+  stored key but sending a freshly typed one → CONFIRMED "duplicate key". A
+  group written under one member's key (`first(...)`): trace a group whose
+  members carry different keys — each written, or only the first while all
+  are marked done?
+- **Batches:** any save submitting several items at once (UI Save,
+  multi-select, import, sync). For each per-item check (conflict,
+  validation, uniqueness, rename), name what it compares against: stored
+  state or the batch's new state.
+- **Partial results:** a loop that can return what it has so far — a
+  cut-short run reported as success is CONFIRMED.
+- **Caps between producer and consumer:** for each size/count limit, every
+  producer and every consumer path (accept, pin, edit, export). Unbounded
+  on one side, capped on the other = stuck state (endless retry, a save
+  that can never succeed).
 
-Write the issue list.
+#### C. Inputs, guards, replaced code
 
-**Step 3b — Test overlap matrix.** Junk tests are judged against each
-other, not one at a time. For each package, list every in-scope test and
-subtest as a row:
+- **Parity with replaced code:** read the deleted code (`git show
+  $BASE:<path>`); list each behaviour — normalisation/encoding (IDN →
+  punycode), redirect following, size caps, retries, timeouts, error
+  mapping, accepted content types, TLS policy. Missing →
+  CONFIRMED "regression: <behaviour> lost from <old file:line>".
+- **Every path of a guard:** a guarantee (size cap, timeout, address
+  check, redirect rule, content type, retry) enforced on one
+  implementation/path is checked on every other (test fakes excluded),
+  production path first. Absent on the path production runs → CONFIRMED.
+  "n/a", "the platform bounds it" (browser, OS, a timeout) and "no failure
+  shown" are not verdicts: name the line bounding the **same** resource, or
+  run it. A bound on another resource doesn't count (a timeout doesn't
+  bound memory; a page count doesn't bound page size).
+- **Realistic external input,** run (test or trace) against:
+  - URLs: IDN, redirect to another host, apex ↔ `www.`, explicit port, IP
+    literal, trailing dot, mixed case — each also combined with a redirect;
+  - HTTP: 403/429/503 on the first page and mid-run, redirect chains,
+    oversized body, non-HTML type, a challenge/captcha widget inside an
+    ordinary page;
+  - text: empty, very long, non-ASCII, markup, prompt injection.
+  A whitelist/blacklist of markers or statuses is checked for what else
+  matches it.
+- **Security:** input validation, injection sinks (query/HTML/shell),
+  authn/authz, crypto, logging → new vectors, weakened controls, trust
+  boundaries crossed, hardcoded secrets, sensitive data in logs. A stored
+  or moved secret: list every copy (logs, traces, audit tables, backups,
+  analytics) and who can read each (`GRANT`, IAM).
 
-```
-test/subtest | entry point called | inputs (fixture, stub, ctx, options) | fields asserted
-```
+#### D. Behaviour and contracts
 
-- Two rows with the same entry point and equivalent inputs that assert
-  different fields → CONFIRMED "duplicate invocations". Write the merged
-  table (cases × every asserted field).
-- A row whose inputs differ only by a value the package cannot distinguish
-  (e.g. two budgets both above the cap, a "voice"/"chat" split in a package
-  that has no channels) → CONFIRMED "wrong-layer / same case twice".
-- A row whose name claims an outcome no assertion in the row checks (name
-  says "RunsLexicalOnly", fields asserted say only "reached the query
-  stage") → CONFIRMED "name promises more than it asserts".
+- **Behaviour changes:** removed filters, changed error handling, altered
+  semantics. **Error paths:** swallowed errors, wrong wrapping,
+  partial-failure states, panics where errors used to return. **Nil
+  guards:** removed checks, ignored bool returns. **Boundaries:**
+  off-by-one, zero/empty/nil, max, first/last. **Resource leaks:**
+  connections, goroutines, files, temp state.
+- **Call sites and contracts:** signature changes without updated callers;
+  exported API, serialization, schema or config formats breaking existing
+  consumers.
+- **Performance:** hot-path regressions, O(n²), N+1, unbounded growth.
+- **Dependencies:** each new dep — license, CVEs, pinning, needed at all.
+- **Docs:** build/test/run/release changes reflected in README/docs;
+  deleted code's docs deleted.
+- **Fix at source:** a workaround for a shared defect in one place (a
+  private client to get a timeout) when fixing the source is small →
+  CONFIRMED "fix at source: <file:line>".
+- **Project rules:** check added lines against `CLAUDE.md`/`AGENTS.md`
+  rules; CONFIRMED by quoting rule and line. **Naming:** names must not lie.
+  **CL hygiene:** reformat hunks mixed with behaviour; intermediate
+  commits that don't build (spot-check only when cheap).
 
-The matrix goes in the Phase 3 report.
+#### E. Tests
 
-### Phase 2 — Verify Each Claim
+- **Coverage:** for each changed branch/query/condition, name the test that
+  fails if it breaks. None, or only skipped ones → finding. Tests no longer
+  matching behaviour → finding.
+- **Scope:** every added/changed test function and every subtest/table
+  case, plus every test in a touched test file whose subject overlaps.
+- **Test gate** — each in-scope test answers all five; a missing answer is
+  a finding: (1) what behaviour/contract it protects; (2) what credible
+  regression fails it; (3) why the owner test (ONE per contract, strongest
+  boundary) doesn't already; (4) does it need a seam no production caller
+  uses; (5) is the expected value right by the **intent**, not the code (a
+  test locking in a bad behaviour turns the bug into a contract).
+- **Junk tests:** constant echo (asserts a tuning value); name/fixture
+  promising more than it asserts; negative control passing for an
+  unrelated reason; weak assertion (`> 0`, `!= nil`) where the value is
+  computable; N tests with the same inputs each checking one field (merge
+  into one table); wrong-layer test already covered at the owner;
+  expected value computed by the code under test, or a mock implementing
+  the asserted behaviour; test-only seam; assertion-free probes,
+  self-comparisons, copied fixtures, source greps.
+- **Retention bar:** keep a test that independently guards a public API,
+  protocol, config, storage, security or user-facing default (a documented
+  default is a contract; a tuning constant is not). "Static" or "slow" is
+  not redundancy. A test finding is CONFIRMED with: name + location, what
+  it can detect, the owner test that remains, what removing it unlocks.
+  Missing field → "needs verification", except a duplicate pair in the
+  overlap matrix, which is CONFIRMED on its own.
 
-Create a **task list** (one task per issue). For each task, trace the **full
-execution path** from the changed code to its consumer. Mark the task:
+#### F. Comments and bloat
 
-- **CONFIRMED** — the issue is real, with proof
-- **FALSE POSITIVE** — the issue doesn't materialize, with proof
-- **N/A** — not applicable (dead code, unreachable path)
+- **Comments:** an added comment says what the code does or why — nothing
+  else. History/session references ("previously", "now does X", "fix
+  for…", "unchanged from before") and comments contradicting their code →
+  CONFIRMED by quoting. **Verbose:** restating code, narrating steps,
+  essays where one line does, banners → CONFIRMED with the shortened
+  version. Keep non-obvious *why*: business rules, gotchas, constraints.
+- **Bloat** — every added line must be needed: single-use abstraction
+  (prove the reference count); impossible-case handling (trace the guard);
+  reinvented stdlib/dependency (name the function); reinvented in-repo
+  subsystem (search the concept and open branches — a design finding);
+  speculative knobs every caller sets the same; dead code (zero
+  references); redundant intermediates; semantic duplication of a
+  neighbour; code with no effect on output; unrequested scope. CONFIRMED
+  only with the smaller replacement (or "delete lines X–Y") **and** proof
+  it behaves the same. Taste is not a finding.
 
-**Verification rules:**
+### Step 3b — Test overlap matrix
 
-1. **Trace the call chain.** Follow each function from caller to callee. Verify
-   the value actually reaches the point of concern. Don't assume.
+Per package, one row per in-scope test/subtest:
+`test | entry point | inputs (fixture, stub, ctx, options) | fields asserted`
 
-2. **Check upstream guards.** Before claiming "this will panic if nil", verify no
-   earlier check prevents the nil from reaching that point.
+- Same entry point, equivalent inputs, different fields → CONFIRMED
+  "duplicate invocations"; write the merged table.
+- Inputs differing only by a value the package can't distinguish →
+  CONFIRMED "same case twice".
+- Name claims an outcome no assertion checks → CONFIRMED "name promises
+  more than it asserts".
 
-3. **Check all call sites.** Before claiming "this function is broken", verify
-   every caller and whether each one satisfies the precondition.
+## Phase 2 — Verify each claim
 
-4. **Trace the data flow.** If a deposit routes to chain B's queue, trace from
-   `drainChains` → `dispatchUpdates` → `queue.add` → `runWorker` →
-   `GenerateFill` → `a.Chain(id)`. At each step, check what's guaranteed.
+One task per lead; trace the full path from the changed code to its
+consumer; mark **CONFIRMED** (with proof), **FALSE POSITIVE** (with proof)
+or **N/A** (dead/unreachable). One at a time.
 
-5. **Read the live code, not just the diff.** The diff shows what changed, not
-   what exists. A removed nil check might be replaced by an earlier guard.
+1. Follow the call chain caller → callee; check the value really reaches
+   the point of concern.
+2. Check upstream guards before "panics if nil".
+3. Check every call site before "this function is broken".
+4. Trace data flow step by step, noting what each step guarantees.
+5. Read the live code, not just the diff.
+6. Check startup ordering (a blocking wait before `Start()` makes
+   dependent code safe).
+7. Check the method is called at all (`ffgrep`, `lsp_navigation
+   references`).
 
-6. **Check startup ordering.** If `WaitForHubChain()` blocks before `Start()`,
-   then hub-dependent code in `Start()` is safe. Don't flag it.
+Tools: `lsp_navigation` (references, definition), `ast_grep_search`,
+`ffgrep`, `read` with offset/limit.
 
-7. **Check whether a method is actually called.** If `Executor.Close()` is never
-   invoked, whether it closes mempool senders is irrelevant. Use `grep` or
-   `lsp_navigation(references)` to verify.
+**Phase 2b — Re-derivation.** For each CONFIRMED issue, re-derive it from
+the diff and cited lines only, not your earlier reasoning. Ask what guard,
+caller or ordering kills it. Not re-derivable → FALSE POSITIVE (unproven).
 
-**Task list format:**
+**Phase 2c — Root cause.** Two or more confirmed issues stemming from one
+design decision (where data lives, who owns a resource, sync vs async) →
+one **design** finding (important) with them as evidence and the
+alternative that removes them.
 
-```
-todo(action: "create", subject: "Verify: [issue title]", description: "Trace: [call chain]")
-```
+## Phase 3 — Report
 
-Process tasks one at a time. Mark `in_progress`, trace the code, mark
-`completed` with the verdict.
-
-**Tracing techniques:**
-
-- `lsp_navigation(operation: "references", filePath: "...", line: N)` — find all
-  callers of a function
-- `lsp_navigation(operation: "definition", filePath: "...", line: N)` — jump to
-  where a symbol is defined
-- `ast_grep_search(pattern: "$E.Close()", lang: "go")` — find all Close() calls
-- `ffgrep(pattern: "executor.Close")` — text search for method invocations
-- `read(path: "...", offset: N, limit: N)` — read the live code at key points
-
-### Phase 2b — Re-derivation pass
-
-For every CONFIRMED issue, re-derive it from the diff and the cited lines
-**only** — no access to your Phase 1/2 reasoning trail. Reading your own
-narrative again re-manufactures its hallucinations; the point of this pass is
-to disprove. For each issue ask: what guard, caller, or ordering kills this?
-Anything you can't re-derive from the evidence alone is downgraded to FALSE
-POSITIVE (unproven).
-
-### Phase 2c — Root cause
-
-Group the surviving CONFIRMED issues by the design decision they stem from
-(where data lives, who owns a resource, sync vs async). Two or more sharing
-one decision → one **design** finding (important), with those issues as
-evidence and the alternative that removes them. The proof is the confirmed
-issues themselves, not taste.
-
-### Phase 3 — Report
-
-Summarize the findings. Severity is derived from evidence, not opinion —
-**proven by failing test** > **traced call chain + guard-checked** >
-plausible pattern. Labels: **blocking** (correctness, security, data loss —
-must fix), **important** (should fix), **nit** (polish). Not everything is
-blocking.
+Severity follows evidence: failing test > traced + guard-checked >
+plausible pattern. **blocking** (correctness, security, data loss),
+**important**, **nit**. A user-visible failure the user cannot recover from
+(data loss, an operation that can never succeed, an error on every retry)
+is at least important.
 
 ```
 ## Review: <branch>
-
-Intent: [Step 1b intent model, 2-3 sentences]
+Intent: [Step 1b]
 
 ### Design findings (N)
-1. **[Decision]** — important. Causes: [confirmed issue numbers].
-   Alternative: [design that removes them, existing in-repo example if any].
+1. **[Decision]** — important. Causes: [#s]. Alternative: [design, in-repo example].
 
-### Confirmed Issues (N)
-1. **[Title]** — [blocking|important|nit] (evidence: failing-test|traced)
-   — file:line. Proof: [trace]. Repro: [command/scenario, for blocking].
-   Fix: [suggestion].
+### Confirmed issues (N)
+1. **[Title]** — [blocking|important|nit] (evidence: failing-test|traced) — file:line.
+   Proof: [trace]. Repro: [for blocking]. Fix: [suggestion].
 
-### False Positives (N)
-1. **[Title]** — thought X, but traced Y → safe because Z.
+### False positives (N)
+1. **[Title]** — thought X, traced Y → safe because Z.
 
 ### N/A (N)
-1. **[Title]** — dead code / unreachable.
 
 ### Bloat (N lines removable)
-1. **[Title]** — file:lines. Proof: [ref count / guard trace / stdlib fn].
-   Replacement: [shorter code or "delete"].
+1. **[Title]** — file:lines. Proof. Replacement.
+Comment density: X / Y added lines.
 
-Comment density: X added comment lines / Y added lines.
+### Required artifacts
+[the tables and cases from the Step 3 artifact list]
 
 ### Test audit
-Test gate (one row per in-scope test AND subtest/table case — an empty or
-hand-waved cell is itself a finding):
-
-| test/case | 1. behavior protected | 2. regression that fails it | 3. why the owner test doesn't | 4. prod seam? | 5. expected value matches intent? |
-|---|---|---|---|---|---|
-
-Overlap matrix: [Step 3b rows; duplicates marked]
-Skipped: [test → reason → covered elsewhere? y/n]
-LOC: production +A/−B, tests +C/−D (git diff --numstat)
+| test/case | 1. behaviour | 2. regression | 3. why not the owner | 4. seam? | 5. intent? |
+Overlap matrix · Skipped (test → reason → covered elsewhere?) · LOC prod +A/−B, tests +C/−D
 
 ### Coverage
-One row per Step 3 category: ✅ reviewed / ⚠️ shallow / ❌ not covered.
-Declined to judge: [each item considered and set aside, with reason —
-"none" is a valid answer. An item with a concrete cost (failure, load, data
-exposure, metric skew) cannot sit here: confirm it or refute it with proof]
-
-Done well: [1-3 things worth keeping]
+One row per Step 3 category and per area: ✅ / ⚠️ / ❌, with what was read.
+Declined to judge: [items set aside, with reason; "none" is valid]
+Done well: [1–3 items]
 
 ### Verdict: APPROVE | COMMENT | REQUEST CHANGES
-
 ### Grade: X/100
 ```
 
-APPROVE = no confirmed blocking/important issues. COMMENT = nits only.
-REQUEST CHANGES otherwise.
+**Declined to judge** cannot hold an item with a concrete cost (failure,
+load, data exposure, metric skew): confirm or refute it. A resource lead
+(memory, size, time, connections) is refuted only by a measurement or a
+bound on that same resource, never by an argument about another.
+**Done well** items may not contradict any Step 3 rule — re-check them.
 
-**Grading rubric** (applied identically to every branch): grade = 100, then
-deduct per confirmed issue — blocking −20, important −10, nit −3; each
-confirmed bloat/verbose-comment/junk-test finding −2 (total bloat deduction
-capped at −15). Caps applied after deductions:
+APPROVE = no confirmed blocking/important. COMMENT = nits only. REQUEST
+CHANGES otherwise.
 
-- a changed line guarded only by a skipped test → **85**
-- confirmed security issue → **75**
-- a diff that could be ≥40% smaller → **85**
-- tests never ran at all (`test_blocked`) → **80**, stated in the report
-- unresolved design finding → **85**
+**Grading:** 100, minus 20 per blocking, 10 per important, 3 per nit, 2 per
+bloat/verbose-comment/junk-test finding (bloat total capped at −15). Caps
+after deductions: a line guarded only by a skipped test → 85; confirmed
+security issue → 75; diff could be ≥40% smaller → 85; `test_blocked` → 80;
+unresolved design finding → 85; any area or category ⚠️/❌ → 85. Score from
+executable evidence first, traced findings second.
 
-Score from executable evidence first (suite result), traced
-findings second, everything else last.
+**Dismissal memory:** before Step 1, read project memory for refuted
+hypotheses; don't re-report them unless the diff changed the facts. After
+the report, persist new refuted hypotheses.
 
-**Dismissal memory:** before Step 1, read project memory for previously
-refuted hypotheses and dismissed finding types — don't re-report what an
-earlier pass disproved unless the diff changed the facts. After the report,
-persist new refuted hypotheses (memory tool) so the next pass starts from
-them.
+Credibility over volume: be honest about false positives.
 
-Be honest about false positives. Credibility matters more than finding issues.
-
-## Example
+## Examples
 
 ```
 Claim: "Executor.Close() doesn't close mempool senders"
-Trace: grep for executor.Close() → 0 matches. Method exists but is never called.
-Verdict: FALSE POSITIVE — the method is dead code; whether it closes senders is
-         irrelevant.
+Trace: grep executor.Close() → 0 matches; never called.
+Verdict: FALSE POSITIVE — dead method.
 
-Claim: "GenerateFill ignores Chain() bool, nil deref possible"
-Trace: GenerateFill called from processNext → runWorker → queue. Queue only
-       exists for chains that initialized. Worker only starts after chain added
-       to map. Source chain must be connected to emit the deposit. Both chains
-       present when GenerateFill runs.
-Verdict: FALSE POSITIVE — startup ordering guarantees both chains are in the map.
+Claim: "drainChains removed the destination filter"
+Trace: deposits for missing chains reach dispatchUpdates, no queue → dropped at Debug.
+Verdict: CONFIRMED (nit) — deposits for permanently failed chains vanish silently.
 
-Claim: "drainChains removed destination chain filter"
-Trace: Old code skipped deposits for missing/paused destinations. New code
-       routes all deposits. dispatchUpdates checks queuesSnapshot — if no queue,
-       drops at Debug. Queue pre-created for all non-paused chains in InitChains.
-       Deposits for chains that never connect: dropped silently at Debug.
-Verdict: CONFIRMED (minor) — deposits for permanently-failed chains are silently
-         dropped. Acceptable during startup, could mask failed chains.
-
-Claim: "newRetryPolicy() + RetryOptions struct is a single-use abstraction"
-Trace: grep newRetryPolicy → 1 caller (client.go:42), passes defaults only.
-       RetryOptions fields MaxJitter/OnRetry are never set by any caller.
-Verdict: CONFIRMED (bloat) — inline as `for i := 0; i < maxRetries; i++`
-         at client.go:42; delete retry.go (38 lines).
-
-Claim: "12-line doc comment on parseID restates the signature"
-Trace: comment says "parseID takes a string and returns an int and an error";
-       nothing in it is non-obvious.
-Verdict: CONFIRMED (verbose comment) — delete, or keep a single line:
-         `// parseID accepts legacy "u-" prefixed IDs.`
+Claim: "newRetryPolicy() is a single-use abstraction"
+Trace: 1 caller (client.go:42), defaults only; MaxJitter/OnRetry never set.
+Verdict: CONFIRMED (bloat) — inline a loop at client.go:42, delete retry.go (38 lines).
 
 Claim: "TestRetrieveLexicalOnly_Live guards the lexical-only SQL"
-Trace: go test -v with RAG_TEST_DSN → --- SKIP (no chunks in DB). Siblings
-       seed their own tenant; this test relies on data already present
-       instead of seeding its own.
-Verdict: CONFIRMED — lexical-only query is untested; the live test must seed
-         its own chunk and assert the exact score (1/61 lexical, 2/61 both).
+Trace: go test -v with the DSN → SKIP (no chunks); siblings seed their own tenant.
+Verdict: CONFIRMED — untested query; seed a chunk, assert the exact score.
 ```
 
 ## Constraints
 
-- **Issues start in the diff; effects do not stop there.** Every issue must
-  originate from a changed line, but its consequences in untouched code
-  (triggers, readers, dashboards, pools, other services) are in scope and
-  graded. Bugs that predate the branch in untouched code are listed at most
-  as "pre-existing, out of scope" notes — never as confirmed issues, never
-  graded.
-- **Never edit the reviewed tree.** Use `read`, `bash`, `grep`,
-  `lsp_navigation`, `ast_grep_search` — never `edit` or `write` on it (except
-  for task list).
-- **Never report speculative bugs.** If you can't prove it by tracing, mark it
-  "needs verification" or skip it.
-- **One task at a time.** Don't batch verification. Trace one claim fully before
-  moving to the next.
-- **Keep the issue list short.** 3-8 issues. Quality over quantity. A review
-  with 0 confirmed issues is a valid result. Bloat, verbose-comment, and
-  junk-test findings don't count toward this limit; group the same pattern into one
-  finding (e.g. "9 restating comments in handler.go").
-- **Bloat lowers the grade.** Bloat is never a correctness bug — the Phase 3
-  rubric deducts for every confirmed bloat finding and caps a diff that could
-  be ≥40% smaller at 85.
+- **Issues start in the diff; effects do not stop there.** Consequences in
+  untouched code (triggers, readers, dashboards, pools, other services)
+  are in scope and graded. Pre-existing bugs in untouched code are at most
+  "pre-existing, out of scope" notes, never graded.
+- **Never hand a lead to another area.** "Belongs to X" is not a verdict:
+  trace it yourself. A lead you still set aside goes under "Declined to
+  judge", where the orchestrator picks it up.
+- **Never edit the reviewed tree** (read, bash, grep, LSP, ast-grep only).
+- **Never report speculative bugs:** unproven → "needs verification".
+- **No quota, either way:** report every CONFIRMED issue, never stop after
+  a handful, never pad. Zero is a valid result. Group one pattern into one
+  finding.

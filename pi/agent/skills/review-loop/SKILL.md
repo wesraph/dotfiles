@@ -9,9 +9,8 @@ Iterative quality loop: run `branch-review` on the current changes, **fix every
 confirmed issue**, then review again. Repeat until a pass returns zero confirmed
 issues — or the safety cap is hit.
 
-The core insight: fixing one issue can introduce or reveal another. A single
-pass is never enough. This skill automates the "review, fix, re-review" cycle a
-careful engineer does manually.
+Fixing one issue can introduce or reveal another, so a single pass is
+never enough.
 
 ## When to use
 
@@ -31,8 +30,9 @@ does not read the diff or trace code to hunt for issues. Its job is to
 orchestrate — detect the change surface, spawn the reviewer, receive the
 report, apply fixes to confirmed issues, run validation, and loop.
 
-- One fresh `reviewer` per pass. Never resume or reuse a previous pass's
-  reviewer: each pass must judge the current diff without inherited bias.
+- Fresh `reviewer`s for every pass (one, or one per area on a large diff —
+  Step 2). Never resume or reuse a previous pass's reviewer: each pass must
+  judge the current diff without inherited bias.
 - The reviewer never edits the reviewed tree (throwaway mutants in
   `branch-review-deep`'s mutation worktree are allowed, when that variant is
   used). Fixes are applied in the main session (or a
@@ -100,10 +100,54 @@ appended) after every pass: confirmed issues (fixed / open), refuted
 hypotheses (with the proof that killed them), approaches tried, what remains.
 Cap it around 800 words — whatever you omit is gone, and that is the point:
 each pass starts from curated memory, not from an ever-growing pile of reports.
+File refuted hypotheses by area. The notes never tell a reviewer where to
+look: no "focus on", no list of the code the last fixes touched as a hint.
+A reviewer steered toward the latest fix re-reviews the fix and misses the
+rest of the branch.
 
-### Step 2 — Review pass (in a fresh subagent)
+### Step 2 — Review pass (in fresh subagents)
 
-Spawn one `reviewer` subagent with `context: "fresh"` (synchronous — the
+**Size the pass first.** Count the change surface
+(`git diff --shortstat $BASE..HEAD`).
+
+- **Up to ~3000 changed lines:** one `reviewer` covers the whole diff.
+- **Over ~3000 changed lines:** one reviewer cannot cover it — it reports
+  the first few things it finds and the rest of the branch goes unread.
+  Split the diff into areas (one per service/command, shared package,
+  schema/migrations, web app, mobile app, infra; merge tiny ones, split any
+  area still over ~3000 lines) and spawn, in the same pass:
+  - one reviewer **per area**, scoped to that area's changes (effects
+    traced anywhere, as always);
+  - **cross-cutting** reviewers over the whole diff, limited to the
+    branch-review categories that cross areas, split in three from the
+    start (one reviewer cannot cover them all on a large diff and marks
+    them ⚠️):
+    1. schema rules reach every existing writer, every writer of a shared
+       row, parity with replaced code;
+    2. new deployable vs its closest sibling (with its pools and clients),
+       production configuration;
+    3. realistic external input, every implementation of a guard,
+       product promises and factual claims.
+  Reviewers are read-only, so they run in parallel (`workflow:
+  "parallel"`); the fixes wait for all of them. Merge their reports,
+  dedupe findings, and treat the pass grade as the **lowest** reviewer
+  grade. A finding reported by several reviewers keeps the **highest**
+  severity any of them gave it, with the union of their evidence.
+- **Before grading a split pass:**
+  - a reviewer that returned no report (timeout, crash) is re-spawned for
+    its area; it is never graded as clean. Give split-pass reviewers an
+    explicit timeout of at least 60 min and tell them to write the report
+    before the last 10;
+  - collect every "Declined to judge" / "outside this area" item; any
+    that no report confirmed or refuted goes to one more fresh reviewer;
+  - a cross-cutting category marked ⚠️ is re-run by another reviewer on
+    that category alone.
+- **Live tests in parallel:** reviewers that run live tests on one shared
+  database collide (shared rows, duplicate keys). Give each its own
+  database, or run the scoped suite once yourself and pass the result:
+  reviewers then run only their own repro and mutant tests.
+
+Spawn each `reviewer` subagent with `context: "fresh"` (synchronous — the
 fixes depend on its result). Its prompt contains only:
 
 - the repo path (and worktree path, if working in one),
@@ -112,6 +156,9 @@ fixes depend on its result). Its prompt contains only:
   which **changes** are reviewed, never their **effects**: never write
   "review only this diff" or anything that keeps the reviewer from tracing
   into untouched code (triggers, readers, dashboards, pools, other services),
+- its area (or "cross-cutting" with its categories), when the diff is split,
+- the scoped suite result (log path, failing and skipped tests) when you
+  ran it once for a split pass, and the path its report must be written to,
 - the current `notes.md` (refuted hypotheses, so it does not re-report them).
   Refuted hypotheses only — never pass "tests X/Y are fine" or a prior
   grade: a test verdict is re-earned every pass (by the per-test mutants,
@@ -121,20 +168,9 @@ fixes depend on its result). Its prompt contains only:
   false positives, grade).
 
 No conversation context beyond that. The subagent runs the **full
-`branch-review` workflow**:
-
-1. Phase 1 — capture diff + hypothesize issues.
-2. Phase 2 — verify each claim by tracing the call chain. Only **CONFIRMED**
-   issues with proof count.
-3. Phase 2b — re-derivation pass. (With `branch-review-deep`: Phase 2m,
-   the mutation check, runs first — surviving mutants are CONFIRMED issues.)
-4. Phase 2c — root cause: confirmed issues sharing one design decision
-   become a **design** finding.
-5. Phase 3 — report: design findings, confirmed issues, false positives,
-   grade.
-
-Use `branch-review`'s tracing rules verbatim. Do not weaken them — a fix
-targeting a false positive is wasted work (and often introduces a real bug).
+`branch-review` workflow** (with `branch-review-deep`, its mutation check
+too), and only CONFIRMED issues with proof count. Never weaken its tracing
+rules: a fix aimed at a false positive is wasted work and often a new bug.
 
 ### Step 3 — Fix every confirmed issue
 
@@ -213,6 +249,13 @@ Stop the loop when **any** of these is true:
   directions; the test run is ground truth and overrides any review verdict.
   An unresolved design finding also blocks the clean exit, unless the user
   explicitly accepted it (recorded in `notes.md`).
+  On a split diff (Step 2), a clean pass means **every** area reviewer and
+  every cross-cutting reviewer came back with zero confirmed issues and no
+  area or category marked ⚠️/❌ in their Coverage tables. One reviewer's
+  100/100 says that reviewer found nothing new, not that the branch is
+  covered. Confirm it with a **second clean pass** in which the areas are
+  regrouped differently and the cross-cutting categories are grouped
+  differently; only then exit.
 - **Safety cap.** The loop hits a maximum number of passes (default **5**). If
   you reach the cap without a clean pass, stop, report what remains, and flag
   that the cap was hit — the branch likely needs human judgement, not more
@@ -243,6 +286,9 @@ grade. A clean run looks like `3 → 1 → 0`. A capped run looks like
   breaks the build is not a fix.
 - **Respect the safety cap.** A loop that never converges is a signal to stop
   and escalate, not to grind forever.
+- **Fixed reviewer count is not a budget.** On a large diff the per-area
+  reviewers are the minimum, not an upgrade: skipping them to save tokens
+  turns the loop into a review of the last fix.
 - **Master mode reviews only recent changes.** When on `main`/`master`, do not
   attempt to review the entire history — scope to `HEAD~1..HEAD` plus the
   working tree.
