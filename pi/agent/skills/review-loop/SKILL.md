@@ -119,7 +119,7 @@ rest of the branch.
   - one reviewer **per area**, scoped to that area's changes (effects
     traced anywhere, as always);
   - **cross-cutting** reviewers over the whole diff, limited to the
-    branch-review categories that cross areas, split in three from the
+    branch-review categories that cross areas, split in five from the
     start (one reviewer cannot cover them all on a large diff and marks
     them ⚠️):
     1. schema rules reach every existing writer, every writer of a shared
@@ -127,7 +127,16 @@ rest of the branch.
     2. new deployable vs its closest sibling (with its pools and clients),
        production configuration;
     3. realistic external input, every implementation of a guard,
-       product promises and factual claims.
+       product promises and factual claims;
+    4. threat model: the trust-boundary artifact (untrusted input →
+       privileged sink, credentials per workload, sandbox escapes, files a
+       sandboxed process writes that its supervisor trusts);
+    5. spec and setup-doc conformance: every spec requirement and every
+       value a README/prompt names, checked against the code.
+  Lenses 4 and 5 also run as their own reviewers on diffs **under** ~3000
+  lines when the branch adds a service, sandbox, credential, LLM session
+  or spec: a per-area reviewer sees only one half of a path whose input
+  and sink sit in different areas, and grades its half clean.
   Reviewers are read-only, so they run in parallel (`workflow:
   "parallel"`); the fixes wait for all of them. Merge their reports,
   dedupe findings, and treat the pass grade as the **lowest** reviewer

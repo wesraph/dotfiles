@@ -34,8 +34,19 @@ git diff $BASE..HEAD --stat; git log --oneline $BASE..HEAD; git diff $BASE..HEAD
 
 ### Step 1b — Intent model
 
-Read commits, PR description, linked issue. Write 2–3 sentences: what the
-branch claims to do. It goes in the report. Then:
+Read commits, PR description, linked issue, and the repo's specs/design
+docs and setup docs (README install/deploy steps, job prompts) the branch
+implements. Write 2–3 sentences: what the branch claims to do. It goes in
+the report. Then:
+
+- **Spec conformance:** every spec requirement maps to code or to a
+  decision the PR records. Missing command/feature/behaviour, or code
+  doing something else → CONFIRMED "spec gap: <spec file:line>".
+- **Docs match code:** every value a setup doc or prompt names (callback
+  path, service name, env var, API to enable, space/channel ID) is the
+  one the code uses; names of things in another repo are checked against
+  that repo's source when available. Placeholder IDs in shipped config with
+  no startup validation and no setup step → CONFIRMED.
 
 - A promised behaviour needs code **and** a test; a promise with no code is
   a lead (omissions only surface here). Diff not serving the intent is an
@@ -98,6 +109,8 @@ ticked without being done:
 | Keys | *key → each caller or grouping step → where its key comes from → verdict* |
 | Batches | the two-item case: A and B both edited; A replaced by C |
 | Tests | test gate table + overlap matrix (Step 3b) |
+| Trust boundaries | *untrusted input → each privileged sink it reaches → mediating line → verdict* (Security, C) |
+| Spec conformance | *requirement (spec file:line) → code or recorded decision → verdict* (Step 1b) |
 
 #### A. Runtime and lifecycle
 
@@ -201,11 +214,36 @@ ticked without being done:
   boundaries crossed, hardcoded secrets, sensitive data in logs. A stored
   or moved secret: list every copy (logs, traces, audit tables, backups,
   analytics) and who can read each (`GRANT`, IAM).
+- **Threat model (trust-boundary artifact).** List untrusted inputs (user,
+  chat or meeting text, PR bodies, logs, alerts, web pages, files a
+  sandboxed process can write, notes/memories/summaries another run
+  persisted) and privileged sinks (tokens, DSNs, command-running tools or
+  LLM sessions with tools, open egress, shared state, prompts of more
+  privileged sessions). Trace each input → sink across packages, processes
+  and containers:
+  - least privilege per caller: a read-only workload holding a
+    write-capable credential → CONFIRMED;
+  - deny lists, prompt rules and unsetting env vars are not boundaries:
+    find the bypass (`gh api graphql`, `curl $TOKEN`, another binary, a
+    same-uid child reading /proc, profile dirs or keyring/DBus sockets).
+    The control must be server-side (scoped token, ruleset, DB role,
+    network policy);
+  - text persisted by one session and injected into another's prompt is
+    untrusted unless a human confirmed it: wrapped or left out when the
+    reader holds more privilege than the writer's sources;
+  - a sandboxed process must not write files its supervisor parses and
+    acts on (status, rate-limit events, results): play the forged value;
+  - egress allowlist and metadata-server block in place before containers
+    start, including those Docker restarts at boot;
+  - "addressed to me" checks compare against the service's own id;
+    redirect targets are validated after URL resolution (origin compare).
 
 #### D. Behaviour and contracts
 
 - **Behaviour changes:** removed filters, changed error handling, altered
-  semantics. **Error paths:** swallowed errors, wrong wrapping,
+  semantics. **Text matching:** substring checks on words or commands
+  (`Contains("resolved")` matches "unresolved"), a prefix (bot name)
+  stripped by one parser but not its siblings. **Error paths:** swallowed errors, wrong wrapping,
   partial-failure states, panics where errors used to return. **Nil
   guards:** removed checks, ignored bool returns. **Boundaries:**
   off-by-one, zero/empty/nil, max, first/last. **Resource leaks:**
