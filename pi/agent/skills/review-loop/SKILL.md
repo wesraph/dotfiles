@@ -192,7 +192,10 @@ For each **CONFIRMED** issue from the pass:
    on the pre-fix code for the intended reason: revert the fix, run the test,
    read the failure, restore the fix. A test that passes without the fix
    doesn't count. One test at the owner boundary, not one per layer. Live
-   tests seed their own data. Never assert tuning constants.
+   tests seed their own data. Never assert tuning constants. Respect
+   `branch-review`'s **Proportion** rule: extend an existing case before
+   adding one, and reach a seam the package already exposes before adding a
+   test-only one.
 4. Verify the fix locally — `make build`, `make verify`, then tests scoped to
    the changed packages (branch-review Step 2), never the whole suite.
 5. A reported junk test is a symptom of its file. Record every test file a

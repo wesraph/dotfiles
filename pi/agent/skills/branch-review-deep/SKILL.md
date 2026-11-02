@@ -107,6 +107,11 @@ correctness.
 suggested test against the mutant worktree (fix reverted) — it must fail for
 the intended reason, or don't suggest it.
 
+**A survivor is not a mandate for a new case:** `branch-review`'s
+**Proportion** rule still applies. A survivor on a guard or constant with no
+documented contract is reported as a note, not a finding that adds a test;
+when a test is warranted, extend an existing case before adding one.
+
 ### Test audit changes
 
 - **Retention bar**: a CONFIRMED test finding must also name the mutant it

@@ -291,6 +291,16 @@ ticked without being done:
   it can detect, the owner test that remains, what removing it unlocks.
   Missing field → "needs verification", except a duplicate pair in the
   overlap matrix, which is CONFIRMED on its own.
+- **Proportion:** size the tests to the risk, not to the mutant count. One
+  case per behaviour a caller would notice (the fix works; the thing it must
+  not do, it doesn't) — not one per guard. A guard or constant whose only
+  failure mode is "obviously wrong on read" (`ctx.Err()` check, a retry
+  budget, a clamp bound) needs no case of its own unless it protects a
+  documented contract. Test diff > ~2× the code diff, or a new fake/helper
+  for a single test → finding with the trimmed case list. Reach a seam the
+  package already exposes (config field, constructor option, existing test
+  hook) before adding one; a new `export_test.go`, a `const` turned `var`,
+  or a package global mutated by tests is a CONFIRMED test-only seam.
 
 #### F. Comments and bloat
 
