@@ -185,8 +185,14 @@ function extractSystemText(payload: unknown): string | undefined {
 	const first = Array.isArray(request.messages) ? request.messages[0] : undefined;
 	if (!first || typeof first !== "object") return undefined;
 	const message = first as { role?: unknown; content?: unknown };
-	if (message.role !== "system" || typeof message.content !== "string") return undefined;
-	return message.content || undefined;
+	if (message.role !== "system" && message.role !== "developer") return undefined;
+	if (typeof message.content === "string") return message.content || undefined;
+	if (!Array.isArray(message.content)) return undefined;
+	const text = message.content
+		.map((block) => (block as { text?: unknown })?.text)
+		.filter((part): part is string => typeof part === "string")
+		.join("\n\n");
+	return text || undefined;
 }
 
 export default function liveCompactionExtension(pi: ExtensionAPI) {
@@ -239,7 +245,12 @@ export default function liveCompactionExtension(pi: ExtensionAPI) {
 		// Replicate the live request: same transcript (leading system message with
 		// tool declarations) with one appended user instruction. The provider's
 		// prompt cache covers the unchanged prefix; only the instruction is new.
-		const llmMessages = convertToLlm(projection.messages);
+		// convertToLlm hands system messages back as the session's own objects: the edits below must
+		// stay in this request. Written through, they drop the sections from the live session, and the
+		// next prompt renders the captured text and the sections again, the whole prompt twice.
+		const llmMessages = convertToLlm(projection.messages).map((message) =>
+			message.role === "system" ? { ...message } : message,
+		);
 		const head = llmMessages[0];
 		if (head && head.role === "system") {
 			const captured = sessionFile ? readCapturedSystemText(sessionFile) : undefined;

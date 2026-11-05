@@ -586,6 +586,38 @@ test("pins the system message to the captured provider text", async () => {
 	});
 });
 
+test("leaves the session's own system messages untouched", async () => {
+	await withTmp(async (sessionFile) => {
+		const handler = loadHandler();
+		const capture = loadCaptureHandler();
+		const head = structuredClone(systemMessage);
+		const update = structuredClone(systemUpdate);
+		const headBefore = structuredClone(head);
+		const updateBefore = structuredClone(update);
+		const { ctx } = makeCtx({
+			messages: [head, userMessage, assistantText, update],
+			sessionFile,
+			respond: async () => summaryResponse,
+		});
+		await capture({ type: "before_provider_request", payload: { messages: [{ role: "system", content: CAPTURED_SYSTEM }] } }, ctx);
+		await handler(baseEvent(makePreparation()), ctx);
+		assert.deepEqual(head, headBefore, "the leading message keeps its sections");
+		assert.deepEqual(update, updateBefore, "the later message keeps its sections");
+	});
+});
+
+test("captures a system message sent as text blocks, or as developer", async () => {
+	await withTmp(async (sessionFile) => {
+		const capture = loadCaptureHandler();
+		const { ctx } = makeCtx({ messages: [systemMessage, userMessage], sessionFile, respond: async () => summaryResponse });
+		const sidecar = `${sessionFile}.live-system.txt`;
+		await capture({ type: "before_provider_request", payload: { messages: [{ role: "system", content: [{ type: "text", text: "blocks" }] }] } }, ctx);
+		assert.equal(readFileSync(sidecar, "utf8"), "blocks");
+		await capture({ type: "before_provider_request", payload: { messages: [{ role: "developer", content: "dev" }] } }, ctx);
+		assert.equal(readFileSync(sidecar, "utf8"), "dev");
+	});
+});
+
 test("captures the system text from OpenAI-style and Anthropic-style payloads", async () => {
 	await withTmp(async (sessionFile) => {
 		const capture = loadCaptureHandler();
