@@ -31,13 +31,14 @@
   "quietStartup": true,
   "defaultThinkingLevel": "high",
   "enabledModels": [
-    "zai-renaud/glm-5.3",
-    "zai-renaud/glm-5.3-flash",
-    "qwen3.8-27b",
-    "anthropic/claude-opus-5-5",
+    "anthropic/claude-fable-5-1",
     "anthropic/claude-haiku-5-5",
+    "anthropic/claude-opus-5-5",
     "anthropic/claude-sonnet-5-5",
-    "anthropic/claude-fable-5-1"
+    "openai/gpt-6.1-sol",
+    "qwen3.8-27b",
+    "zai-renaud/glm-5.3",
+    "zai-renaud/glm-5.3-flash"
   ],
   "hideThinkingBlock": false,
   "retry": {
