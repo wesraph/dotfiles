@@ -36,6 +36,7 @@
     "anthropic/claude-opus-5-5",
     "anthropic/claude-sonnet-5-5",
     "openai/gpt-6.1-sol",
+    "openrouter/deepseek/deepseek-v4.1-flash-1017",
     "qwen3.8-27b",
     "zai-renaud/glm-5.3",
     "zai-renaud/glm-5.3-flash"
