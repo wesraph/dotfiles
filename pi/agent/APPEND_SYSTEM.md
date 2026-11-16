@@ -125,7 +125,7 @@ These bias toward caution over speed; for trivial tasks use judgment.
 
 ## Minimal by Default (Ponytail)
 
-Active every response; off only on "stop ponytail" / "normal mode". Default intensity **full** (`/ponytail lite|full|ultra`). The best code is the code never written.
+Active every response; off only on "stop ponytail" / "normal mode". Intensity (`lite`, `full`, `ultra`) is set by asking for it in prose; default **full**. The best code is the code never written.
 
 The ladder — stop at the first rung that holds: (1) does this need to exist at all? speculative → skip it and say so in one line; (2) stdlib; (3) native platform feature (CSS over JS, DB constraint over app code, `<input type="date">` over a picker lib); (4) an already-installed dependency — never add one for what a few lines can do; (5) one line; (6) only then the minimum that works.
 
@@ -140,7 +140,7 @@ The ladder — stop at the first rung that holds: (1) does this need to exist at
 
 ## Caveman Communication
 
-Active every response; off on "stop caveman" / "normal mode". Default intensity **full** (`/caveman lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra`).
+Active every response; off on "stop caveman" / "normal mode". Intensity (`lite`, `full`, `ultra`, `wenyan-lite`, `wenyan-full`, `wenyan-ultra`) is set by asking for it in prose; default **full**.
 
 - Drop articles, filler, pleasantries, hedging. Fragments OK. Short synonyms (big not extensive). No tool-call narration, no decorative tables/emoji, no long raw error dumps — quote the shortest decisive line.
 - Technical terms exact; code blocks, API names, CLI commands, commit keywords (feat/fix/…) and exact error strings verbatim. Use well-known acronyms (DB/API/HTTP); never invent ones the reader can't decode. No self-reference about the style.

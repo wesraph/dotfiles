@@ -31,6 +31,12 @@ git diff $BASE..HEAD --stat; git log --oneline $BASE..HEAD; git diff $BASE..HEAD
 - **Areas:** split the change surface into areas (one per service/command,
   shared package, schema, web app, mobile app, infra) with line counts.
   Every Step 3 category applies to every area; an area not reached is ❌.
+- **Shipped?** per area: yes when the area is reachable from something that
+  ships — a deployed binary or image (Dockerfile, Makefile/CI deploy target,
+  main package), a served route, a published package's public API, an
+  installed CLI. No for tests, fixtures, benchmarks, examples, dev scripts,
+  docs. Derive it from the build and deploy config, not from directory
+  names. Every later rule that says "shipped" means this column.
 
 ### Step 1b — Intent model
 
@@ -102,7 +108,10 @@ ticked without being done:
 
 | category | artifact |
 |---|---|
-| Parity with replaced code | *old behaviour → new code → verdict*, every item, "n/a" included |
+| Parity with replaced code | *behaviour → base → branch → verdict*, BOTH directions: every behaviour of the deleted or moved code, and every step the new code adds; "n/a" included |
+| Behaviour gained on a shipped area | *added line → shipped entry point → what base did not do → intent or decision → verdict* (C) |
+| Local inputs | *decoder → unknown keys → required keys → fixture-mutant result → verdict* (C) |
+| Newly shared symbols | *symbol → each effect on what it does not own → in its doc? → verdict* (D) |
 | Every path of a guard | *guard → each implementation/path → bound line or measurement* |
 | Partial results | *outcome × position → (result, err) → what the caller does* |
 | Writers of a shared row | every writer (by grep) + the **longest** staleness window of each blind one |
@@ -192,6 +201,21 @@ ticked without being done:
   punycode), redirect following, size caps, retries, timeouts, error
   mapping, accepted content types, TLS policy. Missing →
   CONFIRMED "regression: <behaviour> lost from <old file:line>".
+- **Behaviour gained on a shipped area:** every added line in a shipped
+  area that is not a pure move (`git diff --color-moved=dimmed-zebra`):
+  name the shipped entry point reaching it and what it does that base did
+  not. A gain is CONFIRMED "shipped behaviour gained: <file:line>" when the
+  intent (Step 1b) claims a refactor, extraction, move or tooling-only
+  change, or the user ruled no shipped change; otherwise it must map to a
+  requirement or it is unrequested scope. A comment explaining the step
+  is a claim (checked), never a decision.
+- **Local inputs are inputs:** every file, env var, flag or fixture the
+  code decodes and acts on. For each decoder: unknown keys rejected (the
+  library's strict mode, or a schema check), required keys validated,
+  wrong type an error. Fixture mutant, always run: rename one key that
+  carries an expectation or a setting in one real file, run the loader. A
+  loader that still accepts it → CONFIRMED "lenient decoder: <file:line>;
+  a typo in <key> silently changes <outcome>".
 - **Every path of a guard:** a guarantee (size cap, timeout, address
   check, redirect rule, content type, retry) enforced on one
   implementation/path is checked on every other (test fakes excluded),
@@ -251,6 +275,13 @@ ticked without being done:
 - **Call sites and contracts:** signature changes without updated callers;
   exported API, serialization, schema or config formats breaking existing
   consumers.
+- **Newly shared symbols:** each function made public, or moved where a
+  second importer calls it. List every effect on what it does not own:
+  writes through a reference parameter (pointer, object, slice, map),
+  globals, process state, a usable result returned beside an error. Each
+  effect is in the doc comment, or CONFIRMED "undocumented contract:
+  <effect> at <file:line>". Find them by reading the body for writes to
+  each parameter, not by trusting the name.
 - **Performance:** hot-path regressions, O(n²), N+1, unbounded growth.
 - **Dependencies:** each new dep — license, CVEs, pinning, needed at all.
 - **Docs:** build/test/run/release changes reflected in README/docs;

@@ -1,6 +1,10 @@
 ---
 name: commit
-description: Commit staged or pending work in the "area: sentence" style — a subject that states the new behaviour as a fact, and a body in plain prose that says what was wrong, why, and what the code does now. Use when the user asks to commit, to write a commit message, or says "commit in our style".
+description: >-
+  Commit staged or pending work in the "area: sentence" style — a subject that
+  states the new behaviour as a fact, and a body in plain prose that says what
+  was wrong, why, and what the code does now. Use when the user asks to commit,
+  to write a commit message, or says "commit in our style".
 ---
 
 # Commit

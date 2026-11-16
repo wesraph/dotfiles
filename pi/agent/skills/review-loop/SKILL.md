@@ -96,10 +96,16 @@ This makes the cycle visible and gives a natural place to record the verdict of
 each pass.
 
 Also maintain `.pi/scratch/review-loop/notes.md`, **rewritten** (never
-appended) after every pass: confirmed issues (fixed / open), refuted
-hypotheses (with the proof that killed them), approaches tried, what remains.
-Cap it around 800 words — whatever you omit is gone, and that is the point:
-each pass starts from curated memory, not from an ever-growing pile of reports.
+appended) after every pass: open issues, refuted hypotheses (with the proof
+that killed them), approaches tried, what remains. A fixed issue is deleted
+once its fix is verified: only open issues and refuted hypotheses persist.
+800 words is a hard cap — over it, rewrite before spawning. Whatever you
+omit is gone, and that is the point: each pass starts from curated memory,
+not from an ever-growing pile of reports.
+
+A user decision that supersedes an earlier one re-opens every fix it
+touches: grep the notes for the decision's symbols, move those fixes from
+"fixed" to "open", and the next pass re-judges them under the new rule.
 File refuted hypotheses by area. The notes never tell a reviewer where to
 look: no "focus on", no list of the code the last fixes touched as a hint.
 A reviewer steered toward the latest fix re-reviews the fix and misses the
@@ -268,6 +274,11 @@ Stop the loop when **any** of these is true:
   covered. Confirm it with a **second clean pass** in which the areas are
   regrouped differently and the cross-cutting categories are grouped
   differently; only then exit.
+  Two consecutive passes with nits only is convergence of the checklist,
+  not of the diff. Before the loop may stop, one more fresh pass runs only
+  branch-review's required-artifact tables (Step 3's artifact list) across
+  the whole diff, with every artifact written out; a finding there restarts
+  the loop.
 - **Safety cap.** The loop hits a maximum number of passes (default **5**). If
   you reach the cap without a clean pass, stop, report what remains, and flag
   that the cap was hit — the branch likely needs human judgement, not more
