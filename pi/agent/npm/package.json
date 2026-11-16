@@ -5,7 +5,7 @@
     "@ff-labs/pi-fff": "^0.11.0",
     "@ifi/oh-pi-themes": "^0.5.1",
     "@juicesharp/rpiv-ask-user-question": "^2.13.9",
-    "@narumitw/pi-goal": "^0.54.8",
+    "@narumitw/pi-goal": "^0.55.3",
     "pi-anthropic-oauth": "^0.3.2",
     "pi-lens": "^4.3.0"
   }

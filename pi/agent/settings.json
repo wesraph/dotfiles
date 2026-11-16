@@ -1,10 +1,10 @@
 {
-  "lastChangelogVersion": "1.0.2",
+  "lastChangelogVersion": "1.5.2",
   "defaultProvider": "zai-renaud",
   "defaultModel": "glm-5.3",
   "packages": [
-    "git:github.com/nicobailon/pi-subagents@a4c8ced69a8176cdf4179b127feddc8875e3418f",
-    "git:github.com/nicobailon/pi-powerline-footer@bdf069fcf33211d9037919e539aa129d4efd263e",
+    "git:github.com/nicobailon/pi-subagents@d75001352364e7ae0a48d8ebd1d4aa16bab2e5c7",
+    "git:github.com/nicobailon/pi-powerline-footer@eeacaa2ca5097328c548d85f8173f033f6752d81",
     "npm:@ifi/oh-pi-themes@0.5.1",
     "npm:pi-lens",
     "npm:@ff-labs/pi-fff",
@@ -57,5 +57,11 @@
   "images": {
     "blockImages": false
   },
-  "deviceId": "22058167-8645-4428-ab6e-6731051e2351"
+  "deviceId": "22058167-8645-4428-ab6e-6731051e2351",
+  "extensionChangelogVersions": {
+    "{\"source\":\"git:github.com/nicobailon/pi-subagents@d75001352364e7ae0a48d8ebd1d4aa16bab2e5c7\",\"scope\":\"user\"}": "0.88.1",
+    "{\"source\":\"git:github.com/nicobailon/pi-powerline-footer@eeacaa2ca5097328c548d85f8173f033f6752d81\",\"scope\":\"user\"}": "0.22.0",
+    "{\"source\":\"npm:pi-lens\",\"scope\":\"user\"}": "4.5.1",
+    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.55.3"
+  }
 }
