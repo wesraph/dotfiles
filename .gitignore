@@ -5,3 +5,4 @@ config/ncmpcpp/*.log
 pi/agent/powerline-footer/
 pi/agent/models-store.json
 pi/*.log
+pi/tmp-build/
