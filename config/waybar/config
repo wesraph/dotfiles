@@ -5,7 +5,7 @@
     "height": 12, // Waybar height
     "font": 11,
     "modules-left": ["hyprland/workspaces",  "custom/soulseek", "hyprland/submap", "custom/ping"],
-    "modules-center": [ "custom/bnb",  "custom/btc", "custom/eth",  "custom/tia", "custom/rcc"],
+    "modules-center": [ "custom/bnb",  "custom/btc", "custom/eth",  "custom/tia", "custom/rcc", "custom/glm"],
     "modules-right": [  "pulseaudio", "cpu", "memory", "battery", "custom/headset", "temperature",  "tray", "clock"],
     "sway/workspaces": {
         "disable-scroll": true,
@@ -173,6 +173,12 @@
         "interval": 120, // Remove this if your script is endless and write in loop
         "exec": "~/.scripts/crypto/getRCCAPY.sh",
         "on-click": "chromium https://grafana.westphal.fr/d/aduj7miej0agwa/raph-s-crypto-capital?orgId=1&from=now-24h&to=now&timezone=browser&var-account=raph"
+    },
+    "custom/glm": {
+        "format": "{} ",
+        "max-length": 40,
+        "interval": 60, // Remove this if your script is endless and write in loop
+        "exec": "~/.scripts/utils/glmQuota.sh"
     },
     "custom/agent": {
         "format": "🔒 {} mn",
