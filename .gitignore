@@ -6,3 +6,5 @@ pi/agent/powerline-footer/
 pi/agent/models-store.json
 pi/*.log
 pi/tmp-build/
+pi/agent/mcp-onboarding.json
+pi/agent/agents/draft-pack.md
