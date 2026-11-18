@@ -7,6 +7,9 @@
     "cloakbrowser": {
       "command": "cloakbrowser-mcp",
       "args": [],
+      "env": {
+        "PLAYWRIGHT_MCP_ISOLATED": "true"
+      },
       "description": "CloakBrowser: stealth browser automation, navigation, and scraping"
     },
     "blender": {
