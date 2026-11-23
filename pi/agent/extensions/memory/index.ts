@@ -72,25 +72,33 @@ export default function memoryExtension(pi: ExtensionAPI) {
 	pi.on("before_agent_start", async (event, ctx) => {
 		const { root, file } = await resolveScope(ctx.cwd);
 		const content = await readFileOrNull(file);
-		if (!content?.trim() || listEntries(content).length === 0) return;
+		const hasEntries = !!content?.trim() && listEntries(content).length > 0;
 
-		const truncation = truncateHead(content, {
-			maxBytes: MEMORY_PROMPT_MAX_BYTES,
-			maxLines: MEMORY_PROMPT_MAX_LINES,
-		});
-		let text = truncation.content.trimEnd();
-		if (truncation.truncated) {
-			text += `\n\n[Memory truncated — use the memory tool with action "read" for the full content.]`;
+		// Inject as a prompt SECTION, not a forced systemPrompt: a returned
+		// systemPrompt switches pi onto the forced-prompt projection, which
+		// rebuilds the request's leading system message (and on Anthropic the
+		// top-level tools list) from CURRENT state on every request — any later
+		// change to this text or the tool loadout invalidates the provider's
+		// whole cached prefix and re-prefills the entire conversation. A section
+		// is diffed against the transcript instead: it persists as a small
+		// system-message patch at the point of change, so mid-conversation models
+		// keep their cached prefix and only the patch is new.
+		let text = "";
+		if (hasEntries) {
+			const truncation = truncateHead(content, {
+				maxBytes: MEMORY_PROMPT_MAX_BYTES,
+				maxLines: MEMORY_PROMPT_MAX_LINES,
+			});
+			text = truncation.content.trimEnd();
+			if (truncation.truncated) {
+				text += `\n\n[Memory truncated — use the memory tool with action "read" for the full content.]`;
+			}
 		}
-
-		return {
-			systemPrompt: `${event.systemPrompt}
-
-## Project Memory
-
-Long-lived memory for this project (scope: ${root}). Entries persist across sessions and are managed with the \`memory\` tool.
-
-${text}`,
+		event.systemPromptOptions.sections = {
+			...(event.systemPromptOptions.sections ?? {}),
+			memory: text.length > 0
+				? `Long-lived memory for this project (scope: ${root}). Entries persist across sessions and are managed with the \`memory\` tool.\n\n${text}`
+				: "",
 		};
 	});
 
