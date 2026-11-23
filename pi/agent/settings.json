@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "1.5.2",
   "defaultProvider": "zai-renaud",
-  "defaultModel": "glm-5.3",
+  "defaultModel": "glm-5.4",
   "packages": [
     "git:github.com/nicobailon/pi-subagents@d75001352364e7ae0a48d8ebd1d4aa16bab2e5c7",
     "git:github.com/nicobailon/pi-powerline-footer@eeacaa2ca5097328c548d85f8173f033f6752d81",
@@ -37,8 +37,8 @@
     "anthropic/claude-sonnet-5-5",
     "openai/gpt-6.1-sol",
     "qwen3.8-27b",
-    "zai-renaud/glm-5.3",
-    "zai-renaud/glm-5.3-flash"
+    "zai-renaud/glm-5.3-flash",
+    "zai-renaud/glm-5.4"
   ],
   "hideThinkingBlock": false,
   "retry": {
